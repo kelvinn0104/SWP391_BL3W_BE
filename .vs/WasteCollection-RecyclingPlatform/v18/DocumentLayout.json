@@ -1,0 +1,421 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|solutionrelative:wastecollection-recyclingplatform.services\\service\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.services\\service\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|solutionrelative:wastecollection-recyclingplatform.services\\service\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.services\\service\\iinfrastructureservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|solutionrelative:wastecollection-recyclingplatform.services\\service\\iinfrastructureservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.services\\service\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|solutionrelative:wastecollection-recyclingplatform.services\\service\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.services\\service\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|solutionrelative:wastecollection-recyclingplatform.services\\service\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.services\\model\\authmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}|WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj|solutionrelative:wastecollection-recyclingplatform.services\\model\\authmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\repository\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\repository\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\repository\\passwordresetrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\repository\\passwordresetrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\repository\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\repository\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\repository\\ipasswordresetrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\repository\\ipasswordresetrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\entities\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\entities\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\entities\\passwordreset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\entities\\passwordreset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.repositories\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}|WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj|solutionrelative:wastecollection-recyclingplatform.repositories\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\migrations\\20260413145059_adduserrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\migrations\\20260413145059_adduserrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\migrations\\20260413141736_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\migrations\\20260413141736_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\data\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\data\\dbseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\auth\\passwordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\auth\\passwordhasher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\auth\\jwttokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\auth\\jwttokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\auth\\googletokenverifier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\auth\\googletokenverifier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|d:\\wastecollection-recyclingplatform\\wastecollection-recyclingplatform.api\\wastecollection-recyclingplatform.api\\auth\\emailsender.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}|WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj|solutionrelative:wastecollection-recyclingplatform.api\\auth\\emailsender.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\UserService.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Services\\Service\\UserService.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\UserService.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Services\\Service\\UserService.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAUwBcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:25:19.954Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IUserService.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\IUserService.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Services\\Service\\IUserService.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\IUserService.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Services\\Service\\IUserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:25:18.588Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IInfrastructureServices.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\IInfrastructureServices.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Services\\Service\\IInfrastructureServices.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\IInfrastructureServices.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Services\\Service\\IInfrastructureServices.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAABQAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:25:02.52Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IAuthService.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\IAuthService.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Services\\Service\\IAuthService.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\IAuthService.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Services\\Service\\IAuthService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:25:00.799Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\AuthService.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Services\\Service\\AuthService.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Service\\AuthService.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Services\\Service\\AuthService.cs",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAAAOQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:24:11.244Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AuthModels.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Model\\AuthModels.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Services\\Model\\AuthModels.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\Model\\AuthModels.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Services\\Model\\AuthModels.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:59.617Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "UserRepository.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\UserRepository.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\UserRepository.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\UserRepository.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\UserRepository.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:55.926Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "PasswordResetRepository.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\PasswordResetRepository.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\PasswordResetRepository.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\PasswordResetRepository.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\PasswordResetRepository.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:44.612Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\IUserRepository.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\IUserRepository.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\IUserRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:43.609Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IPasswordResetRepository.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\IPasswordResetRepository.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\IPasswordResetRepository.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Repository\\IPasswordResetRepository.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Repository\\IPasswordResetRepository.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:41.489Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "UserRole.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Entities\\UserRole.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Entities\\UserRole.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Entities\\UserRole.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Entities\\UserRole.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:38.395Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "User.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Entities\\User.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Entities\\User.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Entities\\User.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Entities\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:37.083Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "PasswordReset.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Entities\\PasswordReset.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Entities\\PasswordReset.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Entities\\PasswordReset.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Entities\\PasswordReset.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:35.428Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Program.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Program.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Program.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Program.cs",
+              "ViewState": "AgIAAFYAAAAAAAAAAAAAACYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:11.453Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "20260413145059_AddUserRole.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Migrations\\20260413145059_AddUserRole.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Migrations\\20260413145059_AddUserRole.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Migrations\\20260413145059_AddUserRole.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Migrations\\20260413145059_AddUserRole.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:09.457Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "20260413141736_InitialCreate.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Migrations\\20260413141736_InitialCreate.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Migrations\\20260413141736_InitialCreate.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Migrations\\20260413141736_InitialCreate.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Migrations\\20260413141736_InitialCreate.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:07.333Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "DbSeeder.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Data\\DbSeeder.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Data\\DbSeeder.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Data\\DbSeeder.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Data\\DbSeeder.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:23:05.293Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Data\\AppDbContext.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Data\\AppDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:22:56.26Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Controllers\\UsersController.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Controllers\\UsersController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:22:54.287Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.Repositories\\Data\\AppDbContext.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.Repositories\\Data\\AppDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T17:03:29.882Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Controllers\\AuthController.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:22:50.425Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "PasswordHasher.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\PasswordHasher.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Auth\\PasswordHasher.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\PasswordHasher.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Auth\\PasswordHasher.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:22:45.418Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "JwtTokenService.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\JwtTokenService.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Auth\\JwtTokenService.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\JwtTokenService.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Auth\\JwtTokenService.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:22:39.837Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "GoogleTokenVerifier.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\GoogleTokenVerifier.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Auth\\GoogleTokenVerifier.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\GoogleTokenVerifier.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Auth\\GoogleTokenVerifier.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:22:33.187Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "EmailSender.cs",
+              "DocumentMoniker": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\EmailSender.cs",
+              "RelativeDocumentMoniker": "WasteCollection-RecyclingPlatform.API\\Auth\\EmailSender.cs",
+              "ToolTip": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\Auth\\EmailSender.cs",
+              "RelativeToolTip": "WasteCollection-RecyclingPlatform.API\\Auth\\EmailSender.cs",
+              "ViewState": "AgIAAKQAAAAAAAAAAAAAAEYAAACCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T18:22:12.201Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

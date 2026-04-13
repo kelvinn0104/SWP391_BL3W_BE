@@ -1,0 +1,37 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36705.20 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WasteCollection-RecyclingPlatform.API", "WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.API.csproj", "{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WasteCollection-RecyclingPlatform.Services", "WasteCollection-RecyclingPlatform.Services\WasteCollection-RecyclingPlatform.Services.csproj", "{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WasteCollection-RecyclingPlatform.Repositories", "WasteCollection-RecyclingPlatform.Repositories\WasteCollection-RecyclingPlatform.Repositories.csproj", "{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{916FF9C8-6B28-4C68-8ABC-80BBC1EF8CE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8CD99B4-FEAC-47F8-8C32-66385FA596EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A56948D4-77E9-42BB-B9D6-3AC3BAD74589}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96B5E8B0-F534-4CD1-9248-2D3E1837EE97}
+	EndGlobalSection
+EndGlobal

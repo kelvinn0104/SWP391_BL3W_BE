@@ -1,0 +1,271 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj": {}
+  },
+  "projects": {
+    "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj",
+        "projectName": "WasteCollection-RecyclingPlatform.API",
+        "projectPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API.csproj",
+        "packagesPath": "C:\\Users\\songn\\.nuget\\packages\\",
+        "outputPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.API\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\songn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj": {
+                "projectPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.69.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.6, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.6, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.6, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[8.0.3, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.6.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.6.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj",
+        "projectName": "WasteCollection-RecyclingPlatform.Repositories",
+        "projectPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj",
+        "packagesPath": "C:\\Users\\songn\\.nuget\\packages\\",
+        "outputPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\songn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.13, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[8.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj",
+        "projectName": "WasteCollection-RecyclingPlatform.Services",
+        "projectPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\WasteCollection-RecyclingPlatform.Services.csproj",
+        "packagesPath": "C:\\Users\\songn\\.nuget\\packages\\",
+        "outputPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Services\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\songn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj": {
+                "projectPath": "D:\\WasteCollection-RecyclingPlatform\\WasteCollection-RecyclingPlatform.API\\WasteCollection-RecyclingPlatform.Repositories\\WasteCollection-RecyclingPlatform.Repositories.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

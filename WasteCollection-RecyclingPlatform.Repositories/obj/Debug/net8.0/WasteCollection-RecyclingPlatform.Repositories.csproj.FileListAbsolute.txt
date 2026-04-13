@@ -1,0 +1,12 @@
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\bin\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.deps.json
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\bin\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.dll
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\bin\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.pdb
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.GeneratedMSBuildEditorConfig.editorconfig
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.AssemblyInfoInputs.cache
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.AssemblyInfo.cs
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.csproj.CoreCompileInputs.cache
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.dll
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\refint\WasteCollection-RecyclingPlatform.Repositories.dll
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.pdb
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\ref\WasteCollection-RecyclingPlatform.Repositories.dll
+D:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.API\WasteCollection-RecyclingPlatform.Repositories\obj\Debug\net8.0\WasteCollection-RecyclingPlatform.Repositories.csproj.AssemblyReference.cache
