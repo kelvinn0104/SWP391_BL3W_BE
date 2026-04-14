@@ -34,4 +34,7 @@ public class UserRepository : IUserRepository
         _db.Users.Update(user);
         await _db.SaveChangesAsync(ct);
     }
+
+    public async Task<List<User>> GetAllAsync(CancellationToken ct = default)
+        => await _db.Users.AsNoTracking().ToListAsync(ct);
 }

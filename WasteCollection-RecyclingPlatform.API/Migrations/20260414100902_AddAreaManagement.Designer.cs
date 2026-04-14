@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WasteCollection_RecyclingPlatform.Repositories.Data;
 
@@ -11,9 +12,11 @@ using WasteCollection_RecyclingPlatform.Repositories.Data;
 namespace WasteCollectionRecyclingPlatform.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414100902_AddAreaManagement")]
+    partial class AddAreaManagement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("UserWard", b =>
+                {
+                    b.Property<long>("CollectorsId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("WardsId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("CollectorsId", "WardsId");
+
+                    b.HasIndex("WardsId");
+
+                    b.ToTable("ward_collectors", (string)null);
+                });
 
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Area", b =>
                 {
@@ -47,9 +65,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DistrictName")
-                        .IsUnique();
 
                     b.ToTable("areas", (string)null);
                 });
@@ -165,39 +180,12 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AreaId", "Name")
-                        .IsUnique();
+                    b.HasIndex("AreaId");
 
                     b.ToTable("wards", (string)null);
                 });
 
-            modelBuilder.Entity("ward_collectors", b =>
-                {
-                    b.Property<long>("CollectorsId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("WardsId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("CollectorsId", "WardsId");
-
-                    b.HasIndex("WardsId");
-
-                    b.ToTable("ward_collectors");
-                });
-
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Ward", b =>
-                {
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.Area", "Area")
-                        .WithMany("Wards")
-                        .HasForeignKey("AreaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Area");
-                });
-
-            modelBuilder.Entity("ward_collectors", b =>
+            modelBuilder.Entity("UserWard", b =>
                 {
                     b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.User", null)
                         .WithMany()
@@ -210,6 +198,17 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                         .HasForeignKey("WardsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Ward", b =>
+                {
+                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.Area", "Area")
+                        .WithMany("Wards")
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Area");
                 });
 
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Area", b =>

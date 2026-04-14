@@ -18,7 +18,8 @@ public class AppDbContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignT
 
         var optionsBuilder = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<AppDbContext>();
         var conn = config.GetConnectionString("Default");
-        optionsBuilder.UseMySql(conn, new MySqlServerVersion(new Version(8, 0, 34)));
+        optionsBuilder.UseMySql(conn, new MySqlServerVersion(new Version(8, 0, 34)),
+            x => x.MigrationsAssembly("WasteCollection-RecyclingPlatform.API"));
 
         return new AppDbContext(optionsBuilder.Options);
     }

@@ -39,10 +39,12 @@ builder.Services.AddSwaggerGen(options =>
 
 var conn = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(conn, new MySqlServerVersion(new Version(8, 0, 34))));
+    options.UseMySql(conn, new MySqlServerVersion(new Version(8, 0, 34)),
+        x => x.MigrationsAssembly("WasteCollection-RecyclingPlatform.API")));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
+builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -56,6 +58,7 @@ builder.Services.AddSingleton<IEmailSender, SmartEmailSender>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAreaService, AreaService>();
 
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 builder.Services

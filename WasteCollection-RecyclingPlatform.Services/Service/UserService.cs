@@ -20,4 +20,13 @@ public class UserService : IUserService
 
         return new UserProfileResponse(user.Id, user.Email, user.DisplayName, user.Role.ToString(), user.Points);
     }
+
+    public async Task<List<UserProfileResponse>> GetCollectorsAsync(CancellationToken ct = default)
+    {
+        var users = await _userRepo.GetAllAsync(ct);
+        return users
+            .Where(u => u.Role == Repositories.Entities.UserRole.Collector)
+            .Select(u => new UserProfileResponse(u.Id, u.Email, u.DisplayName, u.Role.ToString(), u.Points))
+            .ToList();
+    }
 }

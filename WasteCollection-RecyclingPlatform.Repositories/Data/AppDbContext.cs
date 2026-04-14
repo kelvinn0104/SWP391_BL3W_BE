@@ -9,6 +9,8 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<PasswordReset> PasswordResets => Set<PasswordReset>();
+    public DbSet<Area> Areas => Set<Area>();
+    public DbSet<Ward> Wards => Set<Ward>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +37,37 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => x.UserId);
             entity.Property(x => x.CodeHash).HasMaxLength(255).IsRequired();
             entity.Property(x => x.ResetTokenHash).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<Area>(entity =>
+        {
+            entity.ToTable("areas");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.DistrictName).IsUnique(); // Prevent duplicate district names
+            entity.Property(x => x.DistrictName).HasMaxLength(255).IsRequired();
+            entity.Property(x => x.MonthlyCapacityKg).HasPrecision(18, 2);
+            entity.Property(x => x.ProcessedThisMonthKg).HasPrecision(18, 2);
+        });
+
+        modelBuilder.Entity<Ward>(entity =>
+        {
+            entity.ToTable("wards");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.AreaId, x.Name }).IsUnique(); // Prevent duplicate ward names in same area
+            entity.Property(x => x.Name).HasMaxLength(255).IsRequired();
+            entity.Property(x => x.CollectedKg).HasPrecision(18, 2);
+
+            entity.HasOne(x => x.Area)
+                .WithMany(x => x.Wards)
+                .HasForeignKey(x => x.AreaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(x => x.Collectors)
+                .WithMany(x => x.Wards)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ward_collectors",
+                    j => j.HasOne<User>().WithMany().HasForeignKey("CollectorsId").OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne<Ward>().WithMany().HasForeignKey("WardsId").OnDelete(DeleteBehavior.Cascade));
         });
     }
 }

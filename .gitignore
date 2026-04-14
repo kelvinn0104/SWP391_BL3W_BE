@@ -1,0 +1,39 @@
+## Ignore Visual Studio temporary files, build results, and settings
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+
+## Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

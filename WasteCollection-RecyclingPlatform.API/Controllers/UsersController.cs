@@ -28,4 +28,10 @@ public class UsersController : ControllerBase
         try { return Ok(await _userService.GetProfileAsync(userId, ct)); }
         catch (UnauthorizedAccessException) { return Unauthorized(); }
     }
+
+    [HttpGet("collectors")]
+    public async Task<ActionResult<List<UserProfileResponse>>> GetCollectors(CancellationToken ct)
+    {
+        return Ok(await _userService.GetCollectorsAsync(ct));
+    }
 }
