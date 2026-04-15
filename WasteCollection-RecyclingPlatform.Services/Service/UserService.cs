@@ -53,18 +53,18 @@ public class UserService : IUserService
     private UserProfileResponse MapToProfileResponse(Repositories.Entities.User user)
     {
         return new UserProfileResponse(
-            user.Id, 
-            user.Email, 
-            user.DisplayName, 
-            user.FullName,
-            user.Gender,
-            user.DateOfBirth,
-            user.PhoneNumber,
-            user.Address,
-            user.Language,
-            user.AvatarUrl,
-            user.Role.ToString(), 
-            user.Points
+            UserId: user.Id,
+            Email: user.Email,
+            DisplayName: user.DisplayName,
+            FullName: user.FullName,
+            Gender: user.Gender,
+            DateOfBirth: user.DateOfBirth,
+            PhoneNumber: user.PhoneNumber,
+            Address: user.Address,
+            Language: user.Language,
+            AvatarUrl: user.AvatarUrl,
+            Role: user.Role.ToString(),
+            Points: user.Points
         );
     }
 }

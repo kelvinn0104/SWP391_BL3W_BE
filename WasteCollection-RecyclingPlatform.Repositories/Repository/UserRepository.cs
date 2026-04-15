@@ -14,10 +14,10 @@ public class UserRepository : IUserRepository
     }
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default)
-        => await _db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email, ct);
+        => await _db.Users.FirstOrDefaultAsync(x => x.Email == email, ct);
 
     public async Task<User?> GetByIdAsync(long id, CancellationToken ct = default)
-        => await _db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
+        => await _db.Users.FirstOrDefaultAsync(x => x.Id == id, ct);
 
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default)
         => await _db.Users.AsNoTracking().AnyAsync(x => x.Email == email, ct);

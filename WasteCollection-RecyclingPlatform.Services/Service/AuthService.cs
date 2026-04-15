@@ -232,7 +232,21 @@ public class AuthService : IAuthService
         => (input ?? string.Empty).Trim().ToLowerInvariant();
 
     private static AuthResponse ToAuthResponse(User user, string token)
-        => new(token, user.Id, user.Email, user.DisplayName, user.Role.ToString(), user.Points);
+        => new AuthResponse(
+            AccessToken: token,
+            UserId: user.Id,
+            Email: user.Email,
+            DisplayName: user.DisplayName,
+            Role: user.Role.ToString(),
+            Points: user.Points,
+            FullName: user.FullName,
+            Gender: user.Gender,
+            DateOfBirth: user.DateOfBirth,
+            PhoneNumber: user.PhoneNumber,
+            Address: user.Address,
+            Language: user.Language,
+            AvatarUrl: user.AvatarUrl
+        );
 
     private static string BuildForgotPasswordEmail(string code, string logoSrc) => $"""
         <div style="margin:0;padding:0;background:#f6f8fb">

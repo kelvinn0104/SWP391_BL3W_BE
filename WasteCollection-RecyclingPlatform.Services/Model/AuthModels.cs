@@ -1,3 +1,5 @@
+using System;
+
 namespace WasteCollection_RecyclingPlatform.Services.Model;
 
 public record LoginRequest(string Email, string Password);
@@ -12,7 +14,21 @@ public record VerifyResetCodeRequest(string Email, string Code);
 
 public record ResetPasswordRequest(string Email, string ResetToken, string NewPassword);
 
-public record AuthResponse(string AccessToken, long UserId, string Email, string? DisplayName, string Role, int Points);
+public record AuthResponse(
+    string AccessToken, 
+    long UserId, 
+    string Email, 
+    string? DisplayName, 
+    string Role, 
+    int Points,
+    string? FullName = null,
+    string? Gender = null,
+    DateTime? DateOfBirth = null,
+    string? PhoneNumber = null,
+    string? Address = null,
+    string? Language = null,
+    string? AvatarUrl = null
+);
 
 public record VerifyResetCodeResponse(string ResetToken);
 
