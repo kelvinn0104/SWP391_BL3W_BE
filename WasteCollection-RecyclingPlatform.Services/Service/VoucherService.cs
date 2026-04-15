@@ -230,24 +230,24 @@ public class VoucherService : IVoucherService
 
     private async Task<string> SaveVoucherImageAsync(IFormFile file)
     {
-        // Target: WasteCollection-RecyclingPlatform.FE/src/assets/voucher
+        // Target: WasteCollection-RecyclingPlatform.FE/public/voucher
         // Path is hardcoded based on user's project structure
-        var feAssetsPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\voucher";
+        var fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\voucher";
         
-        if (!Directory.Exists(feAssetsPath))
+        if (!Directory.Exists(fePublicPath))
         {
-            Directory.CreateDirectory(feAssetsPath);
+            Directory.CreateDirectory(fePublicPath);
         }
 
         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        var filePath = Path.Combine(feAssetsPath, fileName);
+        var filePath = Path.Combine(fePublicPath, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // Return path relative to FE src
-        return $"/src/assets/voucher/{fileName}";
+        // Return path relative to FE root
+        return $"/voucher/{fileName}";
     }
 }
