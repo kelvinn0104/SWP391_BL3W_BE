@@ -29,6 +29,18 @@ public class UsersController : ControllerBase
         catch (UnauthorizedAccessException) { return Unauthorized(); }
     }
 
+    [Authorize]
+    [HttpPut("profile")]
+    public async Task<ActionResult<UserProfileResponse>> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken ct)
+    {
+        var sub = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        if (!long.TryParse(sub, out var userId))
+            return Unauthorized();
+
+        try { return Ok(await _userService.UpdateProfileAsync(userId, request, ct)); }
+        catch (UnauthorizedAccessException) { return Unauthorized(); }
+    }
+
     [HttpGet("collectors")]
     public async Task<ActionResult<List<UserProfileResponse>>> GetCollectors(CancellationToken ct)
     {

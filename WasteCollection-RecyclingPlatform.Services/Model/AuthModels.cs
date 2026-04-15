@@ -18,4 +18,28 @@ public record VerifyResetCodeResponse(string ResetToken);
 
 public record MessageResponse(string Message);
 
-public record UserProfileResponse(long UserId, string Email, string? DisplayName, string Role, int Points);
+public record UserProfileResponse(
+    long UserId, 
+    string Email, 
+    string? DisplayName, 
+    string? FullName,
+    string? Gender,
+    DateTime? DateOfBirth,
+    string? PhoneNumber,
+    string? Address,
+    string? Language,
+    string? AvatarUrl,
+    string Role, 
+    int Points
+);
+
+public record UpdateProfileRequest(
+    string? DisplayName,
+    string? FullName,
+    string? Gender,
+    DateTime? DateOfBirth,
+    string? PhoneNumber,
+    string? Address,
+    string? Language,
+    string? AvatarUrl
+);

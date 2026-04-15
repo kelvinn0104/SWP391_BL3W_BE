@@ -18,7 +18,27 @@ public class UserService : IUserService
         if (user is null)
             throw new UnauthorizedAccessException("Người dùng không tồn tại.");
 
-        return new UserProfileResponse(user.Id, user.Email, user.DisplayName, user.Role.ToString(), user.Points);
+        return MapToProfileResponse(user);
+    }
+
+    public async Task<UserProfileResponse> UpdateProfileAsync(long userId, UpdateProfileRequest request, CancellationToken ct = default)
+    {
+        var user = await _userRepo.GetByIdAsync(userId, ct);
+        if (user is null)
+            throw new UnauthorizedAccessException("Người dùng không tồn tại.");
+
+        user.DisplayName = request.DisplayName;
+        user.FullName = request.FullName;
+        user.Gender = request.Gender;
+        user.DateOfBirth = request.DateOfBirth;
+        user.PhoneNumber = request.PhoneNumber;
+        user.Address = request.Address;
+        user.Language = request.Language;
+        if (!string.IsNullOrEmpty(request.AvatarUrl))
+            user.AvatarUrl = request.AvatarUrl;
+
+        await _userRepo.UpdateAsync(user, ct);
+        return MapToProfileResponse(user);
     }
 
     public async Task<List<UserProfileResponse>> GetCollectorsAsync(CancellationToken ct = default)
@@ -26,7 +46,25 @@ public class UserService : IUserService
         var users = await _userRepo.GetAllAsync(ct);
         return users
             .Where(u => u.Role == Repositories.Entities.UserRole.Collector)
-            .Select(u => new UserProfileResponse(u.Id, u.Email, u.DisplayName, u.Role.ToString(), u.Points))
+            .Select(MapToProfileResponse)
             .ToList();
+    }
+
+    private UserProfileResponse MapToProfileResponse(Repositories.Entities.User user)
+    {
+        return new UserProfileResponse(
+            user.Id, 
+            user.Email, 
+            user.DisplayName, 
+            user.FullName,
+            user.Gender,
+            user.DateOfBirth,
+            user.PhoneNumber,
+            user.Address,
+            user.Language,
+            user.AvatarUrl,
+            user.Role.ToString(), 
+            user.Points
+        );
     }
 }
