@@ -231,12 +231,14 @@ public class VoucherService : IVoucherService
     private async Task<string> SaveVoucherImageAsync(IFormFile file)
     {
         // Target: WasteCollection-RecyclingPlatform.FE/public/voucher
-        // Path is hardcoded based on user's project structure
-        var fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\voucher";
+        // Calculate path relative to the solution root
+        var fePublicPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "WasteCollection-RecyclingPlatform.FE", "public", "voucher"));
         
         if (!Directory.Exists(fePublicPath))
         {
-            Directory.CreateDirectory(fePublicPath);
+            // Fallback to absolute path if relative fails (just in case)
+            fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\voucher";
+            if (!Directory.Exists(fePublicPath)) Directory.CreateDirectory(fePublicPath);
         }
 
         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);

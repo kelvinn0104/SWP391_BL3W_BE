@@ -78,6 +78,24 @@ public class VouchersController : ControllerBase
         return Ok();
     }
 
+    [HttpPut("categories/{id}")]
+    // [Authorize(Roles = "Admin,Enterprise")]
+    public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryCreateRequest request, CancellationToken ct)
+    {
+        var success = await _voucherService.UpdateCategoryAsync(id, request, ct);
+        if (!success) return NotFound();
+        return Ok();
+    }
+
+    [HttpDelete("categories/{id}")]
+    // [Authorize(Roles = "Admin,Enterprise")]
+    public async Task<IActionResult> DeleteCategory(int id, CancellationToken ct)
+    {
+        var success = await _voucherService.DeleteCategoryAsync(id, ct);
+        if (!success) return NotFound();
+        return NoContent();
+    }
+
     [HttpPost("redeem/{voucherId}")]
     [Authorize]
     public async Task<IActionResult> Redeem(long voucherId, CancellationToken ct)

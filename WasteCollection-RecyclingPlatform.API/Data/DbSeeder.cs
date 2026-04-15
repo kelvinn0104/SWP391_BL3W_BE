@@ -172,7 +172,7 @@ public static class DbSeeder
                 Title = "Voucher Highland Coffee 50k", 
                 PointsRequired = 500, 
                 CategoryId = foodCat.Id,
-                ImageUrl = "/src/assets/voucher/voucher-1.jpg",
+                ImageUrl = "/voucher/voucher-1.jpg",
                 Codes = new List<VoucherCode>
                 {
                     new VoucherCode { Code = "HL-ABC-123" },
@@ -185,7 +185,7 @@ public static class DbSeeder
                 Title = "Voucher Shopee 100k", 
                 PointsRequired = 1000, 
                 CategoryId = shopCat.Id,
-                ImageUrl = "/src/assets/voucher/voucher-2.jpg",
+                ImageUrl = "/voucher/voucher-2.jpg",
                 Codes = new List<VoucherCode>
                 {
                     new VoucherCode { Code = "SHP-SALE-100" },
@@ -197,7 +197,7 @@ public static class DbSeeder
                 Title = "GrabRide Discount 20k", 
                 PointsRequired = 200, 
                 CategoryId = moveCat.Id,
-                ImageUrl = "/src/assets/voucher/voucher-3.jpg",
+                ImageUrl = "/voucher/voucher-3.jpg",
                 Codes = new List<VoucherCode>
                 {
                     new VoucherCode { Code = "GRAB-20K-1" },
