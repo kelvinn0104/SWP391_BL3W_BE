@@ -39,6 +39,7 @@ public static class DbSeeder
         }
 
         await SeedAreasAsync(db);
+        await SeedVouchersAsync(db);
     }
 
     private static async Task SeedAreasAsync(AppDbContext db)
@@ -144,6 +145,65 @@ public static class DbSeeder
             Points = 1250,
         });
         await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedVouchersAsync(AppDbContext db)
+    {
+        if (await db.VoucherCategories.AnyAsync()) return;
+
+        var foodCat = new VoucherCategory { Name = "Ẩm thực" };
+        var shopCat = new VoucherCategory { Name = "Mua sắm" };
+        var moveCat = new VoucherCategory { Name = "Di chuyển" };
+
+        db.VoucherCategories.AddRange(foodCat, shopCat, moveCat);
+        await db.SaveChangesAsync();
+
+        var vouchers = new List<Voucher>
+        {
+            new Voucher 
+            { 
+                Title = "Voucher Highland Coffee 50k", 
+                PointsRequired = 500, 
+                CategoryId = foodCat.Id,
+                ImageUrl = "/src/assets/voucher/voucher-1.jpg",
+                Codes = new List<VoucherCode>
+                {
+                    new VoucherCode { Code = "HL-ABC-123" },
+                    new VoucherCode { Code = "HL-DEF-456" },
+                    new VoucherCode { Code = "HL-GHI-789" }
+                }
+            },
+            new Voucher 
+            { 
+                Title = "Voucher Shopee 100k", 
+                PointsRequired = 1000, 
+                CategoryId = shopCat.Id,
+                ImageUrl = "/src/assets/voucher/voucher-2.jpg",
+                Codes = new List<VoucherCode>
+                {
+                    new VoucherCode { Code = "SHP-SALE-100" },
+                    new VoucherCode { Code = "SHP-SALE-200" }
+                }
+            },
+            new Voucher 
+            { 
+                Title = "GrabRide Discount 20k", 
+                PointsRequired = 200, 
+                CategoryId = moveCat.Id,
+                ImageUrl = "/src/assets/voucher/voucher-3.jpg",
+                Codes = new List<VoucherCode>
+                {
+                    new VoucherCode { Code = "GRAB-20K-1" },
+                    new VoucherCode { Code = "GRAB-20K-2" },
+                    new VoucherCode { Code = "GRAB-20K-3" },
+                    new VoucherCode { Code = "GRAB-20K-4" }
+                }
+            }
+        };
+
+        db.Vouchers.AddRange(vouchers);
+        await db.SaveChangesAsync();
+        Console.WriteLine("[Seeder] Successfully seeded Voucher data.");
     }
 
     private class HcmcData
