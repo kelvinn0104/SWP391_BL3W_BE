@@ -27,11 +27,20 @@ public class UserService : IUserService
         if (user is null)
             throw new UnauthorizedAccessException("Người dùng không tồn tại.");
 
+        // Validation: PhoneNumber must be 10 digits if provided
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
+            var phone = request.PhoneNumber.Trim();
+            if (phone.Length != 10 || !phone.All(char.IsDigit))
+                throw new ArgumentException("Số điện thoại phải bao gồm đúng 10 chữ số và không chứa ký tự đặc biệt.");
+            
+            user.PhoneNumber = phone;
+        }
+
         user.DisplayName = request.DisplayName;
         user.FullName = request.FullName;
         user.Gender = request.Gender;
         user.DateOfBirth = request.DateOfBirth;
-        user.PhoneNumber = request.PhoneNumber;
         user.Address = request.Address;
         user.Language = request.Language;
         if (!string.IsNullOrEmpty(request.AvatarUrl))
