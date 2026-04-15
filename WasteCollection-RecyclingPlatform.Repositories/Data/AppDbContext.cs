@@ -11,6 +11,9 @@ public class AppDbContext : DbContext
     public DbSet<PasswordReset> PasswordResets => Set<PasswordReset>();
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<Ward> Wards => Set<Ward>();
+    public DbSet<VoucherCategory> VoucherCategories => Set<VoucherCategory>();
+    public DbSet<Voucher> Vouchers => Set<Voucher>();
+    public DbSet<VoucherCode> VoucherCodes => Set<VoucherCode>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -68,6 +71,44 @@ public class AppDbContext : DbContext
                     "ward_collectors",
                     j => j.HasOne<User>().WithMany().HasForeignKey("CollectorsId").OnDelete(DeleteBehavior.Cascade),
                     j => j.HasOne<Ward>().WithMany().HasForeignKey("WardsId").OnDelete(DeleteBehavior.Cascade));
+        });
+
+        modelBuilder.Entity<VoucherCategory>(entity =>
+        {
+            entity.ToTable("voucher_categories");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        });
+
+        modelBuilder.Entity<Voucher>(entity =>
+        {
+            entity.ToTable("vouchers");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Title).HasMaxLength(255).IsRequired();
+            entity.Property(x => x.ImageUrl).HasMaxLength(1000);
+            
+            entity.HasOne(x => x.Category)
+                .WithMany(x => x.Vouchers)
+                .HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<VoucherCode>(entity =>
+        {
+            entity.ToTable("voucher_codes");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Code).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.Code).IsUnique();
+
+            entity.HasOne(x => x.Voucher)
+                .WithMany(x => x.Codes)
+                .HasForeignKey(x => x.VoucherId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.UsedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.UsedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
