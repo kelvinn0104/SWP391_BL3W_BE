@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace WasteCollection_RecyclingPlatform.Services.DTOs;
 
@@ -28,6 +28,7 @@ public class VoucherCreateRequest
     public string Category { get; set; } = null!;
     public int Stock { get; set; }
     public string? Image { get; set; }
+    public IFormFile? ImageFile { get; set; }
     public List<string> Codes { get; set; } = new List<string>();
 }
 
@@ -38,6 +39,7 @@ public class VoucherUpdateRequest
     public string Category { get; set; } = null!;
     public int Stock { get; set; }
     public string? Image { get; set; }
+    public IFormFile? ImageFile { get; set; }
     public List<string> Codes { get; set; } = new List<string>();
 }
 

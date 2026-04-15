@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using WasteCollection_RecyclingPlatform.Repositories.Entities;
 using WasteCollection_RecyclingPlatform.Repositories.Repository;
@@ -110,6 +112,11 @@ public class VoucherService : IVoucherService
             Codes = request.Codes.Select(c => new VoucherCode { Code = c }).ToList()
         };
 
+        if (request.ImageFile != null)
+        {
+            voucher.ImageUrl = await SaveVoucherImageAsync(request.ImageFile);
+        }
+
         await _voucherRepository.AddVoucherAsync(voucher, ct);
         return true;
     }
@@ -130,8 +137,16 @@ public class VoucherService : IVoucherService
 
         voucher.Title = request.Title;
         voucher.PointsRequired = request.Points;
-        voucher.ImageUrl = request.Image;
         voucher.CategoryId = category.Id;
+
+        if (request.ImageFile != null)
+        {
+            voucher.ImageUrl = await SaveVoucherImageAsync(request.ImageFile);
+        }
+        else if (!string.IsNullOrEmpty(request.Image))
+        {
+            voucher.ImageUrl = request.Image;
+        }
 
         // Sync codes - very basic implementation
         // Remove codes that are not used and not in the new list
@@ -211,5 +226,28 @@ public class VoucherService : IVoucherService
             CodeUsed = h.Code,
             TransactionId = $"TXN{h.Id}{h.UsedAtUtc?.Ticks % 1000}"
         }).ToList();
+    }
+
+    private async Task<string> SaveVoucherImageAsync(IFormFile file)
+    {
+        // Target: WasteCollection-RecyclingPlatform.FE/src/assets/voucher
+        // Path is hardcoded based on user's project structure
+        var feAssetsPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\voucher";
+        
+        if (!Directory.Exists(feAssetsPath))
+        {
+            Directory.CreateDirectory(feAssetsPath);
+        }
+
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var filePath = Path.Combine(feAssetsPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // Return path relative to FE src
+        return $"/src/assets/voucher/{fileName}";
     }
 }

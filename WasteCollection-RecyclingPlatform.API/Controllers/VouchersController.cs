@@ -36,21 +36,24 @@ public class VouchersController : ControllerBase
     }
 
     [HttpPost]
-    // [Authorize(Roles = "Admin,Enterprise")] // Uncomment if roles are configured
-    public async Task<IActionResult> CreateVoucher([FromBody] VoucherCreateRequest request, CancellationToken ct)
+    [Consumes("multipart/form-data")]
+    // [Authorize(Roles = "Admin,Enterprise")]
+    public async Task<IActionResult> CreateVoucher([FromForm] VoucherCreateRequest request, CancellationToken ct)
     {
         await _voucherService.CreateVoucherAsync(request, ct);
         return Ok();
     }
 
     [HttpPut("{id}")]
+    [Consumes("multipart/form-data")]
     // [Authorize(Roles = "Admin,Enterprise")]
-    public async Task<IActionResult> UpdateVoucher(long id, [FromBody] VoucherUpdateRequest request, CancellationToken ct)
+    public async Task<IActionResult> UpdateVoucher(long id, [FromForm] VoucherUpdateRequest request, CancellationToken ct)
     {
-        var updated = await _voucherService.UpdateVoucherAsync(id, request, ct);
-        if (!updated) return NotFound();
+        var success = await _voucherService.UpdateVoucherAsync(id, request, ct);
+        if (!success) return NotFound();
         return Ok();
     }
+
 
     [HttpDelete("{id}")]
     // [Authorize(Roles = "Admin,Enterprise")]
