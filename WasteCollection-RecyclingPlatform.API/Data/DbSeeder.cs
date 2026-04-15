@@ -27,7 +27,8 @@ public static class DbSeeder
             email: "collector@gmail.com",
             displayName: "Professional Collector",
             password: "123456",
-            role: UserRole.Collector);
+            role: UserRole.Collector,
+            phoneNumber: "0901234567");
 
         for (int i = 1; i <= 100; i++)
         {
@@ -35,7 +36,8 @@ public static class DbSeeder
                 email: $"collector{i}@gmail.com",
                 displayName: $"Collector #{i}",
                 password: "123456",
-                role: UserRole.Collector);
+                role: UserRole.Collector,
+                phoneNumber: $"09{i:D8}");
         }
 
         await SeedAreasAsync(db);
@@ -124,7 +126,8 @@ public static class DbSeeder
         string email,
         string displayName,
         string password,
-        UserRole role)
+        UserRole role,
+        string? phoneNumber = null)
     {
         var normalized = email.Trim().ToLowerInvariant();
         var existing = await db.Users.FirstOrDefaultAsync(x => x.Email == normalized);
@@ -132,6 +135,9 @@ public static class DbSeeder
         {
             if (existing.Role == default) existing.Role = role;
             if (string.IsNullOrWhiteSpace(existing.DisplayName)) existing.DisplayName = displayName;
+            if (!string.IsNullOrWhiteSpace(phoneNumber) && string.IsNullOrWhiteSpace(existing.PhoneNumber))
+                existing.PhoneNumber = phoneNumber;
+
             await db.SaveChangesAsync();
             return;
         }
@@ -142,6 +148,7 @@ public static class DbSeeder
             DisplayName = displayName,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             Role = role,
+            PhoneNumber = phoneNumber,
             Points = 1250,
         });
         await db.SaveChangesAsync();
