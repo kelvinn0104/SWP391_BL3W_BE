@@ -45,6 +45,9 @@ public class AuthService : IAuthService
         if (user is null || !_hasher.Verify(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Email hoặc mật khẩu không đúng.");
 
+        if (user.IsLocked)
+            throw new UnauthorizedAccessException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+
         return ToAuthResponse(user, _jwt.CreateToken(user));
     }
 

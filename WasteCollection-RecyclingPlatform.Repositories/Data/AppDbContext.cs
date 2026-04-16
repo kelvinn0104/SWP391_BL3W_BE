@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
                 .HasMaxLength(32)
                 .IsRequired();
             entity.Property(x => x.Points).IsRequired();
+            entity.Property(x => x.IsLocked).HasDefaultValue(false);
         });
 
         modelBuilder.Entity<PasswordReset>(entity =>

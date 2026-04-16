@@ -35,6 +35,19 @@ public class UserRepository : IUserRepository
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task DeleteAsync(long id, CancellationToken ct = default)
+    {
+        var user = await _db.Users.FindAsync(new object[] { id }, ct);
+        if (user != null)
+        {
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync(ct);
+        }
+    }
+
     public async Task<List<User>> GetAllAsync(CancellationToken ct = default)
         => await _db.Users.AsNoTracking().ToListAsync(ct);
+
+    public async Task<List<User>> GetByRoleAsync(UserRole role, CancellationToken ct = default)
+        => await _db.Users.AsNoTracking().Where(u => u.Role == role).ToListAsync(ct);
 }

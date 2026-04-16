@@ -46,7 +46,8 @@ public record UserProfileResponse(
     string? Language,
     string? AvatarUrl,
     string Role, 
-    int Points
+    int Points,
+    bool IsLocked
 );
 
 public record UpdateProfileRequest(

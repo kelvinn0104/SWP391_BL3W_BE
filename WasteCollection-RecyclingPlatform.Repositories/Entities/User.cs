@@ -17,6 +17,7 @@ public class User
     public UserRole Role { get; set; } = UserRole.Citizen;
     public int Points { get; set; } = 0;
 
+    public bool IsLocked { get; set; } = false;
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public ICollection<Ward> Wards { get; set; } = new List<Ward>();

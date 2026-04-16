@@ -1,3 +1,4 @@
+using WasteCollection_RecyclingPlatform.Repositories.Entities;
 using WasteCollection_RecyclingPlatform.Repositories.Repository;
 using WasteCollection_RecyclingPlatform.Services.Model;
 
@@ -6,10 +7,12 @@ namespace WasteCollection_RecyclingPlatform.Services.Service;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepo;
+    private readonly IPasswordHasher _hasher;
 
-    public UserService(IUserRepository userRepo)
+    public UserService(IUserRepository userRepo, IPasswordHasher hasher)
     {
         _userRepo = userRepo;
+        _hasher = hasher;
     }
 
     public async Task<UserProfileResponse> GetProfileAsync(long userId, CancellationToken ct = default)
@@ -27,12 +30,11 @@ public class UserService : IUserService
         if (user is null)
             throw new UnauthorizedAccessException("Người dùng không tồn tại.");
 
-        // Validation: PhoneNumber must be 10 digits if provided
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
             var phone = request.PhoneNumber.Trim();
             if (phone.Length != 10 || !phone.All(char.IsDigit))
-                throw new ArgumentException("Số điện thoại phải bao gồm đúng 10 chữ số và không chứa ký tự đặc biệt.");
+                throw new ArgumentException("Số điện thoại phải bao gồm đúng 10 chữ số.");
             
             user.PhoneNumber = phone;
         }
@@ -50,13 +52,81 @@ public class UserService : IUserService
         return MapToProfileResponse(user);
     }
 
+    public async Task<List<UserProfileResponse>> GetCitizensAsync(CancellationToken ct = default)
+    {
+        var users = await _userRepo.GetByRoleAsync(UserRole.Citizen, ct);
+        return users.Select(MapToProfileResponse).ToList();
+    }
+
     public async Task<List<UserProfileResponse>> GetCollectorsAsync(CancellationToken ct = default)
     {
-        var users = await _userRepo.GetAllAsync(ct);
-        return users
-            .Where(u => u.Role == Repositories.Entities.UserRole.Collector)
-            .Select(MapToProfileResponse)
-            .ToList();
+        var users = await _userRepo.GetByRoleAsync(UserRole.Collector, ct);
+        return users.Select(MapToProfileResponse).ToList();
+    }
+
+    public async Task<UserProfileResponse> CreateCollectorAsync(CollectorCreateRequest request, CancellationToken ct = default)
+    {
+        var email = request.Email.Trim().ToLowerInvariant();
+        if (await _userRepo.ExistsByEmailAsync(email, ct))
+            throw new InvalidOperationException("Email đã được sử dụng.");
+
+        var user = new User
+        {
+            Email = email,
+            PasswordHash = _hasher.Hash(request.Password),
+            DisplayName = request.DisplayName,
+            FullName = request.FullName,
+            PhoneNumber = request.PhoneNumber,
+            Address = request.Address,
+            Role = UserRole.Collector,
+            Points = 0
+        };
+
+        await _userRepo.AddAsync(user, ct);
+        return MapToProfileResponse(user);
+    }
+
+    public async Task<UserProfileResponse> UpdateAccountAsync(long userId, AccountUpdateRequest request, CancellationToken ct = default)
+    {
+        var user = await _userRepo.GetByIdAsync(userId, ct);
+        if (user is null)
+            throw new KeyNotFoundException("Người dùng không tồn tại.");
+
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
+            var phone = request.PhoneNumber.Trim();
+            if (phone.Length != 10 || !phone.All(char.IsDigit))
+                throw new ArgumentException("Số điện thoại phải bao gồm đúng 10 chữ số.");
+            
+            user.PhoneNumber = phone;
+        }
+
+        user.DisplayName = request.DisplayName ?? user.DisplayName;
+        user.FullName = request.FullName ?? user.FullName;
+        user.Gender = request.Gender ?? user.Gender;
+        user.DateOfBirth = request.DateOfBirth ?? user.DateOfBirth;
+        user.Address = request.Address ?? user.Address;
+        user.Language = request.Language ?? user.Language;
+        if (!string.IsNullOrEmpty(request.AvatarUrl))
+            user.AvatarUrl = request.AvatarUrl;
+
+        await _userRepo.UpdateAsync(user, ct);
+        return MapToProfileResponse(user);
+    }
+
+    public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)
+    {
+        await _userRepo.DeleteAsync(userId, ct);
+    }
+
+    public async Task UpdateAccountStatusAsync(long userId, bool isLocked, CancellationToken ct = default)
+    {
+        var user = await _userRepo.GetByIdAsync(userId, ct);
+        if (user is null)
+            throw new KeyNotFoundException("Người dùng không tồn tại.");
+
+        user.IsLocked = isLocked;
+        await _userRepo.UpdateAsync(user, ct);
     }
 
     private UserProfileResponse MapToProfileResponse(Repositories.Entities.User user)
@@ -73,7 +143,8 @@ public class UserService : IUserService
             Language: user.Language,
             AvatarUrl: user.AvatarUrl,
             Role: user.Role.ToString(),
-            Points: user.Points
+            Points: user.Points,
+            IsLocked: user.IsLocked
         );
     }
 }
