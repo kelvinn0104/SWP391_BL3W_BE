@@ -95,9 +95,9 @@ public class CollectionService : ICollectionService
         return new CollectionRequestResponse(
             req.Id,
             req.CitizenId,
-            req.Citizen?.DisplayName ?? "Unknown",
+            req.CitizenName ?? req.Citizen?.DisplayName ?? "Khách vãng lai",
             req.CollectorId,
-            req.Collector?.DisplayName,
+            req.CollectorName ?? req.Collector?.DisplayName,
             req.Collector?.PhoneNumber,
             req.Address,
             req.WasteType,

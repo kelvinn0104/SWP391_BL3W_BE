@@ -44,4 +44,5 @@ public class CollectionRequest
 
     public string? CitizenName { get; set; }
     public string? CollectorName { get; set; }
+    public string? CollectorPhone { get; set; }
 }
