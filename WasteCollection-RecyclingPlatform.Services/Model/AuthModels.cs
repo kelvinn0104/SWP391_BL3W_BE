@@ -47,7 +47,8 @@ public record UserProfileResponse(
     string? AvatarUrl,
     string Role, 
     int Points,
-    bool IsLocked
+    bool IsLocked,
+    List<long> WardIds
 );
 
 public record UpdateProfileRequest(

@@ -43,6 +43,9 @@ public static class DbSeeder
         await SeedAreasAsync(db);
         await SeedVouchersAsync(db);
         await SeedCollectionRequestsAsync(db);
+
+        // 2. Automatic Repair & Sync (The "Self-Healing" logic)
+        await RepairDataAsync(db);
     }
 
     private static async Task SeedAreasAsync(AppDbContext db)
@@ -294,6 +297,66 @@ public static class DbSeeder
         db.CollectionRequests.AddRange(requests);
         await db.SaveChangesAsync();
         Console.WriteLine($"[Seeder] Successfully seeded {requests.Count} collection requests for {citizens.Count} citizens.");
+    }
+
+    private static async Task RepairDataAsync(AppDbContext db)
+    {
+        Console.WriteLine("[Seeder] Starting Automatic Data Repair...");
+        var rnd = new Random();
+
+        // A. Ensure all collectors are assigned to at least one ward
+        var collectors = await db.Users
+            .Include(u => u.Wards)
+            .Where(u => u.Role == UserRole.Collector)
+            .ToListAsync();
+
+        var allWards = await db.Wards.ToListAsync();
+
+        if (allWards.Any())
+        {
+            foreach (var col in collectors)
+            {
+                if (!col.Wards.Any())
+                {
+                    // Assign to 1-2 random wards if orphaned
+                    int count = rnd.Next(1, 4);
+                    var wardsToAssign = allWards.OrderBy(x => rnd.Next()).Take(count).ToList();
+                    foreach (var w in wardsToAssign) col.Wards.Add(w);
+                    Console.WriteLine($"[Seeder] Auto-assigned {col.DisplayName} to {count} wards.");
+                }
+            }
+        }
+
+        // B. Ensure all collection requests have a WardId by inferring from Address
+        var requests = await db.CollectionRequests
+            .Where(r => r.WardId == null)
+            .ToListAsync();
+
+        if (requests.Any())
+        {
+            foreach (var req in requests)
+            {
+                // Try to find a ward name in the address string
+                var matchingWard = allWards.FirstOrDefault(w => 
+                    !string.IsNullOrEmpty(req.Address) && 
+                    req.Address.Contains(w.Name, StringComparison.OrdinalIgnoreCase));
+
+                if (matchingWard != null)
+                {
+                    req.WardId = matchingWard.Id;
+                    Console.WriteLine($"[Seeder] Inferred Ward '{matchingWard.Name}' for Request #{req.Id} from address.");
+                }
+                else if (allWards.Any())
+                {
+                    // Fallback to a random ward if completely lost
+                    var fallback = allWards[rnd.Next(allWards.Count)];
+                    req.WardId = fallback.Id;
+                }
+            }
+        }
+
+        await db.SaveChangesAsync();
+        Console.WriteLine("[Seeder] Data Repair Complete.");
     }
 
     private class HcmcData
