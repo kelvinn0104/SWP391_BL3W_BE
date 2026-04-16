@@ -216,60 +216,84 @@ public static class DbSeeder
 
     private static async Task SeedCollectionRequestsAsync(AppDbContext db)
     {
-        if (await db.CollectionRequests.AnyAsync()) return;
-
-        await EnsureUserAsync(db,
-            email: "citizen@gmail.com",
-            displayName: "Nguyễn Văn Dân",
-            password: "123456",
-            role: UserRole.Citizen,
-            phoneNumber: "0988776655");
-
-        var citizen = await db.Users.FirstAsync(u => u.Email == "citizen@gmail.com");
-        var collector = await db.Users.FirstAsync(u => u.Role == UserRole.Collector && u.Email == "collector@gmail.com");
-
-        var requests = new List<CollectionRequest>
+        // If we have very few requests, re-seed with the new 25 items for better testing
+        if (await db.CollectionRequests.CountAsync() > 10) return;
+        
+        if (await db.CollectionRequests.AnyAsync())
         {
-            new CollectionRequest
-            {
-                CitizenId = citizen.Id,
-                Address = "123 Lê Lợi, Quận 1, TP.HCM",
-                WasteType = "Nhựa & Kim loại",
-                WeightKg = 5.5m,
-                Note = "Có nhiều chai nhựa rỗng và lon bia.",
-                Priority = "High",
-                Status = CollectionRequestStatus.Pending,
-                MaterialsJson = "[{\"Type\":\"Chai nhựa\",\"Amount\":3.5,\"Unit\":\"kg\"},{\"Type\":\"Lon nhôm\",\"Amount\":2.0,\"Unit\":\"kg\"}]",
-                ImagesJson = "[\"/waste/waste-1.jpg\"]"
-            },
-            new CollectionRequest
-            {
-                CitizenId = citizen.Id,
-                Address = "456 Nguyễn Huệ, Quận 1, TP.HCM",
-                WasteType = "Giấy vụn",
-                WeightKg = 12.0m,
-                Note = "Bìa carton cũ từ việc dọn nhà.",
-                Priority = "Standard",
-                Status = CollectionRequestStatus.Accepted,
-                MaterialsJson = "[{\"Type\":\"Bìa carton\",\"Amount\":12.0,\"Unit\":\"kg\"}]"
-            },
-            new CollectionRequest
-            {
-                CitizenId = citizen.Id,
-                CollectorId = collector.Id,
-                Address = "789 Cách Mạng Tháng 8, Quận 3, TP.HCM",
-                WasteType = "Điện tử cũ",
-                WeightKg = 2.5m,
-                Note = "Máy in và bàn phím hỏng.",
-                Priority = "Medium",
-                Status = CollectionRequestStatus.Assigned,
-                MaterialsJson = "[{\"Type\":\"Linh kiện điện tử\",\"Amount\":2.5,\"Unit\":\"kg\"}]"
-            }
+            db.CollectionRequests.RemoveRange(db.CollectionRequests);
+            await db.SaveChangesAsync();
+        }
+
+        // Ensure multiple citizens
+        var citizensData = new[]
+        {
+            ("citizen@gmail.com", "Nguyễn Văn Dân", "0988776655"),
+            ("tran.anh@gmail.com", "Trần Thị Ánh", "0912345678"),
+            ("le.hoang@gmail.com", "Lê Minh Hoàng", "0933445566"),
+            ("pham.lan@gmail.com", "Phạm Hương Lân", "0944556677"),
+            ("vo.thanh@gmail.com", "Võ Thành Trung", "0955667788")
         };
+
+        foreach (var (email, name, phone) in citizensData)
+        {
+            await EnsureUserAsync(db, email, name, "123456", UserRole.Citizen, phone);
+        }
+
+        var citizens = await db.Users.Where(u => u.Role == UserRole.Citizen).ToListAsync();
+        var collectors = await db.Users.Where(u => u.Role == UserRole.Collector).Take(10).ToListAsync();
+        var rnd = new Random();
+
+        var wasteCategories = new[] { "Nhựa & Kim loại", "Giấy vụn", "Điện tử cũ", "Hỗn hợp", "Thủy tinh", "Kim loại" };
+        var addresses = new[] 
+        { 
+            "123 Lê Lợi, Q.1", "456 Nguyễn Huệ, Q.1", "789 CMT8, Q.3", "101 Võ Văn Tần, Q.3", 
+            "202 Hoàng Sa, Q.Tân Bình", "303 Lý Thường Kiệt, Q.10", "404 Điện Biên Phủ, Q.Bình Thạnh",
+            "505 Nam Kỳ Khởi Nghĩa, Q.3", "606 Trần Hưng Đạo, Q.5", "707 Hậu Giang, Q.6"
+        };
+
+        var requests = new List<CollectionRequest>();
+
+        for (int i = 0; i < 25; i++)
+        {
+            var citizen = citizens[rnd.Next(citizens.Count)];
+            var status = (CollectionRequestStatus)rnd.Next(5);
+            var createdAt = DateTime.UtcNow.AddDays(-rnd.Next(1, 15)).AddHours(-rnd.Next(1, 24));
+            
+            var req = new CollectionRequest
+            {
+                CitizenId = citizen.Id,
+                Address = addresses[rnd.Next(addresses.Length)] + ", TP.HCM",
+                WasteType = wasteCategories[rnd.Next(wasteCategories.Length)],
+                WeightKg = (decimal)(rnd.NextDouble() * 20 + 1),
+                Note = "Ghi chú mẫu cho đơn hàng số " + (i + 1),
+                Priority = i % 3 == 0 ? "High" : (i % 3 == 1 ? "Medium" : "Standard"),
+                Status = status,
+                CreatedAtUtc = createdAt,
+                MaterialsJson = "[{\"Type\":\"Loại rác A\",\"Amount\":2.0, \"Unit\":\"kg\"}]"
+            };
+
+            if (status == CollectionRequestStatus.Assigned || status == CollectionRequestStatus.Collected)
+            {
+                req.CollectorId = collectors[rnd.Next(collectors.Count)].Id;
+            }
+
+            if (status == CollectionRequestStatus.Collected)
+            {
+                req.CompletedAtUtc = createdAt.AddHours(rnd.Next(2, 48));
+            }
+
+            if (status == CollectionRequestStatus.Cancelled)
+            {
+                req.CancellationReason = "Khách hàng thay đổi ý định hoặc không có mặt tại địa chỉ.";
+            }
+
+            requests.Add(req);
+        }
 
         db.CollectionRequests.AddRange(requests);
         await db.SaveChangesAsync();
-        Console.WriteLine("[Seeder] Successfully seeded Collection Request data.");
+        Console.WriteLine($"[Seeder] Successfully seeded {requests.Count} collection requests for {citizens.Count} citizens.");
     }
 
     private class HcmcData
