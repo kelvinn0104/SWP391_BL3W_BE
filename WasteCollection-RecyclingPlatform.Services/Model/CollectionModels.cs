@@ -19,6 +19,8 @@ public record CollectionRequestResponse(
     DateTime CreatedAt,
     DateTime? CompletedAt,
     string? CancellationReason,
+    long? WardId,
+    string? WardName,
     List<WasteMaterialDto> Materials,
     List<string> Images
 );

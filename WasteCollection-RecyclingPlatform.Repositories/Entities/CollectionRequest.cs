@@ -38,4 +38,7 @@ public class CollectionRequest
     // Stored as JSON strings
     public string? MaterialsJson { get; set; }
     public string? ImagesJson { get; set; }
+ 
+    public long? WardId { get; set; }
+    public Ward? Ward { get; set; }
 }

@@ -242,28 +242,25 @@ public static class DbSeeder
 
         var citizens = await db.Users.Where(u => u.Role == UserRole.Citizen).ToListAsync();
         var collectors = await db.Users.Where(u => u.Role == UserRole.Collector).Take(10).ToListAsync();
+        var wards = await db.Wards.Include(w => w.Area).ToListAsync();
         var rnd = new Random();
-
+ 
         var wasteCategories = new[] { "Nhựa & Kim loại", "Giấy vụn", "Điện tử cũ", "Hỗn hợp", "Thủy tinh", "Kim loại" };
-        var addresses = new[] 
-        { 
-            "123 Lê Lợi, Q.1", "456 Nguyễn Huệ, Q.1", "789 CMT8, Q.3", "101 Võ Văn Tần, Q.3", 
-            "202 Hoàng Sa, Q.Tân Bình", "303 Lý Thường Kiệt, Q.10", "404 Điện Biên Phủ, Q.Bình Thạnh",
-            "505 Nam Kỳ Khởi Nghĩa, Q.3", "606 Trần Hưng Đạo, Q.5", "707 Hậu Giang, Q.6"
-        };
-
+ 
         var requests = new List<CollectionRequest>();
-
+ 
         for (int i = 0; i < 25; i++)
         {
             var citizen = citizens[rnd.Next(citizens.Count)];
             var status = (CollectionRequestStatus)rnd.Next(5);
             var createdAt = DateTime.UtcNow.AddDays(-rnd.Next(1, 15)).AddHours(-rnd.Next(1, 24));
+            var ward = wards[rnd.Next(wards.Count)];
             
             var req = new CollectionRequest
             {
                 CitizenId = citizen.Id,
-                Address = addresses[rnd.Next(addresses.Length)] + ", TP.HCM",
+                WardId = ward.Id,
+                Address = $"{rnd.Next(1, 999)} {ward.Name}, {ward.Area.DistrictName}, TP.HCM",
                 WasteType = wasteCategories[rnd.Next(wasteCategories.Length)],
                 WeightKg = (decimal)(rnd.NextDouble() * 20 + 1),
                 Note = "Ghi chú mẫu cho đơn hàng số " + (i + 1),

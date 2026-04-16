@@ -48,6 +48,17 @@ public class UserRepository : IUserRepository
     public async Task<List<User>> GetAllAsync(CancellationToken ct = default)
         => await _db.Users.AsNoTracking().ToListAsync(ct);
 
-    public async Task<List<User>> GetByRoleAsync(UserRole role, CancellationToken ct = default)
-        => await _db.Users.AsNoTracking().Where(u => u.Role == role).ToListAsync(ct);
+    public async Task<List<User>> GetByRoleAsync(UserRole role, long? wardId = null, CancellationToken ct = default)
+    {
+        var query = _db.Users.AsNoTracking()
+            .Include(u => u.Wards)
+            .Where(u => u.Role == role);
+            
+        if (wardId.HasValue)
+        {
+            query = query.Where(u => u.Wards.Any(w => w.Id == wardId.Value));
+        }
+        
+        return await query.ToListAsync(ct);
+    }
 }

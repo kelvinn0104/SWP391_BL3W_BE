@@ -58,9 +58,9 @@ public class UserService : IUserService
         return users.Select(MapToProfileResponse).ToList();
     }
 
-    public async Task<List<UserProfileResponse>> GetCollectorsAsync(CancellationToken ct = default)
+    public async Task<List<UserProfileResponse>> GetCollectorsAsync(long? wardId = null, CancellationToken ct = default)
     {
-        var users = await _userRepo.GetByRoleAsync(UserRole.Collector, ct);
+        var users = await _userRepo.GetByRoleAsync(UserRole.Collector, wardId, ct);
         return users.Select(MapToProfileResponse).ToList();
     }
 

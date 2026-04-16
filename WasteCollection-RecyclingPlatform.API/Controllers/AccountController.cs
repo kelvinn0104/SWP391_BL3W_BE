@@ -25,9 +25,9 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("collectors")]
-    public async Task<ActionResult<List<UserProfileResponse>>> GetCollectors(CancellationToken ct)
+    public async Task<ActionResult<List<UserProfileResponse>>> GetCollectors([FromQuery] long? wardId, CancellationToken ct)
     {
-        var collectors = await _userService.GetCollectorsAsync(ct);
+        var collectors = await _userService.GetCollectorsAsync(wardId, ct);
         return Ok(collectors);
     }
 

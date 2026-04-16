@@ -18,6 +18,7 @@ public class CollectionRequestRepository : ICollectionRequestRepository
         return await _db.CollectionRequests
             .Include(x => x.Citizen)
             .Include(x => x.Collector)
+            .Include(x => x.Ward)
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync(ct);
     }
@@ -27,6 +28,7 @@ public class CollectionRequestRepository : ICollectionRequestRepository
         return await _db.CollectionRequests
             .Include(x => x.Citizen)
             .Include(x => x.Collector)
+            .Include(x => x.Ward)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
@@ -46,6 +48,7 @@ public class CollectionRequestRepository : ICollectionRequestRepository
     {
         return await _db.CollectionRequests
             .Include(x => x.Collector)
+            .Include(x => x.Ward)
             .Where(x => x.CitizenId == citizenId)
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync(ct);
@@ -55,6 +58,7 @@ public class CollectionRequestRepository : ICollectionRequestRepository
     {
         return await _db.CollectionRequests
             .Include(x => x.Citizen)
+            .Include(x => x.Ward)
             .Where(x => x.CollectorId == collectorId)
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync(ct);

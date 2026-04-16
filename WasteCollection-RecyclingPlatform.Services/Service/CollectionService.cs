@@ -107,6 +107,8 @@ public class CollectionService : ICollectionService
             req.CreatedAtUtc,
             req.CompletedAtUtc,
             req.CancellationReason,
+            req.WardId,
+            req.Ward?.Name,
             materials,
             images
         );
