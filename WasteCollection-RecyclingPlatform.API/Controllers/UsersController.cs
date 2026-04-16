@@ -44,6 +44,6 @@ public class UsersController : ControllerBase
     [HttpGet("collectors")]
     public async Task<ActionResult<List<UserProfileResponse>>> GetCollectors(CancellationToken ct)
     {
-        return Ok(await _userService.GetCollectorsAsync(ct));
+        return Ok(await _userService.GetCollectorsAsync(null, ct));
     }
 }

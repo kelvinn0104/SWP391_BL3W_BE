@@ -54,7 +54,7 @@ public class UserService : IUserService
 
     public async Task<List<UserProfileResponse>> GetCitizensAsync(CancellationToken ct = default)
     {
-        var users = await _userRepo.GetByRoleAsync(UserRole.Citizen, ct);
+        var users = await _userRepo.GetByRoleAsync(UserRole.Citizen, null, ct);
         return users.Select(MapToProfileResponse).ToList();
     }
 

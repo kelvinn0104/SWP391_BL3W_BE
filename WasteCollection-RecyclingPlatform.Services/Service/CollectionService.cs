@@ -59,6 +59,7 @@ public class CollectionService : ICollectionService
         if (collector == null || collector.Role != UserRole.Collector) return false;
 
         request.CollectorId = collectorId;
+        request.CollectorName = collector.DisplayName ?? collector.FullName;
         request.Status = CollectionRequestStatus.Assigned;
 
         await _requestRepo.UpdateAsync(request, ct);

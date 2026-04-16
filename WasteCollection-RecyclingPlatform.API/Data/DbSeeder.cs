@@ -259,6 +259,7 @@ public static class DbSeeder
             var req = new CollectionRequest
             {
                 CitizenId = citizen.Id,
+                CitizenName = citizen.DisplayName ?? citizen.FullName,
                 WardId = ward.Id,
                 Address = $"{rnd.Next(1, 999)} {ward.Name}, {ward.Area.DistrictName}, TP.HCM",
                 WasteType = wasteCategories[rnd.Next(wasteCategories.Length)],
@@ -272,7 +273,9 @@ public static class DbSeeder
 
             if (status == CollectionRequestStatus.Assigned || status == CollectionRequestStatus.Collected)
             {
-                req.CollectorId = collectors[rnd.Next(collectors.Count)].Id;
+                var col = collectors[rnd.Next(collectors.Count)];
+                req.CollectorId = col.Id;
+                req.CollectorName = col.DisplayName ?? col.FullName;
             }
 
             if (status == CollectionRequestStatus.Collected)

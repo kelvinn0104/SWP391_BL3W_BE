@@ -41,4 +41,7 @@ public class CollectionRequest
  
     public long? WardId { get; set; }
     public Ward? Ward { get; set; }
+
+    public string? CitizenName { get; set; }
+    public string? CollectorName { get; set; }
 }
