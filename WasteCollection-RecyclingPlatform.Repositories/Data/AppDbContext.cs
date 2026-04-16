@@ -129,6 +129,11 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.CollectorId)
                 .OnDelete(DeleteBehavior.SetNull);
+ 
+            entity.HasOne(x => x.Ward)
+                .WithMany()
+                .HasForeignKey(x => x.WardId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

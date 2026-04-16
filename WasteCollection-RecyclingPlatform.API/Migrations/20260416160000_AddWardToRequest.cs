@@ -14,20 +14,20 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
         {
             migrationBuilder.AddColumn<long>(
                 name: "WardId",
-                table: "CollectionRequests",
+                table: "collection_requests",
                 type: "bigint",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_CollectionRequests_WardId",
-                table: "CollectionRequests",
+                table: "collection_requests",
                 column: "WardId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_CollectionRequests_Wards_WardId",
-                table: "CollectionRequests",
+                table: "collection_requests",
                 column: "WardId",
-                principalTable: "Wards",
+                principalTable: "wards",
                 principalColumn: "Id");
         }
 
@@ -36,15 +36,15 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_CollectionRequests_Wards_WardId",
-                table: "CollectionRequests");
+                table: "collection_requests");
 
             migrationBuilder.DropIndex(
                 name: "IX_CollectionRequests_WardId",
-                table: "CollectionRequests");
+                table: "collection_requests");
 
             migrationBuilder.DropColumn(
                 name: "WardId",
-                table: "CollectionRequests");
+                table: "collection_requests");
         }
     }
 }

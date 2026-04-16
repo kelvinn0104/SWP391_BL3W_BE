@@ -13,14 +13,14 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
         {
             migrationBuilder.AddColumn<string>(
                 name: "CitizenName",
-                table: "CollectionRequests",
+                table: "collection_requests",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AddColumn<string>(
                 name: "CollectorName",
-                table: "CollectionRequests",
+                table: "collection_requests",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -31,11 +31,11 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "CitizenName",
-                table: "CollectionRequests");
+                table: "collection_requests");
 
             migrationBuilder.DropColumn(
                 name: "CollectorName",
-                table: "CollectionRequests");
+                table: "collection_requests");
         }
     }
 }

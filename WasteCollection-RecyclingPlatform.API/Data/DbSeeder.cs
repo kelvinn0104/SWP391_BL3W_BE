@@ -216,8 +216,8 @@ public static class DbSeeder
 
     private static async Task SeedCollectionRequestsAsync(AppDbContext db)
     {
-        // If we have very few requests, re-seed with the new 25 items for better testing
-        if (await db.CollectionRequests.CountAsync() > 10) return;
+        // If we have enough requests and they already have the new CitizenName populated, skip seeding
+        if (await db.CollectionRequests.CountAsync() > 10 && await db.CollectionRequests.AnyAsync(r => r.CitizenName != null)) return;
         
         if (await db.CollectionRequests.AnyAsync())
         {
