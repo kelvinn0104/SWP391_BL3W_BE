@@ -41,9 +41,13 @@ public class CollectionService : ICollectionService
         else if (status == CollectionRequestStatus.Collected)
         {
             request.CompletedAtUtc = DateTime.UtcNow;
-            
-            // Logically, when collected, we could award points to the citizen.
-            // For now, let's just update the status as requested.
+        }
+        else if (status == CollectionRequestStatus.Accepted || status == CollectionRequestStatus.Pending)
+        {
+            // Clear assignment if moved back to early states
+            request.CollectorId = null;
+            request.CollectorName = null;
+            request.CollectorPhone = null;
         }
 
         await _requestRepo.UpdateAsync(request, ct);
@@ -60,6 +64,7 @@ public class CollectionService : ICollectionService
 
         request.CollectorId = collectorId;
         request.CollectorName = collector.DisplayName ?? collector.FullName;
+        request.CollectorPhone = collector.PhoneNumber;
         request.Status = CollectionRequestStatus.Assigned;
 
         await _requestRepo.UpdateAsync(request, ct);
@@ -98,7 +103,7 @@ public class CollectionService : ICollectionService
             req.CitizenName ?? req.Citizen?.DisplayName ?? "Khách vãng lai",
             req.CollectorId,
             req.CollectorName ?? req.Collector?.DisplayName,
-            req.Collector?.PhoneNumber,
+            req.CollectorPhone ?? req.Collector?.PhoneNumber,
             req.Address,
             req.WasteType,
             req.WeightKg,

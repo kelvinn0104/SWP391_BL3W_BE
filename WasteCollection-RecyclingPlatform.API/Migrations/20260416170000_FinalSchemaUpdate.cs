@@ -30,6 +30,13 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.AddColumn<string>(
+                name: "CollectorPhone",
+                table: "collection_requests",
+                type: "longtext",
+                nullable: true)
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_collection_requests_WardId",
                 table: "collection_requests",

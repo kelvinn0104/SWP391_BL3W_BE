@@ -144,7 +144,8 @@ public class UserService : IUserService
             AvatarUrl: user.AvatarUrl,
             Role: user.Role.ToString(),
             Points: user.Points,
-            IsLocked: user.IsLocked
+            IsLocked: user.IsLocked,
+            WardIds: user.Wards?.Select(w => w.Id).ToList() ?? new List<long>()
         );
     }
 }
