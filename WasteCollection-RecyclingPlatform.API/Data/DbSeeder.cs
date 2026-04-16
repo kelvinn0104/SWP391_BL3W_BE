@@ -42,6 +42,7 @@ public static class DbSeeder
 
         await SeedAreasAsync(db);
         await SeedVouchersAsync(db);
+        await SeedCollectionRequestsAsync(db);
     }
 
     private static async Task SeedAreasAsync(AppDbContext db)
@@ -211,6 +212,64 @@ public static class DbSeeder
         db.Vouchers.AddRange(vouchers);
         await db.SaveChangesAsync();
         Console.WriteLine("[Seeder] Successfully seeded Voucher data.");
+    }
+
+    private static async Task SeedCollectionRequestsAsync(AppDbContext db)
+    {
+        if (await db.CollectionRequests.AnyAsync()) return;
+
+        await EnsureUserAsync(db,
+            email: "citizen@gmail.com",
+            displayName: "Nguyễn Văn Dân",
+            password: "123456",
+            role: UserRole.Citizen,
+            phoneNumber: "0988776655");
+
+        var citizen = await db.Users.FirstAsync(u => u.Email == "citizen@gmail.com");
+        var collector = await db.Users.FirstAsync(u => u.Role == UserRole.Collector && u.Email == "collector@gmail.com");
+
+        var requests = new List<CollectionRequest>
+        {
+            new CollectionRequest
+            {
+                CitizenId = citizen.Id,
+                Address = "123 Lê Lợi, Quận 1, TP.HCM",
+                WasteType = "Nhựa & Kim loại",
+                WeightKg = 5.5m,
+                Note = "Có nhiều chai nhựa rỗng và lon bia.",
+                Priority = "High",
+                Status = CollectionRequestStatus.Pending,
+                MaterialsJson = "[{\"Type\":\"Chai nhựa\",\"Amount\":3.5,\"Unit\":\"kg\"},{\"Type\":\"Lon nhôm\",\"Amount\":2.0,\"Unit\":\"kg\"}]",
+                ImagesJson = "[\"/waste/waste-1.jpg\"]"
+            },
+            new CollectionRequest
+            {
+                CitizenId = citizen.Id,
+                Address = "456 Nguyễn Huệ, Quận 1, TP.HCM",
+                WasteType = "Giấy vụn",
+                WeightKg = 12.0m,
+                Note = "Bìa carton cũ từ việc dọn nhà.",
+                Priority = "Standard",
+                Status = CollectionRequestStatus.Accepted,
+                MaterialsJson = "[{\"Type\":\"Bìa carton\",\"Amount\":12.0,\"Unit\":\"kg\"}]"
+            },
+            new CollectionRequest
+            {
+                CitizenId = citizen.Id,
+                CollectorId = collector.Id,
+                Address = "789 Cách Mạng Tháng 8, Quận 3, TP.HCM",
+                WasteType = "Điện tử cũ",
+                WeightKg = 2.5m,
+                Note = "Máy in và bàn phím hỏng.",
+                Priority = "Medium",
+                Status = CollectionRequestStatus.Assigned,
+                MaterialsJson = "[{\"Type\":\"Linh kiện điện tử\",\"Amount\":2.5,\"Unit\":\"kg\"}]"
+            }
+        };
+
+        db.CollectionRequests.AddRange(requests);
+        await db.SaveChangesAsync();
+        Console.WriteLine("[Seeder] Successfully seeded Collection Request data.");
     }
 
     private class HcmcData

@@ -46,6 +46,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
+builder.Services.AddScoped<ICollectionRequestRepository, CollectionRequestRepository>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -61,6 +62,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
+builder.Services.AddScoped<ICollectionService, CollectionService>();
 
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 builder.Services
