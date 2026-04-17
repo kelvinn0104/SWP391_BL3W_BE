@@ -42,6 +42,7 @@ public static class DbSeeder
 
         await SeedAreasAsync(db);
         await SeedVouchersAsync(db);
+        await SeedWasteCategoriesAsync(db);
         await SeedCollectionRequestsAsync(db);
 
         // 2. Automatic Repair & Sync (The "Self-Healing" logic)
@@ -215,6 +216,62 @@ public static class DbSeeder
         db.Vouchers.AddRange(vouchers);
         await db.SaveChangesAsync();
         Console.WriteLine("[Seeder] Successfully seeded Voucher data.");
+    }
+
+    private static async Task SeedWasteCategoriesAsync(AppDbContext db)
+    {
+        if (await db.WasteCategories.AnyAsync()) return;
+
+        var now = DateTime.UtcNow;
+        db.WasteCategories.AddRange(
+            new WasteCategory
+            {
+                Code = "PLASTIC",
+                Name = "Nhựa",
+                Unit = "kg",
+                Description = "Chai, hộp nhựa, túi nilon đã làm sạch.",
+                PointsPerKg = 100,
+                CreatedAtUtc = now,
+            },
+            new WasteCategory
+            {
+                Code = "METAL",
+                Name = "Kim loại",
+                Unit = "kg",
+                Description = "Lon, vỏ hộp và phế liệu kim loại.",
+                PointsPerKg = 120,
+                CreatedAtUtc = now,
+            },
+            new WasteCategory
+            {
+                Code = "PAPER",
+                Name = "Giấy",
+                Unit = "kg",
+                Description = "Bìa carton, giấy báo và giấy văn phòng.",
+                PointsPerKg = 80,
+                CreatedAtUtc = now,
+            },
+            new WasteCategory
+            {
+                Code = "GLASS",
+                Name = "Thủy tinh",
+                Unit = "kg",
+                Description = "Chai lọ thủy tinh còn an toàn để thu gom.",
+                PointsPerKg = 90,
+                CreatedAtUtc = now,
+            },
+            new WasteCategory
+            {
+                Code = "EWASTE",
+                Name = "Rác điện tử",
+                Unit = "kg",
+                Description = "Pin, sạc và thiết bị điện tử nhỏ cần xử lý riêng.",
+                PointsPerKg = 150,
+                CreatedAtUtc = now,
+            });
+
+        await db.SaveChangesAsync();
+        Console.WriteLine("[Seeder] Successfully seeded waste categories.");
     }
 
     private static async Task SeedCollectionRequestsAsync(AppDbContext db)

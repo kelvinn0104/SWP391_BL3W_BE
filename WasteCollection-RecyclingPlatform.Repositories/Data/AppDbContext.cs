@@ -15,6 +15,11 @@ public class AppDbContext : DbContext
     public DbSet<Voucher> Vouchers => Set<Voucher>();
     public DbSet<VoucherCode> VoucherCodes => Set<VoucherCode>();
     public DbSet<CollectionRequest> CollectionRequests => Set<CollectionRequest>();
+    public DbSet<WasteCategory> WasteCategories => Set<WasteCategory>();
+    public DbSet<WasteReport> WasteReports => Set<WasteReport>();
+    public DbSet<WasteReportItem> WasteReportItems => Set<WasteReportItem>();
+    public DbSet<WasteReportImage> WasteReportImages => Set<WasteReportImage>();
+    public DbSet<WasteReportStatusHistory> WasteReportStatusHistories => Set<WasteReportStatusHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -133,6 +138,104 @@ public class AppDbContext : DbContext
             entity.HasOne(x => x.Ward)
                 .WithMany()
                 .HasForeignKey(x => x.WardId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<WasteCategory>(entity =>
+        {
+            entity.ToTable("waste_categories");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.Code).IsUnique();
+            entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Unit).HasMaxLength(20).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(500);
+            entity.Property(x => x.IsActive).HasDefaultValue(true);
+            entity.Property(x => x.PointsPerKg).HasDefaultValue(100);
+        });
+
+        modelBuilder.Entity<WasteReport>(entity =>
+        {
+            entity.ToTable("waste_reports");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.CitizenId);
+            entity.HasIndex(x => x.WardId);
+            entity.HasIndex(x => x.AreaId);
+            entity.HasIndex(x => x.Status);
+            entity.Property(x => x.Title).HasMaxLength(255);
+            entity.Property(x => x.Description).HasMaxLength(2000).IsRequired();
+            entity.Property(x => x.Latitude).HasPrecision(10, 7);
+            entity.Property(x => x.Longitude).HasPrecision(10, 7);
+            entity.Property(x => x.LocationText).HasMaxLength(1000);
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+
+            entity.HasOne(x => x.Citizen)
+                .WithMany()
+                .HasForeignKey(x => x.CitizenId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.Ward)
+                .WithMany()
+                .HasForeignKey(x => x.WardId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(x => x.Area)
+                .WithMany()
+                .HasForeignKey(x => x.AreaId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<WasteReportItem>(entity =>
+        {
+            entity.ToTable("waste_report_items");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.WasteReportId);
+            entity.HasIndex(x => x.WasteCategoryId);
+            entity.Property(x => x.EstimatedWeightKg).HasPrecision(18, 2);
+
+            entity.HasOne(x => x.WasteReport)
+                .WithMany(x => x.Items)
+                .HasForeignKey(x => x.WasteReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.WasteCategory)
+                .WithMany(x => x.ReportItems)
+                .HasForeignKey(x => x.WasteCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<WasteReportImage>(entity =>
+        {
+            entity.ToTable("waste_report_images");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.WasteReportId);
+            entity.Property(x => x.ImageUrl).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.OriginalFileName).HasMaxLength(255);
+            entity.Property(x => x.ContentType).HasMaxLength(100);
+
+            entity.HasOne(x => x.WasteReport)
+                .WithMany(x => x.Images)
+                .HasForeignKey(x => x.WasteReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<WasteReportStatusHistory>(entity =>
+        {
+            entity.ToTable("waste_report_status_histories");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.WasteReportId);
+            entity.HasIndex(x => x.ChangedByUserId);
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(x => x.Note).HasMaxLength(500);
+
+            entity.HasOne(x => x.WasteReport)
+                .WithMany(x => x.StatusHistories)
+                .HasForeignKey(x => x.WasteReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.ChangedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.ChangedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
     }
