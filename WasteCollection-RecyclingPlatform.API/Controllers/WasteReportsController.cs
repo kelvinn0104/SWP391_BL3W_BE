@@ -58,16 +58,17 @@ public class WasteReportsController : ControllerBase
         return Ok(reports);
     }
 
-    [HttpGet("{id:long}/status-tracking")]
-    public async Task<ActionResult<WasteReportStatusTrackingResponse>> GetStatusTracking(long id, CancellationToken ct)
+    [HttpGet("report-collected-status")]
+    public async Task<ActionResult<List<WasteReportResponse>>> SearchCollectedReports(CancellationToken ct)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
             return Unauthorized(new { message = "Cannot identify current user." });
 
-        var tracking = await _wasteReportService.GetCitizenReportStatusAsync(citizenId, id, ct);
-        if (tracking is null) return NotFound();
+        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, 4, ct);
+        if (reports is null)
+            return BadRequest(new { message = "Invalid collected status id." });
 
-        return Ok(tracking);
+        return Ok(reports);
     }
 
     [HttpPost]
