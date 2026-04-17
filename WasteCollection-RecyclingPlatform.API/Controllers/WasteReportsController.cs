@@ -45,13 +45,13 @@ public class WasteReportsController : ControllerBase
         return Ok(report);
     }
 
-    [HttpGet("{id:long}/status-report")]
-    public async Task<ActionResult<List<WasteReportResponse>>> GetListStatus(long id, CancellationToken ct)
+    [HttpGet("search-report-status")]
+    public async Task<ActionResult<List<WasteReportResponse>>> SearchReportsByStatus([FromQuery] long statusId, CancellationToken ct)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
             return Unauthorized(new { message = "Cannot identify current user." });
 
-        var reports = await _wasteReportService.GetCitizenReportsByStatusAsync(citizenId, id, ct);
+        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, statusId, ct);
         if (reports is null)
             return BadRequest(new { message = "Invalid status id. Valid values: 1=Pending, 2=Accepted, 3=Assigned, 4=Collected, 5=Cancelled." });
 

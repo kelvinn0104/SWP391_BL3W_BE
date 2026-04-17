@@ -40,7 +40,7 @@ public class WasteReportService : IWasteReportService
         return reports.Select(MapReport).ToList();
     }
 
-    public async Task<List<WasteReportResponse>?> GetCitizenReportsByStatusAsync(long citizenId, long statusId, CancellationToken ct = default)
+    public async Task<List<WasteReportResponse>?> SearchCitizenReportsByStatusAsync(long citizenId, long statusId, CancellationToken ct = default)
     {
         if (!Enum.IsDefined(typeof(WasteReportStatus), (int)statusId))
             return null;
