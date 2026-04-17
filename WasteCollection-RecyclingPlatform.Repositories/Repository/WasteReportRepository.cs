@@ -49,6 +49,15 @@ public class WasteReportRepository : IWasteReportRepository
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
+    public async Task<WasteReport?> GetStatusTrackingByIdAsync(long id, CancellationToken ct = default)
+    {
+        return await _db.WasteReports
+            .Include(x => x.StatusHistories)
+                .ThenInclude(x => x.ChangedByUser)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
     public async Task<List<WasteReport>> GetByCitizenIdAsync(long citizenId, CancellationToken ct = default)
     {
         return await _db.WasteReports
@@ -58,6 +67,20 @@ public class WasteReportRepository : IWasteReportRepository
                 .ThenInclude(x => x.Images)
             .Include(x => x.Images)
             .Where(x => x.CitizenId == citizenId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<WasteReport>> GetByCitizenIdAndStatusAsync(long citizenId, WasteReportStatus status, CancellationToken ct = default)
+    {
+        return await _db.WasteReports
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
+            .Where(x => x.CitizenId == citizenId && x.Status == status)
             .OrderByDescending(x => x.CreatedAtUtc)
             .AsNoTracking()
             .ToListAsync(ct);

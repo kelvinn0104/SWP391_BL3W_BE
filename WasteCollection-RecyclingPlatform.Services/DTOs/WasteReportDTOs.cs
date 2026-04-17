@@ -77,6 +77,39 @@ public class WasteReportResponse
     public int EstimatedTotalPoints { get; set; }
 }
 
+public class WasteReportStatusTrackingResponse
+{
+    public long ReportId { get; set; }
+    public string CurrentStatus { get; set; } = null!;
+    public DateTime CreatedAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public DateTime? PendingAtUtc { get; set; }
+    public DateTime? AcceptedAtUtc { get; set; }
+    public DateTime? AssignedAtUtc { get; set; }
+    public DateTime? CollectedAtUtc { get; set; }
+    public WasteReportAssignmentInfoResponse? Assignment { get; set; }
+    public List<WasteReportStatusHistoryResponse> StatusHistory { get; set; } = new();
+}
+
+public class WasteReportStatusHistoryResponse
+{
+    public long Id { get; set; }
+    public string Status { get; set; } = null!;
+    public string? Note { get; set; }
+    public long? ChangedByUserId { get; set; }
+    public string? ChangedByName { get; set; }
+    public string? ChangedByRole { get; set; }
+    public DateTime ChangedAtUtc { get; set; }
+}
+
+public class WasteReportAssignmentInfoResponse
+{
+    public long CollectorId { get; set; }
+    public string? CollectorName { get; set; }
+    public string? CollectorPhone { get; set; }
+    public DateTime AssignedAtUtc { get; set; }
+}
+
 public class WasteReportItemResponse
 {
     public long WasteCategoryId { get; set; }
@@ -95,4 +128,13 @@ public class WasteReportCreateResult
 
     public static WasteReportCreateResult Fail(string error) => new() { Success = false, Error = error };
     public static WasteReportCreateResult Ok(WasteReportResponse report) => new() { Success = true, Report = report };
+}
+
+public class WasteReportFormBindResult
+{
+    public bool Success { get; set; }
+    public string? Error { get; set; }
+
+    public static WasteReportFormBindResult Fail(string error) => new() { Success = false, Error = error };
+    public static WasteReportFormBindResult Ok() => new() { Success = true };
 }
