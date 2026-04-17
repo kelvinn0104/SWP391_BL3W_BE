@@ -8,14 +8,7 @@ public class WasteReport
 
     public string? Title { get; set; }
     public string Description { get; set; } = string.Empty;
-    public decimal Latitude { get; set; }
-    public decimal Longitude { get; set; }
     public string? LocationText { get; set; }
-
-    public long? WardId { get; set; }
-    public Ward? Ward { get; set; }
-    public long? AreaId { get; set; }
-    public Area? Area { get; set; }
 
     public WasteReportStatus Status { get; set; } = WasteReportStatus.Pending;
     public int EstimatedTotalPoints { get; set; }

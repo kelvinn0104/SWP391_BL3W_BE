@@ -11,4 +11,6 @@ public class WasteReportItem
 
     public decimal? EstimatedWeightKg { get; set; }
     public int EstimatedPoints { get; set; }
+
+    public ICollection<WasteReportImage> Images { get; set; } = new List<WasteReportImage>();
 }

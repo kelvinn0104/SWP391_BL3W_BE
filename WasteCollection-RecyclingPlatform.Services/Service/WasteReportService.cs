@@ -32,6 +32,12 @@ public class WasteReportService : IWasteReportService
         return categories.Select(MapCategory).ToList();
     }
 
+    public async Task<List<WasteReportResponse>> GetCitizenReportsAsync(long citizenId, CancellationToken ct = default)
+    {
+        var reports = await _wasteReportRepository.GetByCitizenIdAsync(citizenId, ct);
+        return reports.Select(MapReport).ToList();
+    }
+
     public async Task<WasteReportCreateResult> CreateReportAsync(long citizenId, WasteReportCreateRequest request, CancellationToken ct = default)
     {
         var citizen = await _userRepository.GetByIdAsync(citizenId, ct);
@@ -40,9 +46,6 @@ public class WasteReportService : IWasteReportService
 
         var description = request.Description?.Trim();
         if (string.IsNullOrWhiteSpace(description)) return WasteReportCreateResult.Fail("Mô tả là bắt buộc.");
-        if (request.Latitude is < -90 or > 90) return WasteReportCreateResult.Fail("Latitude không hợp lệ.");
-        if (request.Longitude is < -180 or > 180) return WasteReportCreateResult.Fail("Longitude không hợp lệ.");
-
         var requestedItems = request.GetWasteItems();
         if (requestedItems.Count == 0) return WasteReportCreateResult.Fail("Cần chọn ít nhất một loại rác.");
         if (requestedItems.Any(x => x.WasteCategoryId <= 0)) return WasteReportCreateResult.Fail("Loại rác không hợp lệ.");
@@ -54,13 +57,8 @@ public class WasteReportService : IWasteReportService
         var categories = await _wasteReportRepository.GetActiveCategoriesByIdsAsync(categoryIds, ct);
         if (categories.Count != categoryIds.Count) return WasteReportCreateResult.Fail("Một hoặc nhiều loại rác không tồn tại hoặc đã bị tắt.");
 
-        if (request.WardId.HasValue && !await _wasteReportRepository.WardExistsAsync(request.WardId.Value, ct))
-            return WasteReportCreateResult.Fail("WardId không tồn tại.");
-
-        if (request.AreaId.HasValue && !await _wasteReportRepository.AreaExistsAsync(request.AreaId.Value, ct))
-            return WasteReportCreateResult.Fail("AreaId không tồn tại.");
-
-        if (request.Images.Count > MaxImagesPerReport)
+        var totalImageCount = requestedItems.Sum(x => x.Images.Count);
+        if (totalImageCount > MaxImagesPerReport)
             return WasteReportCreateResult.Fail($"Chỉ được tải tối đa {MaxImagesPerReport} ảnh.");
 
         var now = DateTime.UtcNow;
@@ -70,25 +68,47 @@ public class WasteReportService : IWasteReportService
             CitizenId = citizenId,
             Title = string.IsNullOrWhiteSpace(request.Title) ? null : request.Title.Trim(),
             Description = description,
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
             LocationText = string.IsNullOrWhiteSpace(request.LocationText) ? null : request.LocationText.Trim(),
-            WardId = request.WardId,
-            AreaId = request.AreaId,
             Status = WasteReportStatus.Pending,
             CreatedAtUtc = now,
         };
 
-        foreach (var item in requestedItems)
+        try
         {
-            var category = categoryById[item.WasteCategoryId];
-            var estimatedPoints = CalculateEstimatedPoints(item.EstimatedWeightKg, category.PointsPerKg);
-            report.Items.Add(new WasteReportItem
+            foreach (var item in requestedItems)
             {
-                WasteCategoryId = item.WasteCategoryId,
-                EstimatedWeightKg = item.EstimatedWeightKg,
-                EstimatedPoints = estimatedPoints,
-            });
+                var category = categoryById[item.WasteCategoryId];
+                var estimatedPoints = CalculateEstimatedPoints(item.EstimatedWeightKg, category.PointsPerKg);
+                var reportItem = new WasteReportItem
+                {
+                    WasteCategoryId = item.WasteCategoryId,
+                    EstimatedWeightKg = item.EstimatedWeightKg,
+                    EstimatedPoints = estimatedPoints,
+                };
+
+                foreach (var image in item.Images.Where(x => x.Length > 0))
+                {
+                    var imageUrl = await SaveReportImageAsync(image, ct);
+                    var reportImage = new WasteReportImage
+                    {
+                        WasteReport = report,
+                        WasteReportItem = reportItem,
+                        ImageUrl = imageUrl,
+                        OriginalFileName = Path.GetFileName(image.FileName),
+                        ContentType = image.ContentType,
+                        UploadedAtUtc = now,
+                    };
+
+                    report.Images.Add(reportImage);
+                    reportItem.Images.Add(reportImage);
+                }
+
+                report.Items.Add(reportItem);
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            return WasteReportCreateResult.Fail(ex.Message);
         }
 
         report.EstimatedTotalPoints = report.Items.Sum(x => x.EstimatedPoints);
@@ -99,25 +119,6 @@ public class WasteReportService : IWasteReportService
             ChangedAtUtc = now,
             Note = "Citizen created waste report.",
         });
-
-        try
-        {
-            foreach (var image in request.Images.Where(x => x.Length > 0))
-            {
-                var imageUrl = await SaveReportImageAsync(image, ct);
-                report.Images.Add(new WasteReportImage
-                {
-                    ImageUrl = imageUrl,
-                    OriginalFileName = Path.GetFileName(image.FileName),
-                    ContentType = image.ContentType,
-                    UploadedAtUtc = now,
-                });
-            }
-        }
-        catch (InvalidOperationException ex)
-        {
-            return WasteReportCreateResult.Fail(ex.Message);
-        }
 
         await _wasteReportRepository.AddAsync(report, ct);
 
@@ -146,11 +147,7 @@ public class WasteReportService : IWasteReportService
             CitizenId = report.CitizenId,
             Title = report.Title,
             Description = report.Description,
-            Latitude = report.Latitude,
-            Longitude = report.Longitude,
             LocationText = report.LocationText,
-            WardId = report.WardId,
-            AreaId = report.AreaId,
             Status = report.Status.ToString(),
             CreatedAtUtc = report.CreatedAtUtc,
             EstimatedTotalPoints = report.EstimatedTotalPoints,
@@ -161,6 +158,7 @@ public class WasteReportService : IWasteReportService
                 WasteCategoryName = x.WasteCategory?.Name ?? string.Empty,
                 EstimatedWeightKg = x.EstimatedWeightKg,
                 EstimatedPoints = x.EstimatedPoints,
+                ImageUrls = x.Images.Select(image => image.ImageUrl).ToList(),
             }).ToList(),
             ImageUrls = report.Images.Select(x => x.ImageUrl).ToList(),
         };

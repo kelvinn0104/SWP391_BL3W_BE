@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WasteCollection_RecyclingPlatform.Repositories.Data;
 
@@ -11,9 +12,11 @@ using WasteCollection_RecyclingPlatform.Repositories.Data;
 namespace WasteCollectionRecyclingPlatform.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260417024426_RemoveWasteReportLocationColumns")]
+    partial class RemoveWasteReportLocationColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -485,14 +488,9 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.Property<long>("WasteReportId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("WasteReportItemId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("WasteReportId");
-
-                    b.HasIndex("WasteReportItemId");
 
                     b.ToTable("waste_report_images", (string)null);
                 });
@@ -661,14 +659,7 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.WasteReportItem", "WasteReportItem")
-                        .WithMany("Images")
-                        .HasForeignKey("WasteReportItemId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.Navigation("WasteReport");
-
-                    b.Navigation("WasteReportItem");
                 });
 
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.WasteReportItem", b =>
@@ -750,11 +741,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("StatusHistories");
-                });
-
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.WasteReportItem", b =>
-                {
-                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

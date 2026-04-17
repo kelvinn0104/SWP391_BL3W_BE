@@ -159,13 +159,9 @@ public class AppDbContext : DbContext
             entity.ToTable("waste_reports");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.CitizenId);
-            entity.HasIndex(x => x.WardId);
-            entity.HasIndex(x => x.AreaId);
             entity.HasIndex(x => x.Status);
             entity.Property(x => x.Title).HasMaxLength(255);
             entity.Property(x => x.Description).HasMaxLength(2000).IsRequired();
-            entity.Property(x => x.Latitude).HasPrecision(10, 7);
-            entity.Property(x => x.Longitude).HasPrecision(10, 7);
             entity.Property(x => x.LocationText).HasMaxLength(1000);
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
 
@@ -173,16 +169,6 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.CitizenId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(x => x.Ward)
-                .WithMany()
-                .HasForeignKey(x => x.WardId)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            entity.HasOne(x => x.Area)
-                .WithMany()
-                .HasForeignKey(x => x.AreaId)
-                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<WasteReportItem>(entity =>
@@ -209,6 +195,7 @@ public class AppDbContext : DbContext
             entity.ToTable("waste_report_images");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.WasteReportId);
+            entity.HasIndex(x => x.WasteReportItemId);
             entity.Property(x => x.ImageUrl).HasMaxLength(1000).IsRequired();
             entity.Property(x => x.OriginalFileName).HasMaxLength(255);
             entity.Property(x => x.ContentType).HasMaxLength(100);
@@ -216,6 +203,11 @@ public class AppDbContext : DbContext
             entity.HasOne(x => x.WasteReport)
                 .WithMany(x => x.Images)
                 .HasForeignKey(x => x.WasteReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.WasteReportItem)
+                .WithMany(x => x.Images)
+                .HasForeignKey(x => x.WasteReportItemId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

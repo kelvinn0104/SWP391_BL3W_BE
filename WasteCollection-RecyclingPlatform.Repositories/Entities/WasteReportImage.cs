@@ -6,6 +6,9 @@ public class WasteReportImage
     public long WasteReportId { get; set; }
     public WasteReport WasteReport { get; set; } = null!;
 
+    public long? WasteReportItemId { get; set; }
+    public WasteReportItem? WasteReportItem { get; set; }
+
     public string ImageUrl { get; set; } = null!;
     public string? OriginalFileName { get; set; }
     public string? ContentType { get; set; }

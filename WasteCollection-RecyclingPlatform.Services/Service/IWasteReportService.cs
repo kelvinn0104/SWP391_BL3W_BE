@@ -5,5 +5,6 @@ namespace WasteCollection_RecyclingPlatform.Services.Service;
 public interface IWasteReportService
 {
     Task<List<WasteCategoryResponse>> GetCategoriesAsync(CancellationToken ct = default);
+    Task<List<WasteReportResponse>> GetCitizenReportsAsync(long citizenId, CancellationToken ct = default);
     Task<WasteReportCreateResult> CreateReportAsync(long citizenId, WasteReportCreateRequest request, CancellationToken ct = default);
 }

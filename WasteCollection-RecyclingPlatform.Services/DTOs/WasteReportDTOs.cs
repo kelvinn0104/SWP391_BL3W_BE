@@ -10,35 +10,37 @@ public class WasteReportCreateRequest
     [Required]
     public string Description { get; set; } = string.Empty;
 
-    [Range(-90, 90)]
-    public decimal Latitude { get; set; }
-
-    [Range(-180, 180)]
-    public decimal Longitude { get; set; }
-
     public string? LocationText { get; set; }
-    public long? WardId { get; set; }
-    public long? AreaId { get; set; }
 
-    public long? WasteCategoryId { get; set; }
-    public decimal? EstimatedWeightKg { get; set; }
-    public List<WasteReportItemCreateRequest> WasteItems { get; set; } = new();
-
+    public List<long> WasteCategoryIds { get; set; } = new();
+    public List<decimal?> EstimatedWeightKgs { get; set; } = new();
     public List<IFormFile> Images { get; set; } = new();
 
     public List<WasteReportItemCreateRequest> GetWasteItems()
     {
-        if (WasteItems.Count > 0) return WasteItems;
-        if (!WasteCategoryId.HasValue) return new List<WasteReportItemCreateRequest>();
+        var items = new List<WasteReportItemCreateRequest>();
 
-        return new List<WasteReportItemCreateRequest>
+        for (var i = 0; i < WasteCategoryIds.Count; i++)
         {
-            new()
+            var item = new WasteReportItemCreateRequest
             {
-                WasteCategoryId = WasteCategoryId.Value,
-                EstimatedWeightKg = EstimatedWeightKg,
-            },
-        };
+                WasteCategoryId = WasteCategoryIds[i],
+                EstimatedWeightKg = i < EstimatedWeightKgs.Count ? EstimatedWeightKgs[i] : null,
+            };
+
+            if (WasteCategoryIds.Count == 1)
+            {
+                item.Images.AddRange(Images);
+            }
+            else if (i < Images.Count)
+            {
+                item.Images.Add(Images[i]);
+            }
+
+            items.Add(item);
+        }
+
+        return items;
     }
 }
 
@@ -48,6 +50,7 @@ public class WasteReportItemCreateRequest
     public long WasteCategoryId { get; set; }
 
     public decimal? EstimatedWeightKg { get; set; }
+    public List<IFormFile> Images { get; set; } = new();
 }
 
 public class WasteCategoryResponse
@@ -66,11 +69,7 @@ public class WasteReportResponse
     public long CitizenId { get; set; }
     public string? Title { get; set; }
     public string Description { get; set; } = null!;
-    public decimal Latitude { get; set; }
-    public decimal Longitude { get; set; }
     public string? LocationText { get; set; }
-    public long? WardId { get; set; }
-    public long? AreaId { get; set; }
     public string Status { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
     public List<WasteReportItemResponse> WasteItems { get; set; } = new();
@@ -85,6 +84,7 @@ public class WasteReportItemResponse
     public string WasteCategoryName { get; set; } = null!;
     public decimal? EstimatedWeightKg { get; set; }
     public int EstimatedPoints { get; set; }
+    public List<string> ImageUrls { get; set; } = new();
 }
 
 public class WasteReportCreateResult

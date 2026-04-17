@@ -31,16 +31,6 @@ public class WasteReportRepository : IWasteReportRepository
             .ToListAsync(ct);
     }
 
-    public async Task<bool> WardExistsAsync(long wardId, CancellationToken ct = default)
-    {
-        return await _db.Wards.AnyAsync(x => x.Id == wardId, ct);
-    }
-
-    public async Task<bool> AreaExistsAsync(long areaId, CancellationToken ct = default)
-    {
-        return await _db.Areas.AnyAsync(x => x.Id == areaId, ct);
-    }
-
     public async Task AddAsync(WasteReport report, CancellationToken ct = default)
     {
         _db.WasteReports.Add(report);
@@ -52,10 +42,24 @@ public class WasteReportRepository : IWasteReportRepository
         return await _db.WasteReports
             .Include(x => x.Items)
                 .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
             .Include(x => x.Images)
-            .Include(x => x.Ward)
-            .Include(x => x.Area)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
+    public async Task<List<WasteReport>> GetByCitizenIdAsync(long citizenId, CancellationToken ct = default)
+    {
+        return await _db.WasteReports
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
+            .Where(x => x.CitizenId == citizenId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .AsNoTracking()
+            .ToListAsync(ct);
     }
 }
