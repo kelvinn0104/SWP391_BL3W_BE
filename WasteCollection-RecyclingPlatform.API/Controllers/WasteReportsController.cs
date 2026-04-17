@@ -24,7 +24,7 @@ public class WasteReportsController : ControllerBase
         return Ok(await _wasteReportService.GetCategoriesAsync(ct));
     }
 
-    [HttpGet("my-reports-history")]
+    [HttpGet("my-reports")]
     public async Task<ActionResult<List<WasteReportResponse>>> GetMyReports(CancellationToken ct)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
