@@ -58,6 +58,18 @@ public class WasteReportsController : ControllerBase
         return Ok(reports);
     }
 
+    [HttpGet("{id:long}/status-tracking")]
+    public async Task<ActionResult<WasteReportStatusTrackingResponse>> GetStatusTracking(long id, CancellationToken ct)
+    {
+        if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
+            return Unauthorized(new { message = "Cannot identify current user." });
+
+        var tracking = await _wasteReportService.GetCitizenReportStatusAsync(citizenId, id, ct);
+        if (tracking is null) return NotFound();
+
+        return Ok(tracking);
+    }
+
     [HttpPost]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<WasteReportResponse>> CreateReport([FromForm] WasteReportCreateRequest request, CancellationToken ct)
@@ -77,5 +89,62 @@ public class WasteReportsController : ControllerBase
             return BadRequest(new { message = result.Error });
 
         return StatusCode(StatusCodes.Status201Created, result.Report);
+    }
+
+    [HttpPut("{id:long}")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<WasteReportResponse>> UpdateReport(long id, [FromForm] WasteReportUpdateRequest request, CancellationToken ct)
+    {
+        var formItemsResult = _wasteReportService.BindWasteItemsFromRawForm(
+            request,
+            Request.HasFormContentType ? Request.Form : null);
+
+        if (!formItemsResult.Success)
+            return BadRequest(new { message = formItemsResult.Error });
+
+        if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
+            return Unauthorized(new { message = "Cannot identify current user." });
+
+        var result = await _wasteReportService.UpdateReportAsync(citizenId, id, request, ct);
+        if (result.NotFound)
+            return NotFound();
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(result.Report);
+    }
+
+    [HttpPost("{id:long}/advance-status")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise,Collector")]
+    public async Task<ActionResult<WasteReportStatusTrackingResponse>> AdvanceStatus(long id, [FromBody] WasteReportStatusActionRequest? request, CancellationToken ct)
+    {
+        if (!_wasteReportService.TryGetCurrentUserId(User, out var actorUserId))
+            return Unauthorized(new { message = "Cannot identify current user." });
+
+        var result = await _wasteReportService.AdvanceReportStatusAsync(actorUserId, id, request?.Note, ct);
+        if (result.NotFound)
+            return NotFound();
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(result.Tracking);
+    }
+
+    [HttpPost("{id:long}/cancel")]
+    public async Task<ActionResult<WasteReportStatusTrackingResponse>> CancelReport(long id, [FromBody] WasteReportStatusActionRequest? request, CancellationToken ct)
+    {
+        if (!_wasteReportService.TryGetCurrentUserId(User, out var actorUserId))
+            return Unauthorized(new { message = "Cannot identify current user." });
+
+        var result = await _wasteReportService.CancelReportAsync(actorUserId, id, request?.Note, ct);
+        if (result.NotFound)
+            return NotFound();
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(result.Tracking);
     }
 }

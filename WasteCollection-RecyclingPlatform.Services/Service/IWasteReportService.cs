@@ -12,6 +12,9 @@ public interface IWasteReportService
     Task<WasteReportResponse?> GetCitizenReportDetailAsync(long citizenId, long reportId, CancellationToken ct = default);
     Task<WasteReportStatusTrackingResponse?> GetCitizenReportStatusAsync(long citizenId, long reportId, CancellationToken ct = default);
     Task<WasteReportCreateResult> CreateReportAsync(long citizenId, WasteReportCreateRequest request, CancellationToken ct = default);
+    Task<WasteReportUpdateResult> UpdateReportAsync(long citizenId, long reportId, WasteReportUpdateRequest request, CancellationToken ct = default);
+    Task<WasteReportStatusChangeResult> AdvanceReportStatusAsync(long actorUserId, long reportId, string? note, CancellationToken ct = default);
+    Task<WasteReportStatusChangeResult> CancelReportAsync(long actorUserId, long reportId, string? note, CancellationToken ct = default);
     WasteReportFormBindResult BindWasteItemsFromRawForm(WasteReportCreateRequest request, IFormCollection? form);
     bool TryGetCurrentUserId(ClaimsPrincipal user, out long userId);
 }

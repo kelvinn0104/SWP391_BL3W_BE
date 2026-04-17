@@ -208,6 +208,168 @@ public class WasteReportService : IWasteReportService
         return WasteReportCreateResult.Ok(MapReport(saved ?? report));
     }
 
+    public async Task<WasteReportUpdateResult> UpdateReportAsync(long citizenId, long reportId, WasteReportUpdateRequest request, CancellationToken ct = default)
+    {
+        var report = await _wasteReportRepository.GetByIdForUpdateAsync(reportId, ct);
+        if (report is null || report.CitizenId != citizenId)
+            return WasteReportUpdateResult.NotFoundResult();
+
+        if (report.Status != WasteReportStatus.Pending)
+            return WasteReportUpdateResult.Fail("Chỉ được cập nhật báo cáo khi trạng thái còn Pending.");
+
+        var description = request.Description?.Trim();
+        if (string.IsNullOrWhiteSpace(description)) return WasteReportUpdateResult.Fail("Mô tả là bắt buộc.");
+
+        var requestedItems = request.GetWasteItems();
+        if (requestedItems.Count == 0) return WasteReportUpdateResult.Fail("Cần chọn ít nhất một loại rác.");
+        if (requestedItems.Any(x => x.WasteCategoryId <= 0)) return WasteReportUpdateResult.Fail("Loại rác không hợp lệ.");
+        if (requestedItems.Any(x => x.EstimatedWeightKg < 0)) return WasteReportUpdateResult.Fail("Khối lượng ước tính không được âm.");
+
+        var categoryIds = requestedItems.Select(x => x.WasteCategoryId).Distinct().ToList();
+        if (categoryIds.Count != requestedItems.Count) return WasteReportUpdateResult.Fail("Không gửi trùng loại rác trong cùng một báo cáo.");
+
+        var categories = await _wasteReportRepository.GetActiveCategoriesByIdsAsync(categoryIds, ct);
+        if (categories.Count != categoryIds.Count) return WasteReportUpdateResult.Fail("Một hoặc nhiều loại rác không tồn tại hoặc đã bị tắt.");
+
+        var totalImageCount = requestedItems.Sum(x => x.Images.Count);
+        if (totalImageCount > MaxImagesPerReport)
+            return WasteReportUpdateResult.Fail($"Chỉ được tải tối đa {MaxImagesPerReport} ảnh.");
+
+        var now = DateTime.UtcNow;
+        var categoryById = categories.ToDictionary(x => x.Id);
+
+        report.Title = string.IsNullOrWhiteSpace(request.Title) ? null : request.Title.Trim();
+        report.Description = description;
+        report.LocationText = string.IsNullOrWhiteSpace(request.LocationText) ? null : request.LocationText.Trim();
+        report.UpdatedAtUtc = now;
+
+        report.Images.Clear();
+        report.Items.Clear();
+
+        try
+        {
+            foreach (var item in requestedItems)
+            {
+                var category = categoryById[item.WasteCategoryId];
+                var estimatedPoints = CalculateEstimatedPoints(item.EstimatedWeightKg, category.PointsPerKg);
+                var reportItem = new WasteReportItem
+                {
+                    WasteCategoryId = item.WasteCategoryId,
+                    EstimatedWeightKg = item.EstimatedWeightKg,
+                    EstimatedPoints = estimatedPoints,
+                };
+
+                foreach (var image in item.Images.Where(x => x.Length > 0))
+                {
+                    var imageUrl = await SaveReportImageAsync(image, ct);
+                    var reportImage = new WasteReportImage
+                    {
+                        WasteReport = report,
+                        WasteReportItem = reportItem,
+                        ImageUrl = imageUrl,
+                        OriginalFileName = Path.GetFileName(image.FileName),
+                        ContentType = image.ContentType,
+                        UploadedAtUtc = now,
+                    };
+
+                    report.Images.Add(reportImage);
+                    reportItem.Images.Add(reportImage);
+                }
+
+                report.Items.Add(reportItem);
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            return WasteReportUpdateResult.Fail(ex.Message);
+        }
+
+        report.EstimatedTotalPoints = report.Items.Sum(x => x.EstimatedPoints);
+        await _wasteReportRepository.SaveChangesAsync(ct);
+
+        var saved = await _wasteReportRepository.GetByIdAsync(report.Id, ct);
+        return WasteReportUpdateResult.Ok(MapReport(saved ?? report));
+    }
+
+    public async Task<WasteReportStatusChangeResult> AdvanceReportStatusAsync(long actorUserId, long reportId, string? note, CancellationToken ct = default)
+    {
+        var report = await _wasteReportRepository.GetByIdForUpdateAsync(reportId, ct);
+        if (report is null)
+            return WasteReportStatusChangeResult.NotFoundResult();
+
+        if (report.Status == WasteReportStatus.Cancelled)
+            return WasteReportStatusChangeResult.Fail("Báo cáo đã bị hủy nên không thể chuyển tiếp trạng thái.");
+
+        if (report.Status == WasteReportStatus.Collected)
+            return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Collected.");
+
+        var nextStatus = report.Status switch
+        {
+            WasteReportStatus.Pending => WasteReportStatus.Accepted,
+            WasteReportStatus.Accepted => WasteReportStatus.Assigned,
+            WasteReportStatus.Assigned => WasteReportStatus.Collected,
+            _ => report.Status,
+        };
+
+        if (nextStatus == report.Status)
+            return WasteReportStatusChangeResult.Fail("Không thể chuyển trạng thái từ trạng thái hiện tại.");
+
+        var now = DateTime.UtcNow;
+        report.Status = nextStatus;
+        report.UpdatedAtUtc = now;
+        report.StatusHistories.Add(new WasteReportStatusHistory
+        {
+            Status = nextStatus,
+            ChangedByUserId = actorUserId,
+            ChangedAtUtc = now,
+            Note = string.IsNullOrWhiteSpace(note)
+                ? $"Status moved to {nextStatus}."
+                : note.Trim(),
+        });
+
+        await _wasteReportRepository.SaveChangesAsync(ct);
+
+        var trackedReport = await _wasteReportRepository.GetStatusTrackingByIdAsync(report.Id, ct);
+        if (trackedReport is null)
+            return WasteReportStatusChangeResult.Fail("Không thể đọc lại trạng thái sau khi cập nhật.");
+
+        return WasteReportStatusChangeResult.Ok(MapStatusTracking(trackedReport));
+    }
+
+    public async Task<WasteReportStatusChangeResult> CancelReportAsync(long actorUserId, long reportId, string? note, CancellationToken ct = default)
+    {
+        var report = await _wasteReportRepository.GetByIdForUpdateAsync(reportId, ct);
+        if (report is null)
+            return WasteReportStatusChangeResult.NotFoundResult();
+
+        if (report.Status == WasteReportStatus.Collected)
+            return WasteReportStatusChangeResult.Fail("Báo cáo đã thu gom xong, không thể hủy.");
+
+        if (report.Status == WasteReportStatus.Cancelled)
+            return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Cancelled.");
+
+        var now = DateTime.UtcNow;
+        report.Status = WasteReportStatus.Cancelled;
+        report.UpdatedAtUtc = now;
+        report.StatusHistories.Add(new WasteReportStatusHistory
+        {
+            Status = WasteReportStatus.Cancelled,
+            ChangedByUserId = actorUserId,
+            ChangedAtUtc = now,
+            Note = string.IsNullOrWhiteSpace(note)
+                ? "Report cancelled."
+                : note.Trim(),
+        });
+
+        await _wasteReportRepository.SaveChangesAsync(ct);
+
+        var trackedReport = await _wasteReportRepository.GetStatusTrackingByIdAsync(report.Id, ct);
+        if (trackedReport is null)
+            return WasteReportStatusChangeResult.Fail("Không thể đọc lại trạng thái sau khi cập nhật.");
+
+        return WasteReportStatusChangeResult.Ok(MapStatusTracking(trackedReport));
+    }
+
     private static WasteCategoryResponse MapCategory(WasteCategory category)
     {
         return new WasteCategoryResponse

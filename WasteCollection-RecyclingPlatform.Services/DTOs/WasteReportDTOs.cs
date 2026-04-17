@@ -44,6 +44,10 @@ public class WasteReportCreateRequest
     }
 }
 
+public class WasteReportUpdateRequest : WasteReportCreateRequest
+{
+}
+
 public class WasteReportItemCreateRequest
 {
     [Required]
@@ -128,6 +132,35 @@ public class WasteReportCreateResult
 
     public static WasteReportCreateResult Fail(string error) => new() { Success = false, Error = error };
     public static WasteReportCreateResult Ok(WasteReportResponse report) => new() { Success = true, Report = report };
+}
+
+public class WasteReportUpdateResult
+{
+    public bool Success { get; set; }
+    public bool NotFound { get; set; }
+    public string? Error { get; set; }
+    public WasteReportResponse? Report { get; set; }
+
+    public static WasteReportUpdateResult Fail(string error) => new() { Success = false, Error = error };
+    public static WasteReportUpdateResult NotFoundResult() => new() { Success = false, NotFound = true, Error = "Không tìm thấy báo cáo." };
+    public static WasteReportUpdateResult Ok(WasteReportResponse report) => new() { Success = true, Report = report };
+}
+
+public class WasteReportStatusActionRequest
+{
+    public string? Note { get; set; }
+}
+
+public class WasteReportStatusChangeResult
+{
+    public bool Success { get; set; }
+    public bool NotFound { get; set; }
+    public string? Error { get; set; }
+    public WasteReportStatusTrackingResponse? Tracking { get; set; }
+
+    public static WasteReportStatusChangeResult Fail(string error) => new() { Success = false, Error = error };
+    public static WasteReportStatusChangeResult NotFoundResult() => new() { Success = false, NotFound = true, Error = "Không tìm thấy báo cáo." };
+    public static WasteReportStatusChangeResult Ok(WasteReportStatusTrackingResponse tracking) => new() { Success = true, Tracking = tracking };
 }
 
 public class WasteReportFormBindResult

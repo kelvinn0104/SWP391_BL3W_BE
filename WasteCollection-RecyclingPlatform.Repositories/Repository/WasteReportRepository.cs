@@ -49,6 +49,18 @@ public class WasteReportRepository : IWasteReportRepository
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
+    public async Task<WasteReport?> GetByIdForUpdateAsync(long id, CancellationToken ct = default)
+    {
+        return await _db.WasteReports
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
+            .Include(x => x.StatusHistories)
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
     public async Task<WasteReport?> GetStatusTrackingByIdAsync(long id, CancellationToken ct = default)
     {
         return await _db.WasteReports
@@ -84,5 +96,10 @@ public class WasteReportRepository : IWasteReportRepository
             .OrderByDescending(x => x.CreatedAtUtc)
             .AsNoTracking()
             .ToListAsync(ct);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+    {
+        await _db.SaveChangesAsync(ct);
     }
 }
