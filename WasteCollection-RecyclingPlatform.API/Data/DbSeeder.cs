@@ -44,6 +44,7 @@ public static class DbSeeder
         await SeedVouchersAsync(db);
         await SeedWasteCategoriesAsync(db);
         await SeedCollectionRequestsAsync(db);
+        await SeedRewardSamplesAsync(db);
 
         // 2. Automatic Repair & Sync (The "Self-Healing" logic)
         await RepairDataAsync(db);
@@ -354,6 +355,154 @@ public static class DbSeeder
         db.CollectionRequests.AddRange(requests);
         await db.SaveChangesAsync();
         Console.WriteLine($"[Seeder] Successfully seeded {requests.Count} collection requests for {citizens.Count} citizens.");
+    }
+
+    private static async Task SeedRewardSamplesAsync(AppDbContext db)
+    {
+        if (await db.RewardPointTransactions.AnyAsync(x => x.Description != null && x.Description.StartsWith("[Seeder]")))
+            return;
+
+        var sampleCitizens = new[]
+        {
+            new { Email = "citizen@gmail.com", Name = "Nguyen Van Dan", Phone = "0988776655", Points = 980 },
+            new { Email = "tran.anh@gmail.com", Name = "Tran Thi Anh", Phone = "0912345678", Points = 1670 },
+            new { Email = "le.hoang@gmail.com", Name = "Le Minh Hoang", Phone = "0933445566", Points = 1250 },
+            new { Email = "pham.lan@gmail.com", Name = "Pham Huong Lan", Phone = "0944556677", Points = 760 },
+            new { Email = "vo.thanh@gmail.com", Name = "Vo Thanh Trung", Phone = "0955667788", Points = 2140 },
+        };
+
+        foreach (var citizen in sampleCitizens)
+        {
+            await EnsureUserAsync(db, citizen.Email, citizen.Name, "123456", UserRole.Citizen, citizen.Phone);
+        }
+
+        var citizens = await db.Users
+            .Include(u => u.Wards)
+            .Where(u => sampleCitizens.Select(c => c.Email).Contains(u.Email))
+            .ToListAsync();
+
+        foreach (var citizen in citizens)
+        {
+            var sample = sampleCitizens.First(x => x.Email == citizen.Email);
+            citizen.DisplayName = sample.Name;
+            citizen.PhoneNumber = sample.Phone;
+            citizen.Points = sample.Points;
+        }
+
+        var wards = await db.Wards.Take(citizens.Count).ToListAsync();
+        for (var i = 0; i < citizens.Count && i < wards.Count; i++)
+        {
+            if (!citizens[i].Wards.Any())
+                citizens[i].Wards.Add(wards[i]);
+        }
+
+        var categories = await db.WasteCategories.ToListAsync();
+        if (!categories.Any())
+        {
+            await db.SaveChangesAsync();
+            return;
+        }
+
+        var actor = await db.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Collector)
+            ?? await db.Users.FirstAsync(u => u.Role == UserRole.Administrator);
+
+        var plastic = categories.FirstOrDefault(x => x.Code == "PLASTIC") ?? categories[0];
+        var paper = categories.FirstOrDefault(x => x.Code == "PAPER") ?? categories[0];
+        var metal = categories.FirstOrDefault(x => x.Code == "METAL") ?? categories[0];
+        var glass = categories.FirstOrDefault(x => x.Code == "GLASS") ?? categories[0];
+        var eWaste = categories.FirstOrDefault(x => x.Code == "EWASTE") ?? categories[0];
+        var now = DateTime.UtcNow;
+
+        var samplePlans = new[]
+        {
+            new { Email = "vo.thanh@gmail.com", Category = metal, Weight = 8.0m, Points = 960, DaysAgo = 2 },
+            new { Email = "vo.thanh@gmail.com", Category = eWaste, Weight = 4.0m, Points = 600, DaysAgo = 8 },
+            new { Email = "tran.anh@gmail.com", Category = plastic, Weight = 7.5m, Points = 750, DaysAgo = 3 },
+            new { Email = "tran.anh@gmail.com", Category = paper, Weight = 5.0m, Points = 400, DaysAgo = 9 },
+            new { Email = "le.hoang@gmail.com", Category = plastic, Weight = 6.5m, Points = 650, DaysAgo = 4 },
+            new { Email = "citizen@gmail.com", Category = glass, Weight = 5.0m, Points = 450, DaysAgo = 5 },
+            new { Email = "pham.lan@gmail.com", Category = paper, Weight = 4.5m, Points = 360, DaysAgo = 6 },
+        };
+
+        foreach (var plan in samplePlans)
+        {
+            var citizen = citizens.FirstOrDefault(x => x.Email == plan.Email);
+            if (citizen is null) continue;
+
+            var collectedAt = now.AddDays(-plan.DaysAgo);
+            var report = new WasteReport
+            {
+                CitizenId = citizen.Id,
+                Title = $"[Seeder] Reward sample report for {citizen.DisplayName}",
+                Description = "Sample collected report used to test reward points and leaderboard APIs.",
+                LocationText = "Sample location, Ho Chi Minh City",
+                Status = WasteReportStatus.Collected,
+                EstimatedTotalPoints = plan.Points,
+                FinalRewardPoints = plan.Points,
+                RewardVerifiedAtUtc = collectedAt,
+                CreatedAtUtc = collectedAt.AddHours(-6),
+                UpdatedAtUtc = collectedAt,
+                Items = new List<WasteReportItem>
+                {
+                    new WasteReportItem
+                    {
+                        WasteCategoryId = plan.Category.Id,
+                        EstimatedWeightKg = plan.Weight,
+                        EstimatedPoints = plan.Points,
+                    }
+                },
+                StatusHistories = new List<WasteReportStatusHistory>
+                {
+                    new WasteReportStatusHistory
+                    {
+                        Status = WasteReportStatus.Pending,
+                        ChangedByUserId = citizen.Id,
+                        ChangedAtUtc = collectedAt.AddHours(-6),
+                        Note = "[Seeder] Citizen created sample reward report.",
+                    },
+                    new WasteReportStatusHistory
+                    {
+                        Status = WasteReportStatus.Accepted,
+                        ChangedByUserId = actor.Id,
+                        ChangedAtUtc = collectedAt.AddHours(-4),
+                        Note = "[Seeder] Sample report accepted.",
+                    },
+                    new WasteReportStatusHistory
+                    {
+                        Status = WasteReportStatus.Assigned,
+                        ChangedByUserId = actor.Id,
+                        ChangedAtUtc = collectedAt.AddHours(-2),
+                        Note = "[Seeder] Sample report assigned.",
+                    },
+                    new WasteReportStatusHistory
+                    {
+                        Status = WasteReportStatus.Collected,
+                        ChangedByUserId = actor.Id,
+                        ChangedAtUtc = collectedAt,
+                        Note = "[Seeder] Sample report collected.",
+                    },
+                },
+            };
+
+            db.WasteReports.Add(report);
+            await db.SaveChangesAsync();
+
+            db.RewardPointTransactions.Add(new RewardPointTransaction
+            {
+                UserId = citizen.Id,
+                Amount = plan.Points,
+                BalanceAfter = citizen.Points,
+                TransactionType = RewardPointTransactionType.Earned,
+                SourceType = RewardPointSourceType.WasteReportCollected,
+                SourceRefId = report.Id,
+                Description = $"[Seeder] Reward points for collected sample report #{report.Id}",
+                CreatedByUserId = actor.Id,
+                CreatedAtUtc = collectedAt,
+            });
+        }
+
+        await db.SaveChangesAsync();
+        Console.WriteLine("[Seeder] Successfully seeded reward sample reports and point transactions.");
     }
 
     private static async Task RepairDataAsync(AppDbContext db)

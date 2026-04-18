@@ -21,15 +21,18 @@ public class WasteReportService : IWasteReportService
 
     private readonly IWasteReportRepository _wasteReportRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IRewardService _rewardService;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public WasteReportService(
         IWasteReportRepository wasteReportRepository,
         IUserRepository userRepository,
+        IRewardService rewardService,
         IHttpContextAccessor httpContextAccessor)
     {
         _wasteReportRepository = wasteReportRepository;
         _userRepository = userRepository;
+        _rewardService = rewardService;
         _httpContextAccessor = httpContextAccessor;
     }
 
@@ -164,7 +167,7 @@ public class WasteReportService : IWasteReportService
             foreach (var item in requestedItems)
             {
                 var category = categoryById[item.WasteCategoryId];
-                var estimatedPoints = CalculateEstimatedPoints(item.EstimatedWeightKg, category.PointsPerKg);
+                var estimatedPoints = _rewardService.CalculateEstimatedPoints(item.EstimatedWeightKg, category.PointsPerKg);
                 var reportItem = new WasteReportItem
                 {
                     WasteCategoryId = item.WasteCategoryId,
@@ -255,7 +258,7 @@ public class WasteReportService : IWasteReportService
             foreach (var item in requestedItems)
             {
                 var category = categoryById[item.WasteCategoryId];
-                var estimatedPoints = CalculateEstimatedPoints(item.EstimatedWeightKg, category.PointsPerKg);
+                var estimatedPoints = _rewardService.CalculateEstimatedPoints(item.EstimatedWeightKg, category.PointsPerKg);
                 var reportItem = new WasteReportItem
                 {
                     WasteCategoryId = item.WasteCategoryId,
@@ -331,6 +334,11 @@ public class WasteReportService : IWasteReportService
                 : note.Trim(),
         });
 
+        if (nextStatus == WasteReportStatus.Collected)
+        {
+            await _rewardService.AwardFinalPointsForCollectedReportAsync(report, actorUserId, ct);
+        }
+
         await _wasteReportRepository.SaveChangesAsync(ct);
 
         var trackedReport = await _wasteReportRepository.GetStatusTrackingByIdAsync(report.Id, ct);
@@ -399,6 +407,8 @@ public class WasteReportService : IWasteReportService
             Status = report.Status.ToString(),
             CreatedAtUtc = report.CreatedAtUtc,
             EstimatedTotalPoints = report.EstimatedTotalPoints,
+            FinalRewardPoints = report.FinalRewardPoints,
+            RewardVerifiedAtUtc = report.RewardVerifiedAtUtc,
             WasteItems = report.Items.Select(x => new WasteReportItemResponse
             {
                 WasteCategoryId = x.WasteCategoryId,
@@ -646,12 +656,6 @@ public class WasteReportService : IWasteReportService
         }
 
         return int.TryParse(key[startIndex..endIndex], out index);
-    }
-
-    private static int CalculateEstimatedPoints(decimal? estimatedWeightKg, int pointsPerKg)
-    {
-        if (!estimatedWeightKg.HasValue) return 0;
-        return Math.Max(0, (int)Math.Round(estimatedWeightKg.Value * pointsPerKg, MidpointRounding.AwayFromZero));
     }
 
     private static async Task<string> SaveReportImageAsync(IFormFile file, CancellationToken ct)

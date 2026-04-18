@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<WasteReportItem> WasteReportItems => Set<WasteReportItem>();
     public DbSet<WasteReportImage> WasteReportImages => Set<WasteReportImage>();
     public DbSet<WasteReportStatusHistory> WasteReportStatusHistories => Set<WasteReportStatusHistory>();
+    public DbSet<RewardPointTransaction> RewardPointTransactions => Set<RewardPointTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -169,6 +170,27 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.CitizenId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RewardPointTransaction>(entity =>
+        {
+            entity.ToTable("reward_point_transactions");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.UserId);
+            entity.HasIndex(x => x.CreatedAtUtc);
+            entity.Property(x => x.TransactionType).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(x => x.SourceType).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(500);
+
+            entity.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<WasteReportItem>(entity =>

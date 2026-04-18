@@ -79,6 +79,8 @@ public class WasteReportResponse
     public List<WasteReportItemResponse> WasteItems { get; set; } = new();
     public List<string> ImageUrls { get; set; } = new();
     public int EstimatedTotalPoints { get; set; }
+    public int? FinalRewardPoints { get; set; }
+    public DateTime? RewardVerifiedAtUtc { get; set; }
 }
 
 public class WasteReportStatusTrackingResponse

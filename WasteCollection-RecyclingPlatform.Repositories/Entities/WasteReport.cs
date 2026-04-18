@@ -12,6 +12,8 @@ public class WasteReport
 
     public WasteReportStatus Status { get; set; } = WasteReportStatus.Pending;
     public int EstimatedTotalPoints { get; set; }
+    public int? FinalRewardPoints { get; set; }
+    public DateTime? RewardVerifiedAtUtc { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAtUtc { get; set; }
 
