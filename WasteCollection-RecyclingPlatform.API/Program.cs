@@ -55,6 +55,7 @@ builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<ICollectionRequestRepository, CollectionRequestRepository>();
 builder.Services.AddScoped<IWasteReportRepository, WasteReportRepository>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -113,10 +114,33 @@ if (app.Environment.IsDevelopment())
 app.UseCors("fe");
 
 var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
-Directory.CreateDirectory(Path.Combine(staticFilesRoot, "report-images"));
+var reportImagesRoot = Path.Combine(staticFilesRoot, "report-images");
+Directory.CreateDirectory(reportImagesRoot);
+
+var staticFileProviders = new List<IFileProvider>
+{
+    new PhysicalFileProvider(staticFilesRoot),
+};
+
+var legacyFeReportImagesRoot = Path.GetFullPath(Path.Combine(
+    AppContext.BaseDirectory,
+    "..",
+    "..",
+    "..",
+    "..",
+    "..",
+    "SWP391_BL3W_FE",
+    "public",
+    "report-images"));
+
+if (Directory.Exists(legacyFeReportImagesRoot))
+{
+    staticFileProviders.Add(new PhysicalFileProvider(Path.GetFullPath(Path.Combine(legacyFeReportImagesRoot, ".."))));
+}
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(staticFilesRoot),
+    FileProvider = new CompositeFileProvider(staticFileProviders),
     RequestPath = "",
 });
 

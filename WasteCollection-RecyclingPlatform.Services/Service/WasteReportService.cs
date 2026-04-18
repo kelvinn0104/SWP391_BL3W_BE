@@ -21,11 +21,16 @@ public class WasteReportService : IWasteReportService
 
     private readonly IWasteReportRepository _wasteReportRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public WasteReportService(IWasteReportRepository wasteReportRepository, IUserRepository userRepository)
+    public WasteReportService(
+        IWasteReportRepository wasteReportRepository,
+        IUserRepository userRepository,
+        IHttpContextAccessor httpContextAccessor)
     {
         _wasteReportRepository = wasteReportRepository;
         _userRepository = userRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<List<WasteCategoryResponse>> GetCategoriesAsync(CancellationToken ct = default)
@@ -382,7 +387,7 @@ public class WasteReportService : IWasteReportService
         };
     }
 
-    private static WasteReportResponse MapReport(WasteReport report)
+    private WasteReportResponse MapReport(WasteReport report)
     {
         return new WasteReportResponse
         {
@@ -401,10 +406,29 @@ public class WasteReportService : IWasteReportService
                 WasteCategoryName = x.WasteCategory?.Name ?? string.Empty,
                 EstimatedWeightKg = x.EstimatedWeightKg,
                 EstimatedPoints = x.EstimatedPoints,
-                ImageUrls = x.Images.Select(image => image.ImageUrl).ToList(),
+                ImageUrls = x.Images.Select(image => ToClientImageUrl(image.ImageUrl)).ToList(),
             }).ToList(),
-            ImageUrls = report.Images.Select(x => x.ImageUrl).ToList(),
+            ImageUrls = report.Images.Select(x => ToClientImageUrl(x.ImageUrl)).ToList(),
         };
+    }
+
+    private string ToClientImageUrl(string imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return imageUrl;
+
+        if (Uri.TryCreate(imageUrl, UriKind.Absolute, out _))
+            return imageUrl;
+
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is null)
+            return imageUrl;
+
+        var imagePath = imageUrl.StartsWith("/", StringComparison.Ordinal)
+            ? imageUrl
+            : $"/{imageUrl}";
+
+        return $"{request.Scheme}://{request.Host}{request.PathBase}{imagePath}";
     }
 
     private static WasteReportStatusTrackingResponse MapStatusTracking(WasteReport report)
