@@ -40,12 +40,11 @@ public class WasteReportService : IWasteReportService
         return reports.Select(MapReport).ToList();
     }
 
-    public async Task<List<WasteReportResponse>?> SearchCitizenReportsByStatusAsync(long citizenId, long statusId, CancellationToken ct = default)
+    public async Task<List<WasteReportResponse>?> SearchCitizenReportsByStatusAsync(long citizenId, WasteReportStatus status, CancellationToken ct = default)
     {
-        if (!Enum.IsDefined(typeof(WasteReportStatus), (int)statusId))
+        if (!Enum.IsDefined(status))
             return null;
 
-        var status = (WasteReportStatus)(int)statusId;
         var reports = await _wasteReportRepository.GetByCitizenIdAndStatusAsync(citizenId, status, ct);
         return reports.Select(MapReport).ToList();
     }
@@ -657,23 +656,6 @@ public class WasteReportService : IWasteReportService
 
     private static string ResolveUploadDirectory()
     {
-        var workspaceFePublic = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            "SWP391_BL3W_FE",
-            "public",
-            "report-images"));
-
-        var workspaceFeRoot = Path.GetFullPath(Path.Combine(workspaceFePublic, ".."));
-        if (Directory.Exists(workspaceFeRoot))
-        {
-            return workspaceFePublic;
-        }
-
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "wwwroot", "report-images"));
     }
 }

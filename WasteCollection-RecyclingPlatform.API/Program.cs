@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
@@ -110,6 +111,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("fe");
+
+var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+Directory.CreateDirectory(Path.Combine(staticFilesRoot, "report-images"));
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(staticFilesRoot),
+    RequestPath = "",
+});
 
 if (!app.Environment.IsDevelopment())
 {

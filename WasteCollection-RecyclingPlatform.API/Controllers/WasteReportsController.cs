@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WasteCollection_RecyclingPlatform.Repositories.Entities;
 using WasteCollection_RecyclingPlatform.Services.DTOs;
 using WasteCollection_RecyclingPlatform.Services.Service;
 
@@ -46,27 +47,30 @@ public class WasteReportsController : ControllerBase
     }
 
     [HttpGet("search-report-status")]
-    public async Task<ActionResult<List<WasteReportResponse>>> SearchReportsByStatus([FromQuery] long statusId, CancellationToken ct)
+    public async Task<ActionResult<List<WasteReportResponse>>> SearchReportsByStatus([FromQuery] WasteReportStatus status, CancellationToken ct)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
             return Unauthorized(new { message = "Cannot identify current user." });
 
-        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, statusId, ct);
+        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, status, ct);
         if (reports is null)
-            return BadRequest(new { message = "Invalid status id. Valid values: 1=Pending, 2=Accepted, 3=Assigned, 4=Collected, 5=Cancelled." });
+            return BadRequest(new { message = "Invalid report status. Valid values: Pending, Accepted, Assigned, Collected, Cancelled." });
 
         return Ok(reports);
     }
 
+    //Truyền mặc định status = Collected để ưu tiên hiển thị các báo cáo đã được thu gom, giúp người dùng dễ dàng theo dõi lịch sử thu gom của mình.
     [HttpGet("report-collected-status")]
-    public async Task<ActionResult<List<WasteReportResponse>>> SearchCollectedReports(CancellationToken ct)
+    public async Task<ActionResult<List<WasteReportResponse>>> SearchCollectedReports(
+        [FromQuery] WasteReportStatus status = WasteReportStatus.Collected,
+        CancellationToken ct = default)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
             return Unauthorized(new { message = "Cannot identify current user." });
 
-        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, 4, ct);
+        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, status, ct);
         if (reports is null)
-            return BadRequest(new { message = "Invalid collected status id." });
+            return BadRequest(new { message = "Invalid report status. Valid values: Pending, Accepted, Assigned, Collected, Cancelled." });
 
         return Ok(reports);
     }
