@@ -18,6 +18,9 @@ public class WasteReport
     public int EstimatedTotalPoints { get; set; }
     public int? FinalRewardPoints { get; set; }
     public DateTime? RewardVerifiedAtUtc { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public string? CompletionNote { get; set; }
+    public decimal? ActualTotalWeightKg { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAtUtc { get; set; }
 

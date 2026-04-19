@@ -81,6 +81,10 @@ public class WasteReportResponse
     public int EstimatedTotalPoints { get; set; }
     public int? FinalRewardPoints { get; set; }
     public DateTime? RewardVerifiedAtUtc { get; set; }
+    public decimal? ActualTotalWeightKg { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public string? CompletionNote { get; set; }
+    public List<string> ProofImageUrls { get; set; } = new();
 }
 
 public class WasteReportStatusTrackingResponse
@@ -93,7 +97,13 @@ public class WasteReportStatusTrackingResponse
     public DateTime? AcceptedAtUtc { get; set; }
     public DateTime? AssignedAtUtc { get; set; }
     public DateTime? CollectedAtUtc { get; set; }
+    public DateTime? CancelledAtUtc { get; set; }
+    public decimal? ActualTotalWeightKg { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public string? CompletionNote { get; set; }
     public WasteReportAssignmentInfoResponse? Assignment { get; set; }
+    public List<WasteReportItemResponse> WasteItems { get; set; } = new();
+    public List<string> ProofImageUrls { get; set; } = new();
     public List<WasteReportStatusHistoryResponse> StatusHistory { get; set; } = new();
 }
 
@@ -118,10 +128,12 @@ public class WasteReportAssignmentInfoResponse
 
 public class WasteReportItemResponse
 {
+    public long WasteReportItemId { get; set; }
     public long WasteCategoryId { get; set; }
     public string WasteCategoryCode { get; set; } = null!;
     public string WasteCategoryName { get; set; } = null!;
     public decimal? EstimatedWeightKg { get; set; }
+    public decimal? ActualWeightKg { get; set; }
     public int EstimatedPoints { get; set; }
     public List<string> ImageUrls { get; set; } = new();
 }

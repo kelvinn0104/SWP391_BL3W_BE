@@ -322,50 +322,7 @@ public class WasteReportService : IWasteReportService
         if (report is null)
             return WasteReportStatusChangeResult.NotFoundResult();
 
-        if (report.Status == WasteReportStatus.Cancelled)
-            return WasteReportStatusChangeResult.Fail("Báo cáo đã bị hủy nên không thể chuyển tiếp trạng thái.");
-
-        if (report.Status == WasteReportStatus.Collected)
-            return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Collected.");
-
-        if (report.Status == WasteReportStatus.Accepted)
-            return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Accepted. Hãy dùng API assign-collector để phân công collector trước khi chuyển tiếp.");
-
-        var nextStatus = report.Status switch
-        {
-            WasteReportStatus.Pending => WasteReportStatus.Accepted,
-            WasteReportStatus.Assigned => WasteReportStatus.Collected,
-            _ => report.Status,
-        };
-
-        if (nextStatus == report.Status)
-            return WasteReportStatusChangeResult.Fail("Không thể chuyển trạng thái từ trạng thái hiện tại.");
-
-        var now = DateTime.UtcNow;
-        report.Status = nextStatus;
-        report.UpdatedAtUtc = now;
-        report.StatusHistories.Add(new WasteReportStatusHistory
-        {
-            Status = nextStatus,
-            ChangedByUserId = actorUserId,
-            ChangedAtUtc = now,
-            Note = string.IsNullOrWhiteSpace(note)
-                ? $"Trạng thái đã chuyển sang {nextStatus}."
-                : note.Trim(),
-        });
-
-        if (nextStatus == WasteReportStatus.Collected)
-        {
-            await _rewardService.AwardFinalPointsForCollectedReportAsync(report, actorUserId, ct);
-        }
-
-        await _wasteReportRepository.SaveChangesAsync(ct);
-
-        var trackedReport = await _wasteReportRepository.GetStatusTrackingByIdAsync(report.Id, ct);
-        if (trackedReport is null)
-            return WasteReportStatusChangeResult.Fail("Không thể đọc lại trạng thái sau khi cập nhật.");
-
-        return WasteReportStatusChangeResult.Ok(MapStatusTracking(trackedReport));
+        return WasteReportStatusChangeResult.Fail("Luồng trạng thái hiện tại không dùng advance-status để chuyển report sang Accepted. Admin/Enterprise duyệt và phân công bằng API assign-collector để chuyển Pending -> Assigned, hoặc dùng API cancel để chuyển Pending -> Cancelled. Collector sẽ chuyển Assigned -> Accepted khi đồng ý nhận việc.");
     }
 
     public async Task<WasteReportStatusChangeResult> CancelReportAsync(long actorUserId, long reportId, string? note, CancellationToken ct = default)
@@ -374,11 +331,11 @@ public class WasteReportService : IWasteReportService
         if (report is null)
             return WasteReportStatusChangeResult.NotFoundResult();
 
-        if (report.Status == WasteReportStatus.Collected)
-            return WasteReportStatusChangeResult.Fail("Báo cáo đã thu gom xong, không thể hủy.");
-
         if (report.Status == WasteReportStatus.Cancelled)
             return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Cancelled.");
+
+        if (report.Status != WasteReportStatus.Pending)
+            return WasteReportStatusChangeResult.Fail($"Chỉ có thể không duyệt report từ trạng thái Pending. Trạng thái hiện tại là {report.Status}.");
 
         var now = DateTime.UtcNow;
         report.Status = WasteReportStatus.Cancelled;
@@ -417,6 +374,15 @@ public class WasteReportService : IWasteReportService
 
     private WasteReportResponse MapReport(WasteReport report)
     {
+        var reportEvidenceUrls = report.Images
+            .Where(x => x.Purpose == WasteReportImagePurpose.ReportEvidence)
+            .Select(x => ToClientImageUrl(x.ImageUrl))
+            .ToList();
+        var proofImageUrls = report.Images
+            .Where(x => x.Purpose == WasteReportImagePurpose.CompletionProof)
+            .Select(x => ToClientImageUrl(x.ImageUrl))
+            .ToList();
+
         return new WasteReportResponse
         {
             ReportId = report.Id,
@@ -429,16 +395,25 @@ public class WasteReportService : IWasteReportService
             EstimatedTotalPoints = report.EstimatedTotalPoints,
             FinalRewardPoints = report.FinalRewardPoints,
             RewardVerifiedAtUtc = report.RewardVerifiedAtUtc,
+            ActualTotalWeightKg = report.ActualTotalWeightKg,
+            CompletedAtUtc = report.CompletedAtUtc,
+            CompletionNote = report.CompletionNote,
             WasteItems = report.Items.Select(x => new WasteReportItemResponse
             {
+                WasteReportItemId = x.Id,
                 WasteCategoryId = x.WasteCategoryId,
                 WasteCategoryCode = x.WasteCategory?.Code ?? string.Empty,
                 WasteCategoryName = x.WasteCategory?.Name ?? string.Empty,
                 EstimatedWeightKg = x.EstimatedWeightKg,
+                ActualWeightKg = x.ActualWeightKg,
                 EstimatedPoints = x.EstimatedPoints,
-                ImageUrls = x.Images.Select(image => ToClientImageUrl(image.ImageUrl)).ToList(),
+                ImageUrls = x.Images
+                    .Where(image => image.Purpose == WasteReportImagePurpose.ReportEvidence)
+                    .Select(image => ToClientImageUrl(image.ImageUrl))
+                    .ToList(),
             }).ToList(),
-            ImageUrls = report.Images.Select(x => ToClientImageUrl(x.ImageUrl)).ToList(),
+            ImageUrls = reportEvidenceUrls,
+            ProofImageUrls = proofImageUrls,
         };
     }
 
@@ -461,7 +436,7 @@ public class WasteReportService : IWasteReportService
         return $"{request.Scheme}://{request.Host}{request.PathBase}{imagePath}";
     }
 
-    private static WasteReportStatusTrackingResponse MapStatusTracking(WasteReport report)
+    private WasteReportStatusTrackingResponse MapStatusTracking(WasteReport report)
     {
         var histories = report.StatusHistories
             .OrderBy(x => x.ChangedAtUtc)
@@ -504,9 +479,31 @@ public class WasteReportService : IWasteReportService
             UpdatedAtUtc = report.UpdatedAtUtc,
             PendingAtUtc = GetFirstStatusAt(histories, WasteReportStatus.Pending) ?? report.CreatedAtUtc,
             AcceptedAtUtc = GetFirstStatusAt(histories, WasteReportStatus.Accepted),
-            AssignedAtUtc = assignedHistory?.ChangedAtUtc,
+            AssignedAtUtc = assignedHistory?.ChangedAtUtc ?? report.AssignedAtUtc,
             CollectedAtUtc = GetFirstStatusAt(histories, WasteReportStatus.Collected),
-            Assignment = MapAssignment(assignedHistory),
+            CancelledAtUtc = GetFirstStatusAt(histories, WasteReportStatus.Cancelled),
+            ActualTotalWeightKg = report.ActualTotalWeightKg,
+            CompletedAtUtc = report.CompletedAtUtc,
+            CompletionNote = report.CompletionNote,
+            Assignment = MapAssignment(report),
+            WasteItems = report.Items.Select(x => new WasteReportItemResponse
+            {
+                WasteReportItemId = x.Id,
+                WasteCategoryId = x.WasteCategoryId,
+                WasteCategoryCode = x.WasteCategory?.Code ?? string.Empty,
+                WasteCategoryName = x.WasteCategory?.Name ?? string.Empty,
+                EstimatedWeightKg = x.EstimatedWeightKg,
+                ActualWeightKg = x.ActualWeightKg,
+                EstimatedPoints = x.EstimatedPoints,
+                ImageUrls = x.Images
+                    .Where(image => image.Purpose == WasteReportImagePurpose.ReportEvidence)
+                    .Select(image => ToClientImageUrl(image.ImageUrl))
+                    .ToList(),
+            }).ToList(),
+            ProofImageUrls = report.Images
+                .Where(x => x.Purpose == WasteReportImagePurpose.CompletionProof)
+                .Select(x => ToClientImageUrl(x.ImageUrl))
+                .ToList(),
             StatusHistory = historyResponses,
         };
     }
@@ -521,17 +518,17 @@ public class WasteReportService : IWasteReportService
             .FirstOrDefault();
     }
 
-    private static WasteReportAssignmentInfoResponse? MapAssignment(WasteReportStatusHistory? assignedHistory)
+    private static WasteReportAssignmentInfoResponse? MapAssignment(WasteReport report)
     {
-        if (assignedHistory?.ChangedByUser is null || assignedHistory.ChangedByUser.Role != UserRole.Collector)
+        if (!report.AssignedCollectorId.HasValue || !report.AssignedAtUtc.HasValue)
             return null;
 
         return new WasteReportAssignmentInfoResponse
         {
-            CollectorId = assignedHistory.ChangedByUser.Id,
-            CollectorName = assignedHistory.ChangedByUser.DisplayName ?? assignedHistory.ChangedByUser.FullName,
-            CollectorPhone = assignedHistory.ChangedByUser.PhoneNumber,
-            AssignedAtUtc = assignedHistory.ChangedAtUtc,
+            CollectorId = report.AssignedCollectorId.Value,
+            CollectorName = report.AssignedCollector?.DisplayName ?? report.AssignedCollector?.FullName,
+            CollectorPhone = report.AssignedCollector?.PhoneNumber,
+            AssignedAtUtc = report.AssignedAtUtc.Value,
         };
     }
 
@@ -707,3 +704,4 @@ public class WasteReportService : IWasteReportService
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "wwwroot", "report-images"));
     }
 }
+

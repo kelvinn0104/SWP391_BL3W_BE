@@ -12,5 +12,12 @@ public class WasteReportImage
     public string ImageUrl { get; set; } = null!;
     public string? OriginalFileName { get; set; }
     public string? ContentType { get; set; }
+    public string Purpose { get; set; } = WasteReportImagePurpose.ReportEvidence;
     public DateTime UploadedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+public static class WasteReportImagePurpose
+{
+    public const string ReportEvidence = "ReportEvidence";
+    public const string CompletionProof = "CompletionProof";
 }

@@ -5,6 +5,6 @@ public enum WasteReportStatus
     Pending = 1,
     Accepted = 2,
     Assigned = 3,
-    Collected = 4,
-    Cancelled = 5,
+    Collected = 5,
+    Cancelled = 6,
 }

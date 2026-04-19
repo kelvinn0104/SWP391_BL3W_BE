@@ -1,4 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using WasteCollection_RecyclingPlatform.Repositories.Entities;
 
 namespace WasteCollection_RecyclingPlatform.Services.DTOs;
 
@@ -11,10 +13,12 @@ public class CollectorJobCitizenResponse
 
 public class CollectorJobWasteItemResponse
 {
+    public long WasteReportItemId { get; set; }
     public long WasteCategoryId { get; set; }
     public string WasteCategoryCode { get; set; } = null!;
     public string WasteCategoryName { get; set; } = null!;
     public decimal? EstimatedWeightKg { get; set; }
+    public decimal? ActualWeightKg { get; set; }
     public int EstimatedPoints { get; set; }
     public List<string> ImageUrls { get; set; } = new();
 }
@@ -33,10 +37,14 @@ public class CollectorJobResponse
     public string Status { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? AssignedAtUtc { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public string? CompletionNote { get; set; }
+    public decimal? ActualTotalWeightKg { get; set; }
     public CollectorJobCitizenResponse Citizen { get; set; } = null!;
     public List<CollectorJobWasteItemResponse> WasteItems { get; set; } = new();
     public List<string> Images { get; set; } = new();
     public List<string> ImageUrls { get; set; } = new();
+    public List<string> ProofImageUrls { get; set; } = new();
 }
 
 public class CollectorJobSummaryResponse
@@ -53,6 +61,8 @@ public class CollectorJobSummaryResponse
     public string Status { get; set; } = null!;
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? AssignedAtUtc { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public decimal? ActualTotalWeightKg { get; set; }
     public CollectorJobCitizenResponse Citizen { get; set; } = null!;
 }
 
@@ -60,6 +70,31 @@ public class AssignWasteReportCollectorRequest
 {
     [Required]
     public long CollectorId { get; set; }
+}
+
+public class CollectorJobStatusUpdateRequest
+{
+    [Required]
+    public WasteReportStatus Status { get; set; }
+    public string? Note { get; set; }
+}
+
+public class CollectorJobItemActualWeightRequest
+{
+    [Required]
+    public long WasteReportItemId { get; set; }
+    public decimal? ActualWeightKg { get; set; }
+}
+
+public class CollectorJobCompletionRequest
+{
+    public List<IFormFile> Images { get; set; } = new();
+    public List<IFormFile> ProofImages { get; set; } = new();
+    public string? Note { get; set; }
+    public string? CompletionNote { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public List<long> WasteReportItemIds { get; set; } = new();
+    public List<decimal> ActualWeightKgs { get; set; } = new();
 }
 
 public class CollectorJobListResult
@@ -82,4 +117,13 @@ public class CollectorJobDetailResult
     public static CollectorJobDetailResult Fail(string error) => new() { Success = false, Error = error };
     public static CollectorJobDetailResult NotFoundResult() => new() { Success = false, NotFound = true, Error = "Không tìm thấy công việc thu gom." };
     public static CollectorJobDetailResult Ok(CollectorJobResponse job) => new() { Success = true, Job = job };
+}
+
+public class CollectorJobFormBindResult
+{
+    public bool Success { get; set; }
+    public string? Error { get; set; }
+
+    public static CollectorJobFormBindResult Fail(string error) => new() { Success = false, Error = error };
+    public static CollectorJobFormBindResult Ok() => new() { Success = true };
 }

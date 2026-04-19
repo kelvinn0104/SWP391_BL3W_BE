@@ -16,5 +16,6 @@ public interface IWasteReportRepository
     Task<List<WasteReport>> GetByStatusAsync(WasteReportStatus status, CancellationToken ct = default);
     Task<List<WasteReport>> GetAssignedToCollectorAsync(long collectorId, WasteReportStatus? status, CancellationToken ct = default);
     Task<WasteReport?> GetAssignedDetailForCollectorAsync(long collectorId, long reportId, CancellationToken ct = default);
+    Task<WasteReport?> GetAssignedForCollectorUpdateAsync(long collectorId, long reportId, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
 }

@@ -109,7 +109,7 @@ public class WasteReportsController : ControllerBase
     }
 
     [HttpPost("{id:long}/advance-status")]
-    [Authorize(Roles = "Administrator,RecyclingEnterprise,Collector")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
     public async Task<ActionResult<WasteReportStatusTrackingResponse>> AdvanceStatus(long id, [FromBody] WasteReportStatusActionRequest? request, CancellationToken ct)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var actorUserId))
@@ -154,6 +154,7 @@ public class WasteReportsController : ControllerBase
     }
 
     [HttpPost("{id:long}/cancel")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
     public async Task<ActionResult<WasteReportStatusTrackingResponse>> CancelReport(long id, [FromBody] WasteReportStatusActionRequest? request, CancellationToken ct)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var actorUserId))

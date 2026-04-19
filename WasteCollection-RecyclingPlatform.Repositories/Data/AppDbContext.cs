@@ -168,6 +168,8 @@ public class AppDbContext : DbContext
             entity.Property(x => x.Description).HasMaxLength(2000).IsRequired();
             entity.Property(x => x.LocationText).HasMaxLength(1000);
             entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(x => x.CompletionNote).HasMaxLength(1000);
+            entity.Property(x => x.ActualTotalWeightKg).HasPrecision(18, 2);
 
             entity.HasOne(x => x.Citizen)
                 .WithMany()
@@ -252,6 +254,7 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => x.WasteReportId);
             entity.HasIndex(x => x.WasteCategoryId);
             entity.Property(x => x.EstimatedWeightKg).HasPrecision(18, 2);
+            entity.Property(x => x.ActualWeightKg).HasPrecision(18, 2);
 
             entity.HasOne(x => x.WasteReport)
                 .WithMany(x => x.Items)
@@ -273,6 +276,10 @@ public class AppDbContext : DbContext
             entity.Property(x => x.ImageUrl).HasMaxLength(1000).IsRequired();
             entity.Property(x => x.OriginalFileName).HasMaxLength(255);
             entity.Property(x => x.ContentType).HasMaxLength(100);
+            entity.Property(x => x.Purpose)
+                .HasMaxLength(32)
+                .HasDefaultValue(WasteReportImagePurpose.ReportEvidence)
+                .IsRequired();
 
             entity.HasOne(x => x.WasteReport)
                 .WithMany(x => x.Images)

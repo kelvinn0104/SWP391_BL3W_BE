@@ -80,6 +80,12 @@ public class WasteReportRepository : IWasteReportRepository
     public async Task<WasteReport?> GetStatusTrackingByIdAsync(long id, CancellationToken ct = default)
     {
         return await _db.WasteReports
+            .Include(x => x.AssignedCollector)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
             .Include(x => x.StatusHistories)
                 .ThenInclude(x => x.ChangedByUser)
             .AsNoTracking()
@@ -146,6 +152,13 @@ public class WasteReportRepository : IWasteReportRepository
     {
         return await BuildAssignedCollectorQuery(collectorId)
             .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == reportId, ct);
+    }
+
+    public async Task<WasteReport?> GetAssignedForCollectorUpdateAsync(long collectorId, long reportId, CancellationToken ct = default)
+    {
+        return await BuildAssignedCollectorQuery(collectorId)
+            .Include(x => x.StatusHistories)
             .FirstOrDefaultAsync(x => x.Id == reportId, ct);
     }
 

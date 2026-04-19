@@ -431,16 +431,22 @@ public static class DbSeeder
             if (citizen is null) continue;
 
             var collectedAt = now.AddDays(-plan.DaysAgo);
+            var assignedAt = collectedAt.AddHours(-2);
             var report = new WasteReport
             {
                 CitizenId = citizen.Id,
                 Title = $"[Seeder] Reward sample report for {citizen.DisplayName}",
                 Description = "Sample collected report used to test reward points and leaderboard APIs.",
                 LocationText = "Sample location, Ho Chi Minh City",
+                AssignedCollectorId = actor.Id,
+                AssignedAtUtc = assignedAt,
                 Status = WasteReportStatus.Collected,
                 EstimatedTotalPoints = plan.Points,
                 FinalRewardPoints = plan.Points,
                 RewardVerifiedAtUtc = collectedAt,
+                ActualTotalWeightKg = plan.Weight,
+                CompletedAtUtc = collectedAt,
+                CompletionNote = "[Seeder] Collector confirmed sample collection.",
                 CreatedAtUtc = collectedAt.AddHours(-6),
                 UpdatedAtUtc = collectedAt,
                 Items = new List<WasteReportItem>
@@ -449,6 +455,7 @@ public static class DbSeeder
                     {
                         WasteCategoryId = plan.Category.Id,
                         EstimatedWeightKg = plan.Weight,
+                        ActualWeightKg = plan.Weight,
                         EstimatedPoints = plan.Points,
                     }
                 },
@@ -463,17 +470,17 @@ public static class DbSeeder
                     },
                     new WasteReportStatusHistory
                     {
-                        Status = WasteReportStatus.Accepted,
+                        Status = WasteReportStatus.Assigned,
                         ChangedByUserId = actor.Id,
-                        ChangedAtUtc = collectedAt.AddHours(-4),
-                        Note = "[Seeder] Sample report accepted.",
+                        ChangedAtUtc = assignedAt,
+                        Note = "[Seeder] Sample report assigned.",
                     },
                     new WasteReportStatusHistory
                     {
-                        Status = WasteReportStatus.Assigned,
+                        Status = WasteReportStatus.Accepted,
                         ChangedByUserId = actor.Id,
-                        ChangedAtUtc = collectedAt.AddHours(-2),
-                        Note = "[Seeder] Sample report assigned.",
+                        ChangedAtUtc = assignedAt.AddMinutes(15),
+                        Note = "[Seeder] Collector accepted sample report.",
                     },
                     new WasteReportStatusHistory
                     {
@@ -685,6 +692,76 @@ public static class DbSeeder
                     req.WardId = fallback.Id;
                 }
             }
+        }
+
+        // C. Backfill legacy collected waste reports after UC-COL-02 completion fields were added.
+        var collectedReports = await db.WasteReports
+            .Include(r => r.Items)
+            .Include(r => r.StatusHistories)
+            .Where(r => r.Status == WasteReportStatus.Collected)
+            .ToListAsync();
+
+        foreach (var report in collectedReports)
+        {
+            var changed = false;
+            var histories = report.StatusHistories
+                .OrderBy(h => h.ChangedAtUtc)
+                .ThenBy(h => h.Id)
+                .ToList();
+
+            var assignedHistory = histories.LastOrDefault(h => h.Status == WasteReportStatus.Assigned);
+            var collectedHistory = histories.LastOrDefault(h => h.Status == WasteReportStatus.Collected);
+
+            if (assignedHistory is not null
+                && collectedHistory is not null
+                && histories.All(h => h.Status != WasteReportStatus.Accepted || h.ChangedAtUtc <= assignedHistory.ChangedAtUtc))
+            {
+                report.StatusHistories.Add(new WasteReportStatusHistory
+                {
+                    Status = WasteReportStatus.Accepted,
+                    ChangedByUserId = assignedHistory.ChangedByUserId,
+                    ChangedAtUtc = assignedHistory.ChangedAtUtc.AddTicks(
+                        Math.Max(1, (collectedHistory.ChangedAtUtc - assignedHistory.ChangedAtUtc).Ticks / 3)),
+                    Note = "[Seeder] Bổ sung trạng thái Accepted sau Assigned cho dữ liệu thu gom cũ.",
+                });
+                changed = true;
+            }
+
+            if (!report.CompletedAtUtc.HasValue)
+            {
+                report.CompletedAtUtc = collectedHistory?.ChangedAtUtc ?? report.UpdatedAtUtc ?? report.CreatedAtUtc;
+                changed = true;
+            }
+
+            foreach (var item in report.Items.Where(i => !i.ActualWeightKg.HasValue && i.EstimatedWeightKg.HasValue))
+            {
+                item.ActualWeightKg = item.EstimatedWeightKg;
+                changed = true;
+            }
+
+            if (!report.ActualTotalWeightKg.HasValue)
+            {
+                var actualWeights = report.Items
+                    .Select(i => i.ActualWeightKg)
+                    .Where(w => w.HasValue)
+                    .Select(w => w!.Value)
+                    .ToList();
+
+                if (actualWeights.Count > 0)
+                {
+                    report.ActualTotalWeightKg = actualWeights.Sum();
+                    changed = true;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(report.CompletionNote))
+            {
+                report.CompletionNote = "[Seeder] Bổ sung thông tin hoàn tất cho dữ liệu thu gom cũ.";
+                changed = true;
+            }
+
+            if (changed)
+                Console.WriteLine($"[Seeder] Backfilled completion data for WasteReport #{report.Id}.");
         }
 
         await db.SaveChangesAsync();
