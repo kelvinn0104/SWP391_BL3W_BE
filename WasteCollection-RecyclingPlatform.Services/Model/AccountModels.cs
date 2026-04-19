@@ -2,15 +2,29 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WasteCollection_RecyclingPlatform.Services.Model;
 
-public record CollectorCreateRequest(
-    [property: Required][property: EmailAddress] string Email,
-    [property: Required][property: MinLength(6)] string Password,
-    [property: Required][property: Compare("Password")] string ConfirmPassword,
-    string? DisplayName,
-    string? FullName,
-    [property: Required][property: Phone] string PhoneNumber,
-    string? Address
-);
+public class CollectorCreateRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = null!;
+
+    [Required]
+    [MinLength(6)]
+    public string Password { get; set; } = null!;
+
+    [Required]
+    [Compare("Password")]
+    public string ConfirmPassword { get; set; } = null!;
+
+    public string? DisplayName { get; set; }
+    public string? FullName { get; set; }
+
+    [Required]
+    [Phone]
+    public string PhoneNumber { get; set; } = null!;
+
+    public string? Address { get; set; }
+}
 
 public record AccountUpdateRequest(
     string? DisplayName,
@@ -24,5 +38,5 @@ public record AccountUpdateRequest(
 );
 
 public record AccountStatusRequest(
-    [property: Required] bool IsLocked
+    [Required] bool IsLocked
 );
