@@ -21,6 +21,8 @@ public class AppDbContext : DbContext
     public DbSet<WasteReportImage> WasteReportImages => Set<WasteReportImage>();
     public DbSet<WasteReportStatusHistory> WasteReportStatusHistories => Set<WasteReportStatusHistory>();
     public DbSet<RewardPointTransaction> RewardPointTransactions => Set<RewardPointTransaction>();
+    public DbSet<Complaint> Complaints => Set<Complaint>();
+    public DbSet<ComplaintEvidence> ComplaintEvidenceFiles => Set<ComplaintEvidence>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -170,6 +172,50 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.CitizenId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Complaint>(entity =>
+        {
+            entity.ToTable("complaints");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.WasteReportId);
+            entity.HasIndex(x => x.CitizenId);
+            entity.HasIndex(x => x.Status);
+            entity.HasIndex(x => new { x.WasteReportId, x.CitizenId }).IsUnique();
+            entity.Property(x => x.Reason).HasMaxLength(255).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(2000).IsRequired();
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(x => x.AdminNote).HasMaxLength(1000);
+
+            entity.HasOne(x => x.WasteReport)
+                .WithMany(x => x.Complaints)
+                .HasForeignKey(x => x.WasteReportId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Citizen)
+                .WithMany()
+                .HasForeignKey(x => x.CitizenId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.ResolvedByUser)
+                .WithMany()
+                .HasForeignKey(x => x.ResolvedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ComplaintEvidence>(entity =>
+        {
+            entity.ToTable("complaint_evidence_files");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.ComplaintId);
+            entity.Property(x => x.FileUrl).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.OriginalFileName).HasMaxLength(255);
+            entity.Property(x => x.ContentType).HasMaxLength(100);
+
+            entity.HasOne(x => x.Complaint)
+                .WithMany(x => x.EvidenceFiles)
+                .HasForeignKey(x => x.ComplaintId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<RewardPointTransaction>(entity =>

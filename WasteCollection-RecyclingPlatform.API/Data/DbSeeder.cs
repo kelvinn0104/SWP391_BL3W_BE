@@ -45,6 +45,7 @@ public static class DbSeeder
         await SeedWasteCategoriesAsync(db);
         await SeedCollectionRequestsAsync(db);
         await SeedRewardSamplesAsync(db);
+        await SeedComplaintSamplesAsync(db);
 
         // 2. Automatic Repair & Sync (The "Self-Healing" logic)
         await RepairDataAsync(db);
@@ -503,6 +504,131 @@ public static class DbSeeder
 
         await db.SaveChangesAsync();
         Console.WriteLine("[Seeder] Successfully seeded reward sample reports and point transactions.");
+    }
+
+    private static async Task SeedComplaintSamplesAsync(AppDbContext db)
+    {
+        if (await db.Complaints.AnyAsync())
+            return;
+
+        var admin = await db.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Administrator);
+        var collector = await db.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Collector);
+        var categories = await db.WasteCategories.ToListAsync();
+        var fallbackCategory = categories.FirstOrDefault();
+
+        var complaintReports = await db.WasteReports
+            .Include(r => r.Citizen)
+            .Where(r => r.Status == WasteReportStatus.Collected)
+            .OrderByDescending(r => r.CreatedAtUtc)
+            .Take(3)
+            .ToListAsync();
+
+        if (fallbackCategory is not null)
+        {
+            var cancelledCitizen = await db.Users.FirstOrDefaultAsync(u => u.Email == "citizen@gmail.com" && u.Role == UserRole.Citizen);
+            if (cancelledCitizen is not null)
+            {
+                var cancelledAt = DateTime.UtcNow.AddDays(-1);
+                var cancelledReport = new WasteReport
+                {
+                    CitizenId = cancelledCitizen.Id,
+                    Title = "[Seeder] Cancelled report for complaint sample",
+                    Description = "Sample cancelled report used to test complaint feedback APIs.",
+                    LocationText = "123 Nguyen Van Linh, TP.HCM",
+                    Status = WasteReportStatus.Cancelled,
+                    EstimatedTotalPoints = 250,
+                    CreatedAtUtc = cancelledAt.AddHours(-4),
+                    UpdatedAtUtc = cancelledAt,
+                    Items = new List<WasteReportItem>
+                    {
+                        new WasteReportItem
+                        {
+                            WasteCategoryId = fallbackCategory.Id,
+                            EstimatedWeightKg = 2.5m,
+                            EstimatedPoints = 250,
+                        }
+                    },
+                    StatusHistories = new List<WasteReportStatusHistory>
+                    {
+                        new WasteReportStatusHistory
+                        {
+                            Status = WasteReportStatus.Pending,
+                            ChangedByUserId = cancelledCitizen.Id,
+                            ChangedAtUtc = cancelledAt.AddHours(-4),
+                            Note = "[Seeder] Citizen created report for complaint sample.",
+                        },
+                        new WasteReportStatusHistory
+                        {
+                            Status = WasteReportStatus.Cancelled,
+                            ChangedByUserId = admin?.Id ?? collector?.Id,
+                            ChangedAtUtc = cancelledAt,
+                            Note = "[Seeder] Sample report cancelled because collection commitment was not met.",
+                        },
+                    },
+                };
+
+                db.WasteReports.Add(cancelledReport);
+                await db.SaveChangesAsync();
+                complaintReports.Add(cancelledReport);
+            }
+        }
+
+        var now = DateTime.UtcNow;
+        var samples = complaintReports
+            .Select((report, index) => new Complaint
+            {
+                WasteReportId = report.Id,
+                CitizenId = report.CitizenId,
+                Reason = index switch
+                {
+                    0 => "Thu gom không đúng địa điểm",
+                    1 => "Thu gom thiếu / không đúng loại rác",
+                    2 => "Trạng thái cập nhật sai",
+                    _ => "Nhân viên thu gom thái độ không phù hợp",
+                },
+                Description = index switch
+                {
+                    0 => "Nhân viên đến nhầm địa chỉ nên gia đình phải tự mang rác tái chế ra điểm hẹn khác.",
+                    1 => "Báo cáo có nhựa và giấy nhưng đội thu gom chỉ nhận phần nhựa, phần giấy vẫn còn lại.",
+                    2 => "Ứng dụng hiển thị đã thu gom, tuy nhiên thực tế rác vẫn chưa được lấy trong khung giờ cam kết.",
+                    _ => "Lịch thu gom bị hủy sát giờ và không có thông báo rõ ràng cho công dân.",
+                },
+                Status = index switch
+                {
+                    0 => ComplaintStatus.Submitted,
+                    1 => ComplaintStatus.InReview,
+                    2 => ComplaintStatus.Resolved,
+                    _ => ComplaintStatus.Rejected,
+                },
+                AdminNote = index switch
+                {
+                    1 => "Đã chuyển bộ phận điều phối kiểm tra lại hình ảnh và biên bản thu gom.",
+                    2 => "Đã xác minh và cập nhật lại quy trình xác nhận thu gom cho collector.",
+                    3 => "Không đủ bằng chứng để xác nhận vi phạm cam kết thu gom.",
+                    _ => null,
+                },
+                ResolvedByUserId = index is 2 or 3 ? admin?.Id : null,
+                ResolvedAtUtc = index is 2 or 3 ? now.AddHours(-index) : null,
+                CreatedAtUtc = now.AddDays(-(index + 1)).AddHours(-2),
+                UpdatedAtUtc = index == 0 ? null : now.AddDays(-index),
+                EvidenceFiles = index == 0
+                    ? new List<ComplaintEvidence>
+                    {
+                        new ComplaintEvidence
+                        {
+                            FileUrl = "/complaint-evidence/sample-feedback-evidence.jpg",
+                            OriginalFileName = "sample-feedback-evidence.jpg",
+                            ContentType = "image/jpeg",
+                            UploadedAtUtc = now.AddDays(-1),
+                        }
+                    }
+                    : new List<ComplaintEvidence>(),
+            })
+            .ToList();
+
+        db.Complaints.AddRange(samples);
+        await db.SaveChangesAsync();
+        Console.WriteLine($"[Seeder] Successfully seeded {samples.Count} complaint feedback samples.");
     }
 
     private static async Task RepairDataAsync(AppDbContext db)

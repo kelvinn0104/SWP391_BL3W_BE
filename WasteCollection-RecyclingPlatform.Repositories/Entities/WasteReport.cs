@@ -20,4 +20,5 @@ public class WasteReport
     public ICollection<WasteReportItem> Items { get; set; } = new List<WasteReportItem>();
     public ICollection<WasteReportImage> Images { get; set; } = new List<WasteReportImage>();
     public ICollection<WasteReportStatusHistory> StatusHistories { get; set; } = new List<WasteReportStatusHistory>();
+    public ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
 }

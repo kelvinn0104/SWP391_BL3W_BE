@@ -56,6 +56,7 @@ builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 builder.Services.AddScoped<ICollectionRequestRepository, CollectionRequestRepository>();
 builder.Services.AddScoped<IWasteReportRepository, WasteReportRepository>();
 builder.Services.AddScoped<IRewardRepository, RewardRepository>();
+builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -75,6 +76,7 @@ builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<IWasteReportService, WasteReportService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
+builder.Services.AddScoped<IComplaintService, ComplaintService>();
 
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 builder.Services
@@ -117,7 +119,9 @@ app.UseCors("fe");
 
 var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
 var reportImagesRoot = Path.Combine(staticFilesRoot, "report-images");
+var complaintEvidenceRoot = Path.Combine(staticFilesRoot, "complaint-evidence");
 Directory.CreateDirectory(reportImagesRoot);
+Directory.CreateDirectory(complaintEvidenceRoot);
 
 var staticFileProviders = new List<IFileProvider>
 {
