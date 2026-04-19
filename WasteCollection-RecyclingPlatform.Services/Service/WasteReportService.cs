@@ -224,7 +224,7 @@ public class WasteReportService : IWasteReportService
             Status = WasteReportStatus.Pending,
             ChangedByUserId = citizenId,
             ChangedAtUtc = now,
-            Note = "Citizen created waste report.",
+            Note = "Công dân đã tạo báo cáo rác.",
         });
 
         await _wasteReportRepository.AddAsync(report, ct);
@@ -329,7 +329,7 @@ public class WasteReportService : IWasteReportService
             return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Collected.");
 
         if (report.Status == WasteReportStatus.Accepted)
-            return WasteReportStatusChangeResult.Fail("Report da Accepted. Hay dung API assign-collector de phan cong collector truoc khi chuyen tiep.");
+            return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Accepted. Hãy dùng API assign-collector để phân công collector trước khi chuyển tiếp.");
 
         var nextStatus = report.Status switch
         {
@@ -350,7 +350,7 @@ public class WasteReportService : IWasteReportService
             ChangedByUserId = actorUserId,
             ChangedAtUtc = now,
             Note = string.IsNullOrWhiteSpace(note)
-                ? $"Status moved to {nextStatus}."
+                ? $"Trạng thái đã chuyển sang {nextStatus}."
                 : note.Trim(),
         });
 
@@ -389,7 +389,7 @@ public class WasteReportService : IWasteReportService
             ChangedByUserId = actorUserId,
             ChangedAtUtc = now,
             Note = string.IsNullOrWhiteSpace(note)
-                ? "Report cancelled."
+                ? "Báo cáo đã bị hủy."
                 : note.Trim(),
         });
 
@@ -486,7 +486,7 @@ public class WasteReportService : IWasteReportService
                 Status = report.Status.ToString(),
                 ChangedByUserId = report.CitizenId,
                 ChangedAtUtc = report.CreatedAtUtc,
-                Note = "Current status snapshot.",
+                Note = "Ảnh chụp trạng thái hiện tại.",
             });
         }
 

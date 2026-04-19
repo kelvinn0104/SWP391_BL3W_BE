@@ -25,7 +25,7 @@ public class CollectorJobService : ICollectorJobService
     public async Task<CollectorJobListResult> GetMyJobsAsync(long collectorId, WasteReportStatus? status, CancellationToken ct = default)
     {
         if (status.HasValue && !Enum.IsDefined(status.Value))
-            return CollectorJobListResult.Fail("Invalid report status. Valid values: Pending, Accepted, Assigned, Collected, Cancelled.");
+            return CollectorJobListResult.Fail("Trạng thái báo cáo không hợp lệ. Các giá trị hợp lệ: Pending, Accepted, Assigned, Collected, Cancelled.");
 
         var reports = await _wasteReportRepository.GetAssignedToCollectorAsync(collectorId, status, ct);
         return CollectorJobListResult.Ok(reports.Select(MapJobSummary).ToList());
@@ -43,7 +43,7 @@ public class CollectorJobService : ICollectorJobService
     {
         var collector = await _userRepository.GetByIdAsync(collectorId, ct);
         if (collector is null || collector.Role != UserRole.Collector)
-            return CollectorJobDetailResult.Fail("Collector khong ton tai hoac khong dung vai tro Collector.");
+            return CollectorJobDetailResult.Fail("Collector không tồn tại hoặc không đúng vai trò Collector.");
 
         var report = await _wasteReportRepository.GetByIdForAssignmentAsync(reportId, ct);
         if (report is null)
@@ -60,14 +60,14 @@ public class CollectorJobService : ICollectorJobService
             Status = WasteReportStatus.Assigned,
             ChangedByUserId = actorUserId,
             ChangedAtUtc = now,
-            Note = $"Assigned to collector #{collectorId}.",
+            Note = $"Đã phân công cho collector #{collectorId}.",
         });
 
         await _wasteReportRepository.SaveChangesAsync(ct);
 
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
-            ? CollectorJobDetailResult.Fail("Khong the doc lai cong viec sau khi phan cong.")
+            ? CollectorJobDetailResult.Fail("Không thể đọc lại công việc sau khi phân công.")
             : CollectorJobDetailResult.Ok(MapJob(saved));
     }
 

@@ -22,7 +22,7 @@ public class CollectorJobsController : ControllerBase
     public async Task<ActionResult<List<CollectorJobSummaryResponse>>> GetMyAssignedReports(CancellationToken ct)
     {
         if (!_collectorJobService.TryGetCurrentUserId(User, out var collectorId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var result = await _collectorJobService.GetMyJobsAsync(collectorId, null, ct);
         if (!result.Success)
@@ -35,7 +35,7 @@ public class CollectorJobsController : ControllerBase
     public async Task<ActionResult<CollectorJobResponse>> GetMyJobDetail(long reportId, CancellationToken ct)
     {
         if (!_collectorJobService.TryGetCurrentUserId(User, out var collectorId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var result = await _collectorJobService.GetMyJobDetailAsync(collectorId, reportId, ct);
         if (result.NotFound)

@@ -80,6 +80,6 @@ public class CollectorJobDetailResult
     public CollectorJobResponse? Job { get; set; }
 
     public static CollectorJobDetailResult Fail(string error) => new() { Success = false, Error = error };
-    public static CollectorJobDetailResult NotFoundResult() => new() { Success = false, NotFound = true, Error = "Khong tim thay cong viec thu gom." };
+    public static CollectorJobDetailResult NotFoundResult() => new() { Success = false, NotFound = true, Error = "Không tìm thấy công việc thu gom." };
     public static CollectorJobDetailResult Ok(CollectorJobResponse job) => new() { Success = true, Job = job };
 }

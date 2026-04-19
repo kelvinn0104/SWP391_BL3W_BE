@@ -38,7 +38,7 @@ public class RewardService : IRewardService
 
         var citizen = await _rewardRepository.GetUserForUpdateAsync(report.CitizenId, ct);
         if (citizen is null)
-            throw new InvalidOperationException("Cannot find reward receiver.");
+            throw new InvalidOperationException("Không tìm thấy người nhận điểm thưởng.");
 
         var rewardPoints = Math.Max(0, report.EstimatedTotalPoints);
         citizen.Points += rewardPoints;
@@ -55,7 +55,7 @@ public class RewardService : IRewardService
             TransactionType = RewardPointTransactionType.Earned,
             SourceType = RewardPointSourceType.WasteReportCollected,
             SourceRefId = report.Id,
-            Description = $"Reward points for collected report #{report.Id}",
+            Description = $"Điểm thưởng cho báo cáo đã thu gom #{report.Id}",
             CreatedByUserId = actorUserId,
             CreatedAtUtc = now,
         });
@@ -70,7 +70,7 @@ public class RewardService : IRewardService
 
             var user = await _rewardRepository.GetUserByIdAsync(userId, ct);
             if (user is null)
-                return RewardActionResult<RewardPointHistoryResponse>.UnauthorizedResult("User does not exist.");
+                return RewardActionResult<RewardPointHistoryResponse>.UnauthorizedResult("Người dùng không tồn tại.");
 
             var page = await _rewardRepository.GetPointTransactionsAsync(userId, safeSkip, safeTake, ct);
 
@@ -93,7 +93,7 @@ public class RewardService : IRewardService
         {
             var user = await _rewardRepository.GetUserByIdAsync(userId, ct);
             if (user is null)
-                return RewardActionResult<PointBalanceResponse>.UnauthorizedResult("User does not exist.");
+                return RewardActionResult<PointBalanceResponse>.UnauthorizedResult("Người dùng không tồn tại.");
 
             return RewardActionResult<PointBalanceResponse>.Ok(new PointBalanceResponse
             {
@@ -176,7 +176,7 @@ public class RewardService : IRewardService
 
         var area = await _rewardRepository.GetAreaByIdAsync(areaId, ct);
         if (area is null)
-            return RewardActionResult<AreaUserLeaderboardResponse>.NotFoundResult("Area not found.");
+            return RewardActionResult<AreaUserLeaderboardResponse>.NotFoundResult("Không tìm thấy khu vực.");
 
         var usersInArea = await _rewardRepository.GetCitizenLeaderboardRowsByAreaAsync(areaId, ct);
         var myRank = usersInArea.FindIndex(x => x.UserId == currentUserId);

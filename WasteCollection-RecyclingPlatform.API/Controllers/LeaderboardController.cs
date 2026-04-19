@@ -21,7 +21,7 @@ public class LeaderboardController : ControllerBase
     public async Task<ActionResult<List<AreaUserLeaderboardItemResponse>>> GetUserLeaderboard([FromQuery] int skip = 0, [FromQuery] int take = 20, CancellationToken ct = default)
     {
         if (!_rewardService.TryGetCurrentUserId(User, out var userId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var response = await _rewardService.GetUserLeaderboardAsync(userId, skip, take, ct);
         if (response.Unauthorized)
@@ -34,7 +34,7 @@ public class LeaderboardController : ControllerBase
     public async Task<ActionResult<UserLeaderboardResponse>> GetUsersLeaderboard([FromQuery] int skip = 0, [FromQuery] int take = 20, CancellationToken ct = default)
     {
         if (!_rewardService.TryGetCurrentUserId(User, out var userId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var response = await _rewardService.GetUserLeaderboardAsync(userId, skip, take, ct);
         if (response.Unauthorized)
@@ -53,7 +53,7 @@ public class LeaderboardController : ControllerBase
     public async Task<ActionResult<AreaUserLeaderboardResponse>> GetAreaUsersLeaderboard(long areaId, [FromQuery] int skip = 0, [FromQuery] int take = 20, CancellationToken ct = default)
     {
         if (!_rewardService.TryGetCurrentUserId(User, out var userId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var response = await _rewardService.GetAreaUserLeaderboardAsync(areaId, userId, skip, take, ct);
         if (response.Unauthorized)

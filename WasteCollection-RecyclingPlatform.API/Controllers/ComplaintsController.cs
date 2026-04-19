@@ -23,7 +23,7 @@ public class ComplaintsController : ControllerBase
     public async Task<ActionResult<ComplaintResponse>> CreateForReport(long reportId, [FromForm] ComplaintCreateRequest request, CancellationToken ct)
     {
         if (!_complaintService.TryGetCurrentUserId(User, out var citizenId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var result = await _complaintService.CreateComplaintAsync(citizenId, reportId, request, ct);
         if (result.Unauthorized)
@@ -42,7 +42,7 @@ public class ComplaintsController : ControllerBase
     public async Task<ActionResult<List<ComplaintResponse>>> GetMyFeedback(CancellationToken ct)
     {
         if (!_complaintService.TryGetCurrentUserId(User, out var citizenId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var result = await _complaintService.GetMyComplaintsAsync(citizenId, ct);
         if (!result.Success)
@@ -66,7 +66,7 @@ public class ComplaintsController : ControllerBase
     public async Task<ActionResult<ComplaintResponse>> GetFeedbackDetail(long id, CancellationToken ct)
     {
         if (!_complaintService.TryGetCurrentUserId(User, out var actorUserId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var canViewAll = User.IsInRole("Administrator") || User.IsInRole("RecyclingEnterprise");
         var result = await _complaintService.GetComplaintDetailAsync(actorUserId, canViewAll, id, ct);
@@ -84,7 +84,7 @@ public class ComplaintsController : ControllerBase
     public async Task<ActionResult<ComplaintResponse>> UpdateFeedbackStatus(long id, [FromBody] ComplaintStatusUpdateRequest request, CancellationToken ct)
     {
         if (!_complaintService.TryGetCurrentUserId(User, out var actorUserId))
-            return Unauthorized(new { message = "Cannot identify current user." });
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
         var result = await _complaintService.UpdateStatusAsync(actorUserId, id, request, ct);
         if (result.NotFound)

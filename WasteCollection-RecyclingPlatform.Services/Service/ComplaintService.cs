@@ -51,32 +51,32 @@ public class ComplaintService : IComplaintService
         {
             var citizen = await _userRepository.GetByIdAsync(citizenId, ct);
             if (citizen is null)
-                return ComplaintActionResult<ComplaintResponse>.UnauthorizedResult("User does not exist.");
+                return ComplaintActionResult<ComplaintResponse>.UnauthorizedResult("Người dùng không tồn tại.");
 
             if (citizen.Role != UserRole.Citizen)
-                return ComplaintActionResult<ComplaintResponse>.Fail("Only citizens can create complaints.");
+                return ComplaintActionResult<ComplaintResponse>.Fail("Chỉ công dân mới được tạo phản ánh.");
 
             var report = await _wasteReportRepository.GetByIdAsync(reportId, ct);
             if (report is null || report.CitizenId != citizenId)
-                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Waste report not found.");
+                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Không tìm thấy báo cáo rác.");
 
             if (report.Status is not (WasteReportStatus.Collected or WasteReportStatus.Cancelled))
-                return ComplaintActionResult<ComplaintResponse>.Fail("Only collected or cancelled reports can be complained.");
+                return ComplaintActionResult<ComplaintResponse>.Fail("Chỉ có thể phản ánh báo cáo đã thu gom hoặc đã hủy.");
 
             var reason = request.Reason?.Trim();
             if (string.IsNullOrWhiteSpace(reason))
-                return ComplaintActionResult<ComplaintResponse>.Fail("Complaint reason is required.");
+                return ComplaintActionResult<ComplaintResponse>.Fail("Lý do phản ánh là bắt buộc.");
 
             var description = request.Description?.Trim();
             if (string.IsNullOrWhiteSpace(description))
-                return ComplaintActionResult<ComplaintResponse>.Fail("Complaint description is required.");
+                return ComplaintActionResult<ComplaintResponse>.Fail("Mô tả phản ánh là bắt buộc.");
 
             if (await _complaintRepository.ExistsForReportAndCitizenAsync(reportId, citizenId, ct))
-                return ComplaintActionResult<ComplaintResponse>.Fail("A complaint already exists for this report.");
+                return ComplaintActionResult<ComplaintResponse>.Fail("Báo cáo này đã có phản ánh.");
 
             var evidenceFiles = request.EvidenceFiles.Where(x => x.Length > 0).ToList();
             if (evidenceFiles.Count > MaxEvidenceFiles)
-                return ComplaintActionResult<ComplaintResponse>.Fail($"Only {MaxEvidenceFiles} evidence files are allowed.");
+                return ComplaintActionResult<ComplaintResponse>.Fail($"Chỉ được tải tối đa {MaxEvidenceFiles} tệp bằng chứng.");
 
             var now = DateTime.UtcNow;
             var complaint = new Complaint
@@ -112,7 +112,7 @@ public class ComplaintService : IComplaintService
         }
         catch (Exception ex)
         {
-            return ComplaintActionResult<ComplaintResponse>.Fail($"Cannot create complaint: {ex.Message}");
+            return ComplaintActionResult<ComplaintResponse>.Fail($"Không thể tạo phản ánh: {ex.Message}");
         }
     }
 
@@ -125,7 +125,7 @@ public class ComplaintService : IComplaintService
         }
         catch (Exception ex)
         {
-            return ComplaintActionResult<List<ComplaintResponse>>.Fail($"Cannot load complaints: {ex.Message}");
+            return ComplaintActionResult<List<ComplaintResponse>>.Fail($"Không thể tải danh sách phản ánh: {ex.Message}");
         }
     }
 
@@ -134,14 +134,14 @@ public class ComplaintService : IComplaintService
         try
         {
             if (status.HasValue && !Enum.IsDefined(status.Value))
-                return ComplaintActionResult<List<ComplaintResponse>>.Fail("Invalid complaint status.");
+                return ComplaintActionResult<List<ComplaintResponse>>.Fail("Trạng thái phản ánh không hợp lệ.");
 
             var complaints = await _complaintRepository.GetAllAsync(status, ct);
             return ComplaintActionResult<List<ComplaintResponse>>.Ok(complaints.Select(MapComplaint).ToList());
         }
         catch (Exception ex)
         {
-            return ComplaintActionResult<List<ComplaintResponse>>.Fail($"Cannot load complaints: {ex.Message}");
+            return ComplaintActionResult<List<ComplaintResponse>>.Fail($"Không thể tải danh sách phản ánh: {ex.Message}");
         }
     }
 
@@ -151,16 +151,16 @@ public class ComplaintService : IComplaintService
         {
             var complaint = await _complaintRepository.GetByIdAsync(complaintId, ct);
             if (complaint is null)
-                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Complaint not found.");
+                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Không tìm thấy phản ánh.");
 
             if (!canViewAll && complaint.CitizenId != actorUserId)
-                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Complaint not found.");
+                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Không tìm thấy phản ánh.");
 
             return ComplaintActionResult<ComplaintResponse>.Ok(MapComplaint(complaint));
         }
         catch (Exception ex)
         {
-            return ComplaintActionResult<ComplaintResponse>.Fail($"Cannot load complaint: {ex.Message}");
+            return ComplaintActionResult<ComplaintResponse>.Fail($"Không thể tải phản ánh: {ex.Message}");
         }
     }
 
@@ -169,11 +169,11 @@ public class ComplaintService : IComplaintService
         try
         {
             if (!Enum.IsDefined(request.Status))
-                return ComplaintActionResult<ComplaintResponse>.Fail("Invalid complaint status. Valid values: Submitted, InReview, Resolved, Rejected.");
+                return ComplaintActionResult<ComplaintResponse>.Fail("Trạng thái phản ánh không hợp lệ. Các giá trị hợp lệ: Submitted, InReview, Resolved, Rejected.");
 
             var complaint = await _complaintRepository.GetByIdForUpdateAsync(complaintId, ct);
             if (complaint is null)
-                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Complaint not found.");
+                return ComplaintActionResult<ComplaintResponse>.NotFoundResult("Không tìm thấy phản ánh.");
 
             var note = request.AdminNote?.Trim();
             var now = DateTime.UtcNow;
@@ -199,7 +199,7 @@ public class ComplaintService : IComplaintService
         }
         catch (Exception ex)
         {
-            return ComplaintActionResult<ComplaintResponse>.Fail($"Cannot update complaint status: {ex.Message}");
+            return ComplaintActionResult<ComplaintResponse>.Fail($"Không thể cập nhật trạng thái phản ánh: {ex.Message}");
         }
     }
 
@@ -258,16 +258,16 @@ public class ComplaintService : IComplaintService
     private static async Task<string> SaveEvidenceAsync(IFormFile file, CancellationToken ct)
     {
         if (file.Length > MaxEvidenceBytes)
-            throw new InvalidOperationException("Evidence file cannot exceed 10MB.");
+            throw new InvalidOperationException("Tệp bằng chứng không được vượt quá 10MB.");
 
         var extension = Path.GetExtension(file.FileName);
         if (string.IsNullOrWhiteSpace(extension) || !AllowedEvidenceExtensions.Contains(extension))
-            throw new InvalidOperationException("Evidence file type is not supported.");
+            throw new InvalidOperationException("Định dạng tệp bằng chứng không được hỗ trợ.");
 
         if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
             && !string.Equals(file.ContentType, "application/pdf", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("Only image or PDF evidence files are supported.");
+            throw new InvalidOperationException("Chỉ hỗ trợ tệp bằng chứng dạng hình ảnh hoặc PDF.");
         }
 
         var uploadDirectory = ResolveUploadDirectory();
