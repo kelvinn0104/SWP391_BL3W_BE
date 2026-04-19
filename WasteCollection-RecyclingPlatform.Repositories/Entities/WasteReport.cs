@@ -10,6 +10,10 @@ public class WasteReport
     public string Description { get; set; } = string.Empty;
     public string? LocationText { get; set; }
 
+    public long? AssignedCollectorId { get; set; }
+    public User? AssignedCollector { get; set; }
+    public DateTime? AssignedAtUtc { get; set; }
+
     public WasteReportStatus Status { get; set; } = WasteReportStatus.Pending;
     public int EstimatedTotalPoints { get; set; }
     public int? FinalRewardPoints { get; set; }

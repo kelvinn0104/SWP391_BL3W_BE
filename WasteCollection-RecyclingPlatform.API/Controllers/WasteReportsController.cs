@@ -12,10 +12,12 @@ namespace WasteCollection_RecyclingPlatform.API.Controllers;
 public class WasteReportsController : ControllerBase
 {
     private readonly IWasteReportService _wasteReportService;
+    private readonly ICollectorJobService _collectorJobService;
 
-    public WasteReportsController(IWasteReportService wasteReportService)
+    public WasteReportsController(IWasteReportService wasteReportService, ICollectorJobService collectorJobService)
     {
         _wasteReportService = wasteReportService;
+        _collectorJobService = collectorJobService;
     }
 
     [HttpGet("categories")]
@@ -47,28 +49,14 @@ public class WasteReportsController : ControllerBase
     }
 
     [HttpGet("search-report-status")]
+    [Authorize(Roles = "Citizen,Administrator,RecyclingEnterprise")]
     public async Task<ActionResult<List<WasteReportResponse>>> SearchReportsByStatus([FromQuery] WasteReportStatus status, CancellationToken ct)
     {
-        if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
+        if (!_wasteReportService.TryGetCurrentUserId(User, out var currentUserId))
             return Unauthorized(new { message = "Cannot identify current user." });
 
-        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, status, ct);
-        if (reports is null)
-            return BadRequest(new { message = "Invalid report status. Valid values: Pending, Accepted, Assigned, Collected, Cancelled." });
-
-        return Ok(reports);
-    }
-
-    //Truyền mặc định status = Collected để ưu tiên hiển thị các báo cáo đã được thu gom, giúp người dùng dễ dàng theo dõi lịch sử thu gom của mình.
-    [HttpGet("report-collected-status")]
-    public async Task<ActionResult<List<WasteReportResponse>>> SearchCollectedReports(
-        [FromQuery] WasteReportStatus status = WasteReportStatus.Collected,
-        CancellationToken ct = default)
-    {
-        if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
-            return Unauthorized(new { message = "Cannot identify current user." });
-
-        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, status, ct);
+        var canViewAllReports = User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.RecyclingEnterprise.ToString());
+        var reports = await _wasteReportService.SearchReportsByStatusAsync(currentUserId, canViewAllReports, status, ct);
         if (reports is null)
             return BadRequest(new { message = "Invalid report status. Valid values: Pending, Accepted, Assigned, Collected, Cancelled." });
 
@@ -135,6 +123,34 @@ public class WasteReportsController : ControllerBase
             return BadRequest(new { message = result.Error });
 
         return Ok(result.Tracking);
+    }
+
+    [HttpGet("{id:long}/status-history")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
+    public async Task<ActionResult<WasteReportStatusTrackingResponse>> GetStatusHistory(long id, CancellationToken ct)
+    {
+        var tracking = await _wasteReportService.GetReportStatusTrackingAsync(id, ct);
+        if (tracking is null)
+            return NotFound();
+
+        return Ok(tracking);
+    }
+
+    [HttpPatch("{id:long}/assign-collector")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
+    public async Task<ActionResult<CollectorJobResponse>> AssignCollector(long id, [FromBody] AssignWasteReportCollectorRequest request, CancellationToken ct)
+    {
+        if (!_collectorJobService.TryGetCurrentUserId(User, out var actorUserId))
+            return Unauthorized(new { message = "Cannot identify current user." });
+
+        var result = await _collectorJobService.AssignCollectorAsync(actorUserId, id, request.CollectorId, ct);
+        if (result.NotFound)
+            return NotFound();
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(result.Job);
     }
 
     [HttpPost("{id:long}/cancel")]

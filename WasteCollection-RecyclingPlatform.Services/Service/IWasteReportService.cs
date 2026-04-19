@@ -10,8 +10,10 @@ public interface IWasteReportService
     Task<List<WasteCategoryResponse>> GetCategoriesAsync(CancellationToken ct = default);
     Task<List<WasteReportResponse>> GetCitizenReportsAsync(long citizenId, CancellationToken ct = default);
     Task<List<WasteReportResponse>?> SearchCitizenReportsByStatusAsync(long citizenId, WasteReportStatus status, CancellationToken ct = default);
+    Task<List<WasteReportResponse>?> SearchReportsByStatusAsync(long currentUserId, bool canViewAllReports, WasteReportStatus status, CancellationToken ct = default);
     Task<WasteReportResponse?> GetCitizenReportDetailAsync(long citizenId, long reportId, CancellationToken ct = default);
     Task<WasteReportStatusTrackingResponse?> GetCitizenReportStatusAsync(long citizenId, long reportId, CancellationToken ct = default);
+    Task<WasteReportStatusTrackingResponse?> GetReportStatusTrackingAsync(long reportId, CancellationToken ct = default);
     Task<WasteReportCreateResult> CreateReportAsync(long citizenId, WasteReportCreateRequest request, CancellationToken ct = default);
     Task<WasteReportUpdateResult> UpdateReportAsync(long citizenId, long reportId, WasteReportUpdateRequest request, CancellationToken ct = default);
     Task<WasteReportStatusChangeResult> AdvanceReportStatusAsync(long actorUserId, long reportId, string? note, CancellationToken ct = default);

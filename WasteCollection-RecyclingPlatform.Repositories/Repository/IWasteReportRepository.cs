@@ -9,8 +9,12 @@ public interface IWasteReportRepository
     Task AddAsync(WasteReport report, CancellationToken ct = default);
     Task<WasteReport?> GetByIdAsync(long id, CancellationToken ct = default);
     Task<WasteReport?> GetByIdForUpdateAsync(long id, CancellationToken ct = default);
+    Task<WasteReport?> GetByIdForAssignmentAsync(long id, CancellationToken ct = default);
     Task<WasteReport?> GetStatusTrackingByIdAsync(long id, CancellationToken ct = default);
     Task<List<WasteReport>> GetByCitizenIdAsync(long citizenId, CancellationToken ct = default);
     Task<List<WasteReport>> GetByCitizenIdAndStatusAsync(long citizenId, WasteReportStatus status, CancellationToken ct = default);
+    Task<List<WasteReport>> GetByStatusAsync(WasteReportStatus status, CancellationToken ct = default);
+    Task<List<WasteReport>> GetAssignedToCollectorAsync(long collectorId, WasteReportStatus? status, CancellationToken ct = default);
+    Task<WasteReport?> GetAssignedDetailForCollectorAsync(long collectorId, long reportId, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
 }

@@ -57,6 +57,18 @@ public class WasteReportService : IWasteReportService
         return reports.Select(MapReport).ToList();
     }
 
+    public async Task<List<WasteReportResponse>?> SearchReportsByStatusAsync(long currentUserId, bool canViewAllReports, WasteReportStatus status, CancellationToken ct = default)
+    {
+        if (!Enum.IsDefined(status))
+            return null;
+
+        var reports = canViewAllReports
+            ? await _wasteReportRepository.GetByStatusAsync(status, ct)
+            : await _wasteReportRepository.GetByCitizenIdAndStatusAsync(currentUserId, status, ct);
+
+        return reports.Select(MapReport).ToList();
+    }
+
     public async Task<WasteReportResponse?> GetCitizenReportDetailAsync(long citizenId, long reportId, CancellationToken ct = default)
     {
         var report = await _wasteReportRepository.GetByIdAsync(reportId, ct);
@@ -71,6 +83,12 @@ public class WasteReportService : IWasteReportService
         if (report is null || report.CitizenId != citizenId) return null;
 
         return MapStatusTracking(report);
+    }
+
+    public async Task<WasteReportStatusTrackingResponse?> GetReportStatusTrackingAsync(long reportId, CancellationToken ct = default)
+    {
+        var report = await _wasteReportRepository.GetStatusTrackingByIdAsync(reportId, ct);
+        return report is null ? null : MapStatusTracking(report);
     }
 
     public WasteReportFormBindResult BindWasteItemsFromRawForm(WasteReportCreateRequest request, IFormCollection? form)
@@ -310,10 +328,12 @@ public class WasteReportService : IWasteReportService
         if (report.Status == WasteReportStatus.Collected)
             return WasteReportStatusChangeResult.Fail("Báo cáo đã ở trạng thái Collected.");
 
+        if (report.Status == WasteReportStatus.Accepted)
+            return WasteReportStatusChangeResult.Fail("Report da Accepted. Hay dung API assign-collector de phan cong collector truoc khi chuyen tiep.");
+
         var nextStatus = report.Status switch
         {
             WasteReportStatus.Pending => WasteReportStatus.Accepted,
-            WasteReportStatus.Accepted => WasteReportStatus.Assigned,
             WasteReportStatus.Assigned => WasteReportStatus.Collected,
             _ => report.Status,
         };

@@ -40,12 +40,28 @@ public class WasteReportRepository : IWasteReportRepository
     public async Task<WasteReport?> GetByIdAsync(long id, CancellationToken ct = default)
     {
         return await _db.WasteReports
+            .Include(x => x.Citizen)
+            .Include(x => x.AssignedCollector)
             .Include(x => x.Items)
                 .ThenInclude(x => x.WasteCategory)
             .Include(x => x.Items)
                 .ThenInclude(x => x.Images)
             .Include(x => x.Images)
             .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
+    public async Task<WasteReport?> GetByIdForAssignmentAsync(long id, CancellationToken ct = default)
+    {
+        return await _db.WasteReports
+            .Include(x => x.Citizen)
+            .Include(x => x.AssignedCollector)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
+            .Include(x => x.StatusHistories)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
@@ -98,8 +114,56 @@ public class WasteReportRepository : IWasteReportRepository
             .ToListAsync(ct);
     }
 
+    public async Task<List<WasteReport>> GetByStatusAsync(WasteReportStatus status, CancellationToken ct = default)
+    {
+        return await _db.WasteReports
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
+            .Where(x => x.Status == status)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<WasteReport>> GetAssignedToCollectorAsync(long collectorId, WasteReportStatus? status, CancellationToken ct = default)
+    {
+        var query = BuildAssignedCollectorQuery(collectorId);
+
+        if (status.HasValue)
+            query = query.Where(x => x.Status == status.Value);
+
+        return await query
+            .OrderByDescending(x => x.AssignedAtUtc)
+            .ThenByDescending(x => x.CreatedAtUtc)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public async Task<WasteReport?> GetAssignedDetailForCollectorAsync(long collectorId, long reportId, CancellationToken ct = default)
+    {
+        return await BuildAssignedCollectorQuery(collectorId)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == reportId, ct);
+    }
+
     public async Task SaveChangesAsync(CancellationToken ct = default)
     {
         await _db.SaveChangesAsync(ct);
+    }
+
+    private IQueryable<WasteReport> BuildAssignedCollectorQuery(long collectorId)
+    {
+        return _db.WasteReports
+            .Include(x => x.Citizen)
+            .Include(x => x.AssignedCollector)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
+            .Where(x => x.AssignedCollectorId == collectorId);
     }
 }

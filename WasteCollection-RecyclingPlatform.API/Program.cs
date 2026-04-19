@@ -75,6 +75,7 @@ builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<IWasteReportService, WasteReportService>();
+builder.Services.AddScoped<ICollectorJobService, CollectorJobService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
 

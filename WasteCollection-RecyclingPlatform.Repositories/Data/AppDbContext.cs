@@ -162,6 +162,7 @@ public class AppDbContext : DbContext
             entity.ToTable("waste_reports");
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.CitizenId);
+            entity.HasIndex(x => x.AssignedCollectorId);
             entity.HasIndex(x => x.Status);
             entity.Property(x => x.Title).HasMaxLength(255);
             entity.Property(x => x.Description).HasMaxLength(2000).IsRequired();
@@ -172,6 +173,11 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.CitizenId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.AssignedCollector)
+                .WithMany()
+                .HasForeignKey(x => x.AssignedCollectorId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Complaint>(entity =>
