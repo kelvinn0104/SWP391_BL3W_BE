@@ -172,7 +172,7 @@ public class WasteReportsController : ControllerBase
     }
 
     [HttpPost("{id:long}/cancel")]
-    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
+    [Authorize(Roles = "Citizen,Administrator,RecyclingEnterprise")]
     public async Task<ActionResult<WasteReportStatusTrackingResponse>> CancelReport(long id, [FromBody] WasteReportStatusActionRequest? request, CancellationToken ct)
     {
         if (!_wasteReportService.TryGetCurrentUserId(User, out var actorUserId))
