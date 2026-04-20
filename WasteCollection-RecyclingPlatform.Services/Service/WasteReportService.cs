@@ -428,12 +428,11 @@ public class WasteReportService : IWasteReportService
         var materials = report.Items.Select(x => new WasteReportMaterialResponse
         {
             Type = x.WasteCategory?.Name ?? string.Empty,
-            Amount = x.ActualWeightKg ?? x.EstimatedWeightKg ?? 0,
+            Amount = Math.Round(x.ActualWeightKg ?? x.EstimatedWeightKg ?? 0, 2),
             Unit = x.WasteCategory?.Unit ?? "kg",
         }).ToList();
 
-        var weightKg = report.ActualTotalWeightKg
-            ?? materials.Sum(x => x.Amount);
+        var weightKg = Math.Round(report.ActualTotalWeightKg ?? materials.Sum(x => x.Amount), 2);
 
         var wasteType = string.Join(", ", materials
             .Select(x => x.Type)
@@ -443,6 +442,26 @@ public class WasteReportService : IWasteReportService
         if (string.IsNullOrWhiteSpace(wasteType))
             wasteType = report.Title ?? "Chưa phân loại";
 
+        var cancellationReason = report.StatusHistories
+            .Where(x => x.Status == WasteReportStatus.Cancelled)
+            .OrderByDescending(x => x.ChangedAtUtc)
+            .ThenByDescending(x => x.Id)
+            .Select(x => x.Note)
+            .FirstOrDefault();
+
+        var collectedAt = report.CompletedAtUtc
+            ?? report.StatusHistories
+                .Where(x => x.Status == WasteReportStatus.Collected)
+                .OrderByDescending(x => x.ChangedAtUtc)
+                .ThenByDescending(x => x.Id)
+                .Select(x => (DateTime?)x.ChangedAtUtc)
+                .FirstOrDefault();
+
+        var images = report.Images
+            .Where(x => x.Purpose == WasteReportImagePurpose.ReportEvidence)
+            .Select(x => ToClientImageUrl(x.ImageUrl))
+            .ToList();
+
         return new WasteReportGetAllResponse
         {
             Id = report.Id,
@@ -451,23 +470,29 @@ public class WasteReportService : IWasteReportService
             CollectorId = report.AssignedCollectorId,
             CollectorName = report.AssignedCollector?.DisplayName ?? report.AssignedCollector?.FullName,
             CollectorPhone = report.AssignedCollector?.PhoneNumber,
-            Address = report.LocationText ?? string.Empty,
+            Address = report.LocationText ?? report.Citizen?.Address ?? string.Empty,
             WasteType = wasteType,
             WeightKg = weightKg,
             Note = report.Description,
-            Priority = "Standard",
+            Priority = GetReportPriority(weightKg),
             Status = report.Status.ToString(),
             CreatedAt = report.CreatedAtUtc,
-            CompletedAt = report.CompletedAtUtc,
-            CancellationReason = report.Status == WasteReportStatus.Cancelled ? report.CompletionNote : null,
+            CompletedAt = collectedAt,
+            CancellationReason = report.Status == WasteReportStatus.Cancelled
+                ? cancellationReason ?? report.CompletionNote
+                : null,
             WardId = null,
             WardName = null,
             Materials = materials,
-            Images = report.Images
-                .Where(x => x.Purpose == WasteReportImagePurpose.ReportEvidence)
-                .Select(x => ToClientImageUrl(x.ImageUrl))
-                .ToList(),
+            Images = images,
         };
+    }
+
+    private static string GetReportPriority(decimal weightKg)
+    {
+        if (weightKg >= 15) return "High";
+        if (weightKg >= 8) return "Medium";
+        return "Standard";
     }
 
     private string ToClientImageUrl(string imageUrl)

@@ -102,6 +102,7 @@ public class WasteReportRepository : IWasteReportRepository
             .Include(x => x.Items)
                 .ThenInclude(x => x.Images)
             .Include(x => x.Images)
+            .Include(x => x.StatusHistories)
             .OrderByDescending(x => x.CreatedAtUtc)
             .AsNoTracking()
             .ToListAsync(ct);
