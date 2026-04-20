@@ -523,15 +523,12 @@ public class WasteReportService : IWasteReportService
         if (Uri.TryCreate(imageUrl, UriKind.Absolute, out _))
             return imageUrl;
 
-        var request = _httpContextAccessor.HttpContext?.Request;
-        if (request is null)
-            return imageUrl;
-
         var imagePath = imageUrl.StartsWith("/", StringComparison.Ordinal)
             ? imageUrl
             : $"/{imageUrl}";
 
-        return $"{request.Scheme}://{request.Host}{request.PathBase}{imagePath}";
+        // Return relative path so the frontend (Vite) server can serve it directly from its own host.
+        return imagePath;
     }
 
     private WasteReportStatusTrackingResponse MapStatusTracking(WasteReport report)
