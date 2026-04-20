@@ -126,13 +126,27 @@ public class UserService : IUserService
 
     private async Task<string> SaveProfileAvatarAsync(IFormFile file)
     {
-        // Target: WasteCollection-RecyclingPlatform.FE/public/profile
-        var fePublicPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "WasteCollection-RecyclingPlatform.FE", "public", "profile"));
+        // Primary path confirmed for the user's environment
+        string fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\profile";
         
+        // Backup discovery logic
         if (!Directory.Exists(fePublicPath))
         {
-            fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\profile";
-            if (!Directory.Exists(fePublicPath)) Directory.CreateDirectory(fePublicPath);
+            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            while (currentDir != null)
+            {
+                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
+                {
+                    fePublicPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "public", "profile");
+                    break;
+                }
+                currentDir = currentDir.Parent;
+            }
+        }
+
+        if (!Directory.Exists(fePublicPath)) 
+        {
+            Directory.CreateDirectory(fePublicPath);
         }
 
         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
@@ -143,7 +157,7 @@ public class UserService : IUserService
             await file.CopyToAsync(stream);
         }
 
-        return $"/profile/{fileName}";
+        return "/profile/" + fileName;
     }
 
     public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)
