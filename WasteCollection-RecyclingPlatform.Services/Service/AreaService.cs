@@ -30,6 +30,7 @@ public class AreaService : IAreaService
             CompletedRequests = a.CompletedRequests,
             Wards = a.Wards.Select(w => new WardResponse
             {
+                Id = w.Id,
                 Name = w.Name,
                 CollectedKg = w.CollectedKg,
                 CompletedRequests = w.CompletedRequests,

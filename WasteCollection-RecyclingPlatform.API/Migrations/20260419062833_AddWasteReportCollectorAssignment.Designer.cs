@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WasteCollection_RecyclingPlatform.Repositories.Data;
 
@@ -11,9 +12,11 @@ using WasteCollection_RecyclingPlatform.Repositories.Data;
 namespace WasteCollectionRecyclingPlatform.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419062833_AddWasteReportCollectorAssignment")]
+    partial class AddWasteReportCollectorAssignment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -571,19 +574,8 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.Property<long?>("AssignedCollectorId")
                         .HasColumnType("bigint");
 
-                    b.Property<decimal?>("ActualTotalWeightKg")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<long>("CitizenId")
                         .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("CompletedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("CompletionNote")
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime(6)");
@@ -650,13 +642,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Purpose")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
-                        .HasDefaultValue("ReportEvidence");
-
                     b.Property<DateTime>("UploadedAtUtc")
                         .HasColumnType("datetime(6)");
 
@@ -685,10 +670,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
 
                     b.Property<int>("EstimatedPoints")
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("ActualWeightKg")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("EstimatedWeightKg")
                         .HasPrecision(18, 2)
