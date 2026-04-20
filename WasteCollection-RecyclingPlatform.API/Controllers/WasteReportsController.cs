@@ -40,11 +40,7 @@ public class WasteReportsController : ControllerBase
     [Authorize(Roles = "RecyclingEnterprise")]
     public async Task<ActionResult<List<WasteReportResponse>>> GetAllReports(CancellationToken ct)
     {
-        if (!_wasteReportService.TryGetCurrentUserId(User, out var currentUserId))
-            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
-
-        var canViewAllReports = User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.RecyclingEnterprise.ToString());
-        return Ok(await _wasteReportService.GetReportsAsync(currentUserId, canViewAllReports, ct));
+        return Ok(await _wasteReportService.GetReportsAsync(ct));
     }
 
     [HttpGet("{id:long}/detail-report")]
@@ -72,6 +68,17 @@ public class WasteReportsController : ControllerBase
             return BadRequest(new { message = "Trạng thái báo cáo không hợp lệ. Các giá trị hợp lệ: Pending, Accepted, Assigned, Collected, Cancelled." });
 
         return Ok(reports);
+    }
+
+    [HttpGet("report-collected-status")]
+    [Authorize(Roles = "Citizen")]
+    public async Task<ActionResult<List<WasteReportResponse>>> GetCollectedReportsForCurrentCitizen(CancellationToken ct)
+    {
+        if (!_wasteReportService.TryGetCurrentUserId(User, out var citizenId))
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
+
+        var reports = await _wasteReportService.SearchCitizenReportsByStatusAsync(citizenId, WasteReportStatus.Collected, ct);
+        return Ok(reports ?? new List<WasteReportResponse>());
     }
 
     [HttpPost]

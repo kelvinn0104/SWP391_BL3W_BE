@@ -8,7 +8,7 @@ namespace WasteCollection_RecyclingPlatform.Services.Service;
 public interface IWasteReportService
 {
     Task<List<WasteCategoryResponse>> GetCategoriesAsync(CancellationToken ct = default);
-    Task<List<WasteReportResponse>> GetReportsAsync(long currentUserId, bool canViewAllReports, CancellationToken ct = default);
+    Task<List<WasteReportResponse>> GetReportsAsync(CancellationToken ct = default);
     Task<List<WasteReportResponse>> GetCitizenReportsAsync(long citizenId, CancellationToken ct = default);
     Task<List<WasteReportResponse>?> SearchCitizenReportsByStatusAsync(long citizenId, WasteReportStatus status, CancellationToken ct = default);
     Task<List<WasteReportResponse>?> SearchReportsByStatusAsync(long currentUserId, bool canViewAllReports, WasteReportStatus status, CancellationToken ct = default);

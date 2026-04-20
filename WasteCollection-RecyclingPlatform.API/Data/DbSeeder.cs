@@ -222,10 +222,12 @@ public static class DbSeeder
 
     private static async Task SeedWasteCategoriesAsync(AppDbContext db)
     {
-        if (await db.WasteCategories.AnyAsync()) return;
+        var existingCategories = await db.WasteCategories.ToListAsync();
 
         var now = DateTime.UtcNow;
-        db.WasteCategories.AddRange(
+        if (!existingCategories.Any())
+        {
+            db.WasteCategories.AddRange(
             new WasteCategory
             {
                 Code = "PLASTIC",
@@ -252,25 +254,24 @@ public static class DbSeeder
                 Description = "Bìa carton, giấy báo và giấy văn phòng.",
                 PointsPerKg = 80,
                 CreatedAtUtc = now,
-            },
-            new WasteCategory
-            {
-                Code = "GLASS",
-                Name = "Thủy tinh",
-                Unit = "kg",
-                Description = "Chai lọ thủy tinh còn an toàn để thu gom.",
-                PointsPerKg = 90,
-                CreatedAtUtc = now,
-            },
-            new WasteCategory
-            {
-                Code = "EWASTE",
-                Name = "Rác điện tử",
-                Unit = "kg",
-                Description = "Pin, sạc và thiết bị điện tử nhỏ cần xử lý riêng.",
-                PointsPerKg = 150,
-                CreatedAtUtc = now,
             });
+        }
+
+        var removedCategories = existingCategories.Where(x => x.Code is "GLASS" or "EWASTE").ToList();
+        if (removedCategories.Any())
+        {
+            var fallbackCategory = existingCategories.FirstOrDefault(x => x.Code == "PLASTIC")
+                ?? existingCategories.First(x => x.Code is "METAL" or "PAPER");
+            var removedCategoryIds = removedCategories.Select(x => x.Id).ToList();
+            var affectedItems = await db.WasteReportItems
+                .Where(x => removedCategoryIds.Contains(x.WasteCategoryId))
+                .ToListAsync();
+
+            foreach (var item in affectedItems)
+                item.WasteCategoryId = fallbackCategory.Id;
+
+            db.WasteCategories.RemoveRange(removedCategories);
+        }
 
         await db.SaveChangesAsync();
         Console.WriteLine("[Seeder] Successfully seeded waste categories.");
@@ -307,8 +308,8 @@ public static class DbSeeder
         var wards = await db.Wards.Include(w => w.Area).ToListAsync();
         var rnd = new Random();
  
-        var wasteCategories = new[] { "Nhựa & Kim loại", "Giấy vụn", "Điện tử cũ", "Hỗn hợp", "Thủy tinh", "Kim loại" };
- 
+        var wasteCategories = new[] { "Nhựa", "Kim loại", "Giấy" };
+
         var requests = new List<CollectionRequest>();
  
         for (int i = 0; i < 25; i++)
@@ -410,18 +411,16 @@ public static class DbSeeder
         var plastic = categories.FirstOrDefault(x => x.Code == "PLASTIC") ?? categories[0];
         var paper = categories.FirstOrDefault(x => x.Code == "PAPER") ?? categories[0];
         var metal = categories.FirstOrDefault(x => x.Code == "METAL") ?? categories[0];
-        var glass = categories.FirstOrDefault(x => x.Code == "GLASS") ?? categories[0];
-        var eWaste = categories.FirstOrDefault(x => x.Code == "EWASTE") ?? categories[0];
         var now = DateTime.UtcNow;
 
         var samplePlans = new[]
         {
             new { Email = "vo.thanh@gmail.com", Category = metal, Weight = 8.0m, Points = 960, DaysAgo = 2 },
-            new { Email = "vo.thanh@gmail.com", Category = eWaste, Weight = 4.0m, Points = 600, DaysAgo = 8 },
+            new { Email = "vo.thanh@gmail.com", Category = metal, Weight = 4.0m, Points = 480, DaysAgo = 8 },
             new { Email = "tran.anh@gmail.com", Category = plastic, Weight = 7.5m, Points = 750, DaysAgo = 3 },
             new { Email = "tran.anh@gmail.com", Category = paper, Weight = 5.0m, Points = 400, DaysAgo = 9 },
             new { Email = "le.hoang@gmail.com", Category = plastic, Weight = 6.5m, Points = 650, DaysAgo = 4 },
-            new { Email = "citizen@gmail.com", Category = glass, Weight = 5.0m, Points = 450, DaysAgo = 5 },
+            new { Email = "citizen@gmail.com", Category = paper, Weight = 5.0m, Points = 400, DaysAgo = 5 },
             new { Email = "pham.lan@gmail.com", Category = paper, Weight = 4.5m, Points = 360, DaysAgo = 6 },
         };
 
