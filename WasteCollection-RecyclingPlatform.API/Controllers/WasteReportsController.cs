@@ -36,6 +36,17 @@ public class WasteReportsController : ControllerBase
         return Ok(await _wasteReportService.GetCitizenReportsAsync(citizenId, ct));
     }
 
+    [HttpGet("get-all")]
+    [Authorize(Roles = "RecyclingEnterprise")]
+    public async Task<ActionResult<List<WasteReportResponse>>> GetAllReports(CancellationToken ct)
+    {
+        if (!_wasteReportService.TryGetCurrentUserId(User, out var currentUserId))
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
+
+        var canViewAllReports = User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.RecyclingEnterprise.ToString());
+        return Ok(await _wasteReportService.GetReportsAsync(currentUserId, canViewAllReports, ct));
+    }
+
     [HttpGet("{id:long}/detail-report")]
     public async Task<ActionResult<WasteReportResponse>> GetDetailReport(long id, CancellationToken ct)
     {

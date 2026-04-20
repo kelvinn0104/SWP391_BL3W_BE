@@ -92,6 +92,19 @@ public class WasteReportRepository : IWasteReportRepository
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
 
+    public async Task<List<WasteReport>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await _db.WasteReports
+            .Include(x => x.Items)
+                .ThenInclude(x => x.WasteCategory)
+            .Include(x => x.Items)
+                .ThenInclude(x => x.Images)
+            .Include(x => x.Images)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
     public async Task<List<WasteReport>> GetByCitizenIdAsync(long citizenId, CancellationToken ct = default)
     {
         return await _db.WasteReports

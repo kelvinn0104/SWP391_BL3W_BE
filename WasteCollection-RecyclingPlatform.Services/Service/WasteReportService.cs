@@ -42,6 +42,15 @@ public class WasteReportService : IWasteReportService
         return categories.Select(MapCategory).ToList();
     }
 
+    public async Task<List<WasteReportResponse>> GetReportsAsync(long currentUserId, bool canViewAllReports, CancellationToken ct = default)
+    {
+        var reports = canViewAllReports
+            ? await _wasteReportRepository.GetAllAsync(ct)
+            : await _wasteReportRepository.GetByCitizenIdAsync(currentUserId, ct);
+
+        return reports.Select(MapReport).ToList();
+    }
+
     public async Task<List<WasteReportResponse>> GetCitizenReportsAsync(long citizenId, CancellationToken ct = default)
     {
         var reports = await _wasteReportRepository.GetByCitizenIdAsync(citizenId, ct);
