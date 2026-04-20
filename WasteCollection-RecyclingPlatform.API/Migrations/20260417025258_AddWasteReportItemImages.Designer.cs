@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WasteCollection_RecyclingPlatform.Repositories.Data;
 
@@ -11,9 +12,11 @@ using WasteCollection_RecyclingPlatform.Repositories.Data;
 namespace WasteCollectionRecyclingPlatform.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260417025258_AddWasteReportItemImages")]
+    partial class AddWasteReportItemImages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,101 +132,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.ToTable("collection_requests", (string)null);
                 });
 
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Complaint", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AdminNote")
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
-
-                    b.Property<long>("CitizenId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime?>("ResolvedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long?>("ResolvedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long>("WasteReportId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CitizenId");
-
-                    b.HasIndex("ResolvedByUserId");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("WasteReportId");
-
-                    b.HasIndex("WasteReportId", "CitizenId")
-                        .IsUnique();
-
-                    b.ToTable("complaints", (string)null);
-                });
-
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.ComplaintEvidence", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ComplaintId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
-
-                    b.Property<string>("OriginalFileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("UploadedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ComplaintId");
-
-                    b.ToTable("complaint_evidence_files", (string)null);
-                });
-
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.PasswordReset", b =>
                 {
                     b.Property<long>("Id")
@@ -267,57 +175,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("password_resets", (string)null);
-                });
-
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.RewardPointTransaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BalanceAfter")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long?>("CreatedByUserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<long?>("SourceRefId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAtUtc");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("reward_point_transactions", (string)null);
                 });
 
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.User", b =>
@@ -565,25 +422,8 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime?>("AssignedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long?>("AssignedCollectorId")
-                        .HasColumnType("bigint");
-
-                    b.Property<decimal?>("ActualTotalWeightKg")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<long>("CitizenId")
                         .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("CompletedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("CompletionNote")
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime(6)");
@@ -596,15 +436,9 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.Property<int>("EstimatedTotalPoints")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FinalRewardPoints")
-                        .HasColumnType("int");
-
                     b.Property<string>("LocationText")
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
-
-                    b.Property<DateTime?>("RewardVerifiedAtUtc")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -619,8 +453,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignedCollectorId");
 
                     b.HasIndex("CitizenId");
 
@@ -650,13 +482,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Purpose")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
-                        .HasDefaultValue("ReportEvidence");
-
                     b.Property<DateTime>("UploadedAtUtc")
                         .HasColumnType("datetime(6)");
 
@@ -685,10 +510,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
 
                     b.Property<int>("EstimatedPoints")
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("ActualWeightKg")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("EstimatedWeightKg")
                         .HasPrecision(18, 2)
@@ -784,61 +605,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.Navigation("Ward");
                 });
 
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Complaint", b =>
-                {
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.User", "Citizen")
-                        .WithMany()
-                        .HasForeignKey("CitizenId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.User", "ResolvedByUser")
-                        .WithMany()
-                        .HasForeignKey("ResolvedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.WasteReport", "WasteReport")
-                        .WithMany("Complaints")
-                        .HasForeignKey("WasteReportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Citizen");
-
-                    b.Navigation("ResolvedByUser");
-
-                    b.Navigation("WasteReport");
-                });
-
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.ComplaintEvidence", b =>
-                {
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.Complaint", "Complaint")
-                        .WithMany("EvidenceFiles")
-                        .HasForeignKey("ComplaintId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Complaint");
-                });
-
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.RewardPointTransaction", b =>
-                {
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.User", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Voucher", b =>
                 {
                     b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.VoucherCategory", "Category")
@@ -881,18 +647,11 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
 
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.WasteReport", b =>
                 {
-                    b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.User", "AssignedCollector")
-                        .WithMany()
-                        .HasForeignKey("AssignedCollectorId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("WasteCollection_RecyclingPlatform.Repositories.Entities.User", "Citizen")
                         .WithMany()
                         .HasForeignKey("CitizenId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("AssignedCollector");
 
                     b.Navigation("Citizen");
                 });
@@ -972,11 +731,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
                     b.Navigation("Wards");
                 });
 
-            modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Complaint", b =>
-                {
-                    b.Navigation("EvidenceFiles");
-                });
-
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.Voucher", b =>
                 {
                     b.Navigation("Codes");
@@ -994,8 +748,6 @@ namespace WasteCollectionRecyclingPlatform.API.Migrations
 
             modelBuilder.Entity("WasteCollection_RecyclingPlatform.Repositories.Entities.WasteReport", b =>
                 {
-                    b.Navigation("Complaints");
-
                     b.Navigation("Images");
 
                     b.Navigation("Items");
