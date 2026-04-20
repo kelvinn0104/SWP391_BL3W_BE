@@ -84,6 +84,7 @@ public class WasteReportResponse
     public decimal? ActualTotalWeightKg { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
     public string? CompletionNote { get; set; }
+    public string? CancellationReason { get; set; }
     public List<string> ProofImageUrls { get; set; } = new();
 }
 

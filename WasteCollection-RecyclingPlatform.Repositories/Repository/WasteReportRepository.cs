@@ -47,6 +47,7 @@ public class WasteReportRepository : IWasteReportRepository
             .Include(x => x.Items)
                 .ThenInclude(x => x.Images)
             .Include(x => x.Images)
+            .Include(x => x.StatusHistories)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, ct);
     }
@@ -116,6 +117,7 @@ public class WasteReportRepository : IWasteReportRepository
             .Include(x => x.Items)
                 .ThenInclude(x => x.Images)
             .Include(x => x.Images)
+            .Include(x => x.StatusHistories)
             .Where(x => x.CitizenId == citizenId)
             .OrderByDescending(x => x.CreatedAtUtc)
             .AsNoTracking()
@@ -130,6 +132,7 @@ public class WasteReportRepository : IWasteReportRepository
             .Include(x => x.Items)
                 .ThenInclude(x => x.Images)
             .Include(x => x.Images)
+            .Include(x => x.StatusHistories)
             .Where(x => x.CitizenId == citizenId && x.Status == status)
             .OrderByDescending(x => x.CreatedAtUtc)
             .AsNoTracking()
@@ -144,6 +147,7 @@ public class WasteReportRepository : IWasteReportRepository
             .Include(x => x.Items)
                 .ThenInclude(x => x.Images)
             .Include(x => x.Images)
+            .Include(x => x.StatusHistories)
             .Where(x => x.Status == status)
             .OrderByDescending(x => x.CreatedAtUtc)
             .AsNoTracking()

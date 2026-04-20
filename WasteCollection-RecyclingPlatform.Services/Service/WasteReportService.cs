@@ -388,6 +388,14 @@ public class WasteReportService : IWasteReportService
             .Where(x => x.Purpose == WasteReportImagePurpose.CompletionProof)
             .Select(x => ToClientImageUrl(x.ImageUrl))
             .ToList();
+        var cancellationReason = report.Status == WasteReportStatus.Cancelled
+            ? report.StatusHistories
+                .Where(x => x.Status == WasteReportStatus.Cancelled)
+                .OrderByDescending(x => x.ChangedAtUtc)
+                .ThenByDescending(x => x.Id)
+                .Select(x => x.Note)
+                .FirstOrDefault()
+            : null;
 
         return new WasteReportResponse
         {
@@ -404,6 +412,7 @@ public class WasteReportService : IWasteReportService
             ActualTotalWeightKg = report.ActualTotalWeightKg,
             CompletedAtUtc = report.CompletedAtUtc,
             CompletionNote = report.CompletionNote,
+            CancellationReason = cancellationReason,
             WasteItems = report.Items.Select(x => new WasteReportItemResponse
             {
                 WasteReportItemId = x.Id,
