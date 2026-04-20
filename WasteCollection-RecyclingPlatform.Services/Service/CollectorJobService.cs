@@ -87,40 +87,26 @@ public class CollectorJobService : ICollectorJobService
             : CollectorJobDetailResult.Ok(MapJob(saved));
     }
 
-    public async Task<CollectorJobDetailResult> UpdateMyJobStatusAsync(long collectorId, long reportId, CollectorJobStatusUpdateRequest request, CancellationToken ct = default)
+    public async Task<CollectorJobDetailResult> AcceptMyJobAsync(long collectorId, long reportId, string? note, CancellationToken ct = default)
     {
         var report = await _wasteReportRepository.GetAssignedForCollectorUpdateAsync(collectorId, reportId, ct);
         if (report is null)
             return CollectorJobDetailResult.NotFoundResult();
 
+        if (report.Status != WasteReportStatus.Assigned)
+            return CollectorJobDetailResult.Fail($"Chỉ có thể đồng ý nhận công việc từ trạng thái Assigned. Trạng thái hiện tại là {report.Status}.");
+
         var now = DateTime.UtcNow;
-        var defaultNote = request.Status switch
-        {
-            WasteReportStatus.Accepted when report.Status == WasteReportStatus.Assigned =>
-                "Collector đã đồng ý nhận công việc.",
-            WasteReportStatus.Pending when report.Status == WasteReportStatus.Assigned =>
-                "Collector đã từ chối công việc, report quay lại Pending để phân công lại.",
-            _ => null,
-        };
-
-        if (defaultNote is null)
-            return CollectorJobDetailResult.Fail($"Không thể chuyển trạng thái từ {report.Status} sang {request.Status}. Luồng hợp lệ là Pending -> Assigned -> Accepted -> Collected; collector có thể từ chối Assigned về Pending.");
-
-        if (request.Status == WasteReportStatus.Pending)
-        {
-            report.AssignedCollectorId = null;
-            report.AssignedCollector = null;
-            report.AssignedAtUtc = null;
-        }
-
-        report.Status = request.Status;
+        report.Status = WasteReportStatus.Accepted;
         report.UpdatedAtUtc = now;
         report.StatusHistories.Add(new WasteReportStatusHistory
         {
-            Status = request.Status,
+            Status = WasteReportStatus.Accepted,
             ChangedByUserId = collectorId,
             ChangedAtUtc = now,
-            Note = string.IsNullOrWhiteSpace(request.Note) ? defaultNote : request.Note.Trim(),
+            Note = string.IsNullOrWhiteSpace(note)
+                ? "Collector đã đồng ý nhận công việc."
+                : note.Trim(),
         });
 
         await _wasteReportRepository.SaveChangesAsync(ct);
@@ -128,6 +114,39 @@ public class CollectorJobService : ICollectorJobService
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
             ? CollectorJobDetailResult.Fail("Không thể đọc lại công việc sau khi cập nhật trạng thái.")
+            : CollectorJobDetailResult.Ok(MapJob(saved));
+    }
+
+    public async Task<CollectorJobDetailResult> CancelMyJobAsync(long collectorId, long reportId, string? note, CancellationToken ct = default)
+    {
+        var report = await _wasteReportRepository.GetAssignedForCollectorUpdateAsync(collectorId, reportId, ct);
+        if (report is null)
+            return CollectorJobDetailResult.NotFoundResult();
+
+        if (report.Status != WasteReportStatus.Assigned)
+            return CollectorJobDetailResult.Fail($"Chỉ có thể từ chối công việc từ trạng thái Assigned. Trạng thái hiện tại là {report.Status}.");
+
+        var now = DateTime.UtcNow;
+        report.AssignedCollectorId = null;
+        report.AssignedCollector = null;
+        report.AssignedAtUtc = null;
+        report.Status = WasteReportStatus.Pending;
+        report.UpdatedAtUtc = now;
+        report.StatusHistories.Add(new WasteReportStatusHistory
+        {
+            Status = WasteReportStatus.Pending,
+            ChangedByUserId = collectorId,
+            ChangedAtUtc = now,
+            Note = string.IsNullOrWhiteSpace(note)
+                ? "Collector đã từ chối công việc, report quay lại Pending để enterprise phân công collector khác."
+                : note.Trim(),
+        });
+
+        await _wasteReportRepository.SaveChangesAsync(ct);
+
+        var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
+        return saved is null
+            ? CollectorJobDetailResult.Fail("Không thể đọc lại công việc sau khi từ chối.")
             : CollectorJobDetailResult.Ok(MapJob(saved));
     }
 
@@ -148,8 +167,7 @@ public class CollectorJobService : ICollectorJobService
         if (report.Status != WasteReportStatus.Accepted)
             return CollectorJobDetailResult.Fail($"Không thể xác nhận hoàn tất từ trạng thái {report.Status}. Luồng hợp lệ là Pending -> Assigned -> Accepted -> Collected.");
 
-        var proofImages = request.ProofImages.Count > 0 ? request.ProofImages : request.Images;
-        proofImages = proofImages.Where(x => x.Length > 0).ToList();
+        var proofImages = request.ProofImages.Where(x => x.Length > 0).ToList();
         if (proofImages.Count == 0)
             return CollectorJobDetailResult.Fail("Vui lòng tải lên ít nhất một ảnh minh chứng hoàn tất thu gom.");
 
@@ -193,9 +211,7 @@ public class CollectorJobService : ICollectorJobService
 
         report.ActualTotalWeightKg = report.Items.Sum(x => x.ActualWeightKg!.Value);
 
-        var note = !string.IsNullOrWhiteSpace(request.CompletionNote)
-            ? request.CompletionNote.Trim()
-            : request.Note?.Trim();
+        var note = request.CompletionNote?.Trim();
 
         var now = DateTime.UtcNow;
         report.Status = WasteReportStatus.Collected;

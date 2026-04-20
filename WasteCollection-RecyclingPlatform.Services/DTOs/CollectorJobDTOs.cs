@@ -72,10 +72,8 @@ public class AssignWasteReportCollectorRequest
     public long CollectorId { get; set; }
 }
 
-public class CollectorJobStatusUpdateRequest
+public class CollectorJobStatusActionRequest
 {
-    [Required]
-    public WasteReportStatus Status { get; set; }
     public string? Note { get; set; }
 }
 
@@ -88,9 +86,7 @@ public class CollectorJobItemActualWeightRequest
 
 public class CollectorJobCompletionRequest
 {
-    public List<IFormFile> Images { get; set; } = new();
     public List<IFormFile> ProofImages { get; set; } = new();
-    public string? Note { get; set; }
     public string? CompletionNote { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
     public List<long> WasteReportItemIds { get; set; } = new();

@@ -10,7 +10,8 @@ public interface ICollectorJobService
     Task<CollectorJobListResult> GetMyJobsAsync(long collectorId, WasteReportStatus? status, CancellationToken ct = default);
     Task<CollectorJobDetailResult> GetMyJobDetailAsync(long collectorId, long reportId, CancellationToken ct = default);
     Task<CollectorJobDetailResult> AssignCollectorAsync(long actorUserId, long reportId, long collectorId, CancellationToken ct = default);
-    Task<CollectorJobDetailResult> UpdateMyJobStatusAsync(long collectorId, long reportId, CollectorJobStatusUpdateRequest request, CancellationToken ct = default);
+    Task<CollectorJobDetailResult> AcceptMyJobAsync(long collectorId, long reportId, string? note, CancellationToken ct = default);
+    Task<CollectorJobDetailResult> CancelMyJobAsync(long collectorId, long reportId, string? note, CancellationToken ct = default);
     Task<CollectorJobDetailResult> CompleteMyJobAsync(long collectorId, long reportId, CollectorJobCompletionRequest request, CancellationToken ct = default);
     CollectorJobFormBindResult BindCompletionRequestFromRawForm(CollectorJobCompletionRequest request, IFormCollection? form);
     bool TryGetCurrentUserId(ClaimsPrincipal user, out long userId);

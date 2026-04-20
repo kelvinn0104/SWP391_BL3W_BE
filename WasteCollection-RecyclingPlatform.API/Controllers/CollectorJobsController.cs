@@ -46,16 +46,35 @@ public class CollectorJobsController : ControllerBase
         return Ok(result.Job);
     }
 
-    [HttpPatch("{reportId:long}/status")]
-    public async Task<ActionResult<CollectorJobResponse>> UpdateMyJobStatus(
+    [HttpPatch("{reportId:long}/accepted")]
+    public async Task<ActionResult<CollectorJobResponse>> AcceptMyJob(
         long reportId,
-        [FromBody] CollectorJobStatusUpdateRequest request,
+        [FromBody] CollectorJobStatusActionRequest? request,
         CancellationToken ct)
     {
         if (!_collectorJobService.TryGetCurrentUserId(User, out var collectorId))
             return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
 
-        var result = await _collectorJobService.UpdateMyJobStatusAsync(collectorId, reportId, request, ct);
+        var result = await _collectorJobService.AcceptMyJobAsync(collectorId, reportId, request?.Note, ct);
+        if (result.NotFound)
+            return NotFound();
+
+        if (!result.Success)
+            return BadRequest(new { message = result.Error });
+
+        return Ok(result.Job);
+    }
+
+    [HttpPatch("{reportId:long}/cancelled")]
+    public async Task<ActionResult<CollectorJobResponse>> CancelMyJob(
+        long reportId,
+        [FromBody] CollectorJobStatusActionRequest? request,
+        CancellationToken ct)
+    {
+        if (!_collectorJobService.TryGetCurrentUserId(User, out var collectorId))
+            return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
+
+        var result = await _collectorJobService.CancelMyJobAsync(collectorId, reportId, request?.Note, ct);
         if (result.NotFound)
             return NotFound();
 
