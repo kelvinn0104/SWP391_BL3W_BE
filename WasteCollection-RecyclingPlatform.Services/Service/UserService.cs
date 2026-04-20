@@ -126,8 +126,8 @@ public class UserService : IUserService
 
     private async Task<string> SaveProfileAvatarAsync(IFormFile file)
     {
-        // Primary path confirmed for the user's environment
-        string fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\profile";
+        // Target specifically src/assets/profile as requested
+        string fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\profile";
         
         // Backup discovery logic
         if (!Directory.Exists(fePublicPath))
@@ -137,7 +137,7 @@ public class UserService : IUserService
             {
                 if (currentDir.Name == "WasteCollection-RecyclingPlatform")
                 {
-                    fePublicPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "public", "profile");
+                    fePublicPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "profile");
                     break;
                 }
                 currentDir = currentDir.Parent;
@@ -157,7 +157,8 @@ public class UserService : IUserService
             await file.CopyToAsync(stream);
         }
 
-        return "/profile/" + fileName;
+        // Return URL that Vite can serve in dev mode
+        return "/src/assets/profile/" + fileName;
     }
 
     public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)
