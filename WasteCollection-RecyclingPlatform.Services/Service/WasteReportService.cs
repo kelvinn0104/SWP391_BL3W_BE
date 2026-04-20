@@ -203,20 +203,6 @@ public class WasteReportService : IWasteReportService
 
                 report.Items.Add(reportItem);
             }
-
-            foreach (var image in reportImages)
-            {
-                var imageUrl = await SaveReportImageAsync(image, ct);
-                report.Images.Add(new WasteReportImage
-                {
-                    WasteReport = report,
-                    ImageUrl = imageUrl,
-                    OriginalFileName = Path.GetFileName(image.FileName),
-                    ContentType = image.ContentType,
-                    Purpose = WasteReportImagePurpose.ReportEvidence,
-                    UploadedAtUtc = now,
-                });
-            }
         }
         catch (InvalidOperationException ex)
         {
@@ -232,7 +218,35 @@ public class WasteReportService : IWasteReportService
             Note = "Công dân đã tạo báo cáo rác.",
         });
 
+        // Save report first to generate the ID
         await _wasteReportRepository.AddAsync(report, ct);
+
+        if (reportImages.Any())
+        {
+            try
+            {
+                foreach (var image in reportImages)
+                {
+                    var imageUrl = await SaveReportImageAsync(image, report.Id, ct);
+                    report.Images.Add(new WasteReportImage
+                    {
+                        WasteReport = report,
+                        ImageUrl = imageUrl,
+                        OriginalFileName = Path.GetFileName(image.FileName),
+                        ContentType = image.ContentType,
+                        Purpose = WasteReportImagePurpose.ReportEvidence,
+                        UploadedAtUtc = now,
+                    });
+                }
+                
+                // Update report with the images
+                await _wasteReportRepository.SaveChangesAsync(ct);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return WasteReportCreateResult.Fail(ex.Message);
+            }
+        }
 
         var saved = await _wasteReportRepository.GetByIdAsync(report.Id, ct);
         return WasteReportCreateResult.Ok(MapReport(saved ?? report));
@@ -295,7 +309,7 @@ public class WasteReportService : IWasteReportService
 
             foreach (var image in reportImages)
             {
-                var imageUrl = await SaveReportImageAsync(image, ct);
+                var imageUrl = await SaveReportImageAsync(image, report.Id, ct);
                 report.Images.Add(new WasteReportImage
                 {
                     WasteReport = report,
@@ -759,7 +773,7 @@ public class WasteReportService : IWasteReportService
         return int.TryParse(key[startIndex..endIndex], out index);
     }
 
-    private static async Task<string> SaveReportImageAsync(IFormFile file, CancellationToken ct)
+    private static async Task<string> SaveReportImageAsync(IFormFile file, long reportId, CancellationToken ct)
     {
         if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Chỉ hỗ trợ tệp hình ảnh.");
@@ -771,7 +785,7 @@ public class WasteReportService : IWasteReportService
         if (string.IsNullOrWhiteSpace(extension) || !AllowedImageExtensions.Contains(extension))
             throw new InvalidOperationException("Định dạng ảnh không được hỗ trợ.");
 
-        var uploadDirectory = ResolveUploadDirectory();
+        var uploadDirectory = ResolveUploadDirectory(reportId);
         Directory.CreateDirectory(uploadDirectory);
 
         var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
@@ -780,12 +794,28 @@ public class WasteReportService : IWasteReportService
         await using var stream = new FileStream(filePath, FileMode.CreateNew);
         await file.CopyToAsync(stream, ct);
 
-        return $"/report-images/{fileName}";
+        return $"/src/assets/report-images/{reportId}/{fileName}";
     }
 
-    private static string ResolveUploadDirectory()
+    private static string ResolveUploadDirectory(long reportId)
     {
-        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "wwwroot", "report-images"));
+        string feAssetsPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\report-images";
+        
+        if (!Directory.Exists(feAssetsPath))
+        {
+            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            while (currentDir != null)
+            {
+                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
+                {
+                    feAssetsPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "report-images");
+                    break;
+                }
+                currentDir = currentDir.Parent;
+            }
+        }
+
+        return Path.Combine(feAssetsPath, reportId.ToString());
     }
 }
 
