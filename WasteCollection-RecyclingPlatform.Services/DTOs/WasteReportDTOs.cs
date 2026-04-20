@@ -87,6 +87,36 @@ public class WasteReportResponse
     public List<string> ProofImageUrls { get; set; } = new();
 }
 
+public class WasteReportGetAllResponse
+{
+    public long Id { get; set; }
+    public long CitizenId { get; set; }
+    public string CitizenName { get; set; } = null!;
+    public long? CollectorId { get; set; }
+    public string? CollectorName { get; set; }
+    public string? CollectorPhone { get; set; }
+    public string Address { get; set; } = string.Empty;
+    public string WasteType { get; set; } = string.Empty;
+    public decimal WeightKg { get; set; }
+    public string? Note { get; set; }
+    public string? Priority { get; set; }
+    public string Status { get; set; } = null!;
+    public DateTime CreatedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+    public string? CancellationReason { get; set; }
+    public long? WardId { get; set; }
+    public string? WardName { get; set; }
+    public List<WasteReportMaterialResponse> Materials { get; set; } = new();
+    public List<string> Images { get; set; } = new();
+}
+
+public class WasteReportMaterialResponse
+{
+    public string Type { get; set; } = null!;
+    public decimal Amount { get; set; }
+    public string Unit { get; set; } = "kg";
+}
+
 public class WasteReportStatusTrackingResponse
 {
     public long ReportId { get; set; }

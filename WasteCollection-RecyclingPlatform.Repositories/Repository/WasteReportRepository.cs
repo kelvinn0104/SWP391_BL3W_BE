@@ -95,6 +95,8 @@ public class WasteReportRepository : IWasteReportRepository
     public async Task<List<WasteReport>> GetAllAsync(CancellationToken ct = default)
     {
         return await _db.WasteReports
+            .Include(x => x.Citizen)
+            .Include(x => x.AssignedCollector)
             .Include(x => x.Items)
                 .ThenInclude(x => x.WasteCategory)
             .Include(x => x.Items)

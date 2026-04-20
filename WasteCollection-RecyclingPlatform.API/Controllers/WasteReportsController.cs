@@ -38,7 +38,7 @@ public class WasteReportsController : ControllerBase
 
     [HttpGet("get-all")]
     [Authorize(Roles = "RecyclingEnterprise")]
-    public async Task<ActionResult<List<WasteReportResponse>>> GetAllReports(CancellationToken ct)
+    public async Task<ActionResult<List<WasteReportGetAllResponse>>> GetAllReports(CancellationToken ct)
     {
         return Ok(await _wasteReportService.GetReportsAsync(ct));
     }

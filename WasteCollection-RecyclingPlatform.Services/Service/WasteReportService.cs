@@ -42,10 +42,10 @@ public class WasteReportService : IWasteReportService
         return categories.Select(MapCategory).ToList();
     }
 
-    public async Task<List<WasteReportResponse>> GetReportsAsync(CancellationToken ct = default)
+    public async Task<List<WasteReportGetAllResponse>> GetReportsAsync(CancellationToken ct = default)
     {
         var reports = await _wasteReportRepository.GetAllAsync(ct);
-        return reports.Select(MapReport).ToList();
+        return reports.Select(MapGetAllReport).ToList();
     }
 
     public async Task<List<WasteReportResponse>> GetCitizenReportsAsync(long citizenId, CancellationToken ct = default)
@@ -420,6 +420,53 @@ public class WasteReportService : IWasteReportService
             }).ToList(),
             ImageUrls = reportEvidenceUrls,
             ProofImageUrls = proofImageUrls,
+        };
+    }
+
+    private WasteReportGetAllResponse MapGetAllReport(WasteReport report)
+    {
+        var materials = report.Items.Select(x => new WasteReportMaterialResponse
+        {
+            Type = x.WasteCategory?.Name ?? string.Empty,
+            Amount = x.ActualWeightKg ?? x.EstimatedWeightKg ?? 0,
+            Unit = x.WasteCategory?.Unit ?? "kg",
+        }).ToList();
+
+        var weightKg = report.ActualTotalWeightKg
+            ?? materials.Sum(x => x.Amount);
+
+        var wasteType = string.Join(", ", materials
+            .Select(x => x.Type)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct());
+
+        if (string.IsNullOrWhiteSpace(wasteType))
+            wasteType = report.Title ?? "Chưa phân loại";
+
+        return new WasteReportGetAllResponse
+        {
+            Id = report.Id,
+            CitizenId = report.CitizenId,
+            CitizenName = report.Citizen?.DisplayName ?? report.Citizen?.FullName ?? "Khách vãng lai",
+            CollectorId = report.AssignedCollectorId,
+            CollectorName = report.AssignedCollector?.DisplayName ?? report.AssignedCollector?.FullName,
+            CollectorPhone = report.AssignedCollector?.PhoneNumber,
+            Address = report.LocationText ?? string.Empty,
+            WasteType = wasteType,
+            WeightKg = weightKg,
+            Note = report.Description,
+            Priority = "Standard",
+            Status = report.Status.ToString(),
+            CreatedAt = report.CreatedAtUtc,
+            CompletedAt = report.CompletedAtUtc,
+            CancellationReason = report.Status == WasteReportStatus.Cancelled ? report.CompletionNote : null,
+            WardId = null,
+            WardName = null,
+            Materials = materials,
+            Images = report.Images
+                .Where(x => x.Purpose == WasteReportImagePurpose.ReportEvidence)
+                .Select(x => ToClientImageUrl(x.ImageUrl))
+                .ToList(),
         };
     }
 
