@@ -33,7 +33,8 @@ public class UsersController : ControllerBase
 
     [Authorize]
     [HttpPut("profile")]
-    public async Task<ActionResult<UserProfileResponse>> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken ct)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserProfileResponse>> UpdateProfile([FromForm] UpdateProfileRequest request, CancellationToken ct)
     {
         var sub = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         if (!long.TryParse(sub, out var userId))

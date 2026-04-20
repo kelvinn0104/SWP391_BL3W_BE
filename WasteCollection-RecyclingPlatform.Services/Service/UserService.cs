@@ -1,3 +1,5 @@
+using System.IO;
+using Microsoft.AspNetCore.Http;
 using WasteCollection_RecyclingPlatform.Repositories.Entities;
 using WasteCollection_RecyclingPlatform.Repositories.Repository;
 using WasteCollection_RecyclingPlatform.Services.Model;
@@ -45,7 +47,11 @@ public class UserService : IUserService
         user.DateOfBirth = request.DateOfBirth;
         user.Address = request.Address;
         user.Language = request.Language;
-        if (!string.IsNullOrEmpty(request.AvatarUrl))
+        if (request.AvatarFile != null)
+        {
+            user.AvatarUrl = await SaveProfileAvatarAsync(request.AvatarFile);
+        }
+        else if (!string.IsNullOrEmpty(request.AvatarUrl))
             user.AvatarUrl = request.AvatarUrl;
 
         await _userRepo.UpdateAsync(user, ct);
@@ -107,11 +113,37 @@ public class UserService : IUserService
         user.DateOfBirth = request.DateOfBirth ?? user.DateOfBirth;
         user.Address = request.Address ?? user.Address;
         user.Language = request.Language ?? user.Language;
-        if (!string.IsNullOrEmpty(request.AvatarUrl))
+        if (request.AvatarFile != null)
+        {
+            user.AvatarUrl = await SaveProfileAvatarAsync(request.AvatarFile);
+        }
+        else if (!string.IsNullOrEmpty(request.AvatarUrl))
             user.AvatarUrl = request.AvatarUrl;
 
         await _userRepo.UpdateAsync(user, ct);
         return MapToProfileResponse(user);
+    }
+
+    private async Task<string> SaveProfileAvatarAsync(IFormFile file)
+    {
+        // Target: WasteCollection-RecyclingPlatform.FE/public/profile
+        var fePublicPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "WasteCollection-RecyclingPlatform.FE", "public", "profile"));
+        
+        if (!Directory.Exists(fePublicPath))
+        {
+            fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\profile";
+            if (!Directory.Exists(fePublicPath)) Directory.CreateDirectory(fePublicPath);
+        }
+
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var filePath = Path.Combine(fePublicPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        return $"/profile/{fileName}";
     }
 
     public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)
