@@ -86,7 +86,7 @@ public class CollectorJobsController : ControllerBase
 
     [HttpPost("{reportId:long}/complete")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<CollectorJobResponse>> CompleteMyJob(
+    public async Task<ActionResult<WasteReportResponse>> CompleteMyJob(
         long reportId,
         [FromForm] CollectorJobCompletionRequest request,
         CancellationToken ct)
@@ -108,6 +108,6 @@ public class CollectorJobsController : ControllerBase
         if (!result.Success)
             return BadRequest(new { message = result.Error });
 
-        return Ok(result.Job);
+        return Ok(result.Report);
     }
 }

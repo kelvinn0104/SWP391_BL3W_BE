@@ -89,7 +89,7 @@ public class CollectorJobCompletionRequest
     public List<IFormFile> ProofImages { get; set; } = new();
     public string? CompletionNote { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
-    public List<long> WasteReportItemIds { get; set; } = new();
+    public List<string> CategoryNames { get; set; } = new();
     public List<decimal> ActualWeightKgs { get; set; } = new();
 }
 
@@ -113,6 +113,18 @@ public class CollectorJobDetailResult
     public static CollectorJobDetailResult Fail(string error) => new() { Success = false, Error = error };
     public static CollectorJobDetailResult NotFoundResult() => new() { Success = false, NotFound = true, Error = "Không tìm thấy công việc thu gom." };
     public static CollectorJobDetailResult Ok(CollectorJobResponse job) => new() { Success = true, Job = job };
+}
+
+public class CollectorJobCompletionResult
+{
+    public bool Success { get; set; }
+    public bool NotFound { get; set; }
+    public string? Error { get; set; }
+    public WasteReportResponse? Report { get; set; }
+
+    public static CollectorJobCompletionResult Fail(string error) => new() { Success = false, Error = error };
+    public static CollectorJobCompletionResult NotFoundResult() => new() { Success = false, NotFound = true, Error = "Không tìm thấy công việc thu gom." };
+    public static CollectorJobCompletionResult Ok(WasteReportResponse report) => new() { Success = true, Report = report };
 }
 
 public class CollectorJobFormBindResult

@@ -170,7 +170,8 @@ public class WasteReportService : IWasteReportService
         var categories = await _wasteReportRepository.GetActiveCategoriesByIdsAsync(categoryIds, ct);
         if (categories.Count != categoryIds.Count) return WasteReportCreateResult.Fail("Một hoặc nhiều loại rác không tồn tại hoặc đã bị tắt.");
 
-        var totalImageCount = requestedItems.Sum(x => x.Images.Count);
+        var reportImages = request.Images.Where(x => x.Length > 0).ToList();
+        var totalImageCount = reportImages.Count;
         if (totalImageCount > MaxImagesPerReport)
             return WasteReportCreateResult.Fail($"Chỉ được tải tối đa {MaxImagesPerReport} ảnh.");
 
@@ -199,24 +200,21 @@ public class WasteReportService : IWasteReportService
                     EstimatedPoints = estimatedPoints,
                 };
 
-                foreach (var image in item.Images.Where(x => x.Length > 0))
-                {
-                    var imageUrl = await SaveReportImageAsync(image, ct);
-                    var reportImage = new WasteReportImage
-                    {
-                        WasteReport = report,
-                        WasteReportItem = reportItem,
-                        ImageUrl = imageUrl,
-                        OriginalFileName = Path.GetFileName(image.FileName),
-                        ContentType = image.ContentType,
-                        UploadedAtUtc = now,
-                    };
-
-                    report.Images.Add(reportImage);
-                    reportItem.Images.Add(reportImage);
-                }
-
                 report.Items.Add(reportItem);
+            }
+
+            foreach (var image in reportImages)
+            {
+                var imageUrl = await SaveReportImageAsync(image, ct);
+                report.Images.Add(new WasteReportImage
+                {
+                    WasteReport = report,
+                    ImageUrl = imageUrl,
+                    OriginalFileName = Path.GetFileName(image.FileName),
+                    ContentType = image.ContentType,
+                    Purpose = WasteReportImagePurpose.ReportEvidence,
+                    UploadedAtUtc = now,
+                });
             }
         }
         catch (InvalidOperationException ex)
@@ -262,7 +260,8 @@ public class WasteReportService : IWasteReportService
         var categories = await _wasteReportRepository.GetActiveCategoriesByIdsAsync(categoryIds, ct);
         if (categories.Count != categoryIds.Count) return WasteReportUpdateResult.Fail("Một hoặc nhiều loại rác không tồn tại hoặc đã bị tắt.");
 
-        var totalImageCount = requestedItems.Sum(x => x.Images.Count);
+        var reportImages = request.Images.Where(x => x.Length > 0).ToList();
+        var totalImageCount = reportImages.Count;
         if (totalImageCount > MaxImagesPerReport)
             return WasteReportUpdateResult.Fail($"Chỉ được tải tối đa {MaxImagesPerReport} ảnh.");
 
@@ -290,24 +289,21 @@ public class WasteReportService : IWasteReportService
                     EstimatedPoints = estimatedPoints,
                 };
 
-                foreach (var image in item.Images.Where(x => x.Length > 0))
-                {
-                    var imageUrl = await SaveReportImageAsync(image, ct);
-                    var reportImage = new WasteReportImage
-                    {
-                        WasteReport = report,
-                        WasteReportItem = reportItem,
-                        ImageUrl = imageUrl,
-                        OriginalFileName = Path.GetFileName(image.FileName),
-                        ContentType = image.ContentType,
-                        UploadedAtUtc = now,
-                    };
-
-                    report.Images.Add(reportImage);
-                    reportItem.Images.Add(reportImage);
-                }
-
                 report.Items.Add(reportItem);
+            }
+
+            foreach (var image in reportImages)
+            {
+                var imageUrl = await SaveReportImageAsync(image, ct);
+                report.Images.Add(new WasteReportImage
+                {
+                    WasteReport = report,
+                    ImageUrl = imageUrl,
+                    OriginalFileName = Path.GetFileName(image.FileName),
+                    ContentType = image.ContentType,
+                    Purpose = WasteReportImagePurpose.ReportEvidence,
+                    UploadedAtUtc = now,
+                });
             }
         }
         catch (InvalidOperationException ex)

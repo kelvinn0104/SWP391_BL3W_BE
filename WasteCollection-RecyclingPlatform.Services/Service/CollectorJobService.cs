@@ -158,46 +158,51 @@ public class CollectorJobService : ICollectorJobService
         return ValidateParallelArrays(request);
     }
 
-    public async Task<CollectorJobDetailResult> CompleteMyJobAsync(long collectorId, long reportId, CollectorJobCompletionRequest request, CancellationToken ct = default)
+    public async Task<CollectorJobCompletionResult> CompleteMyJobAsync(long collectorId, long reportId, CollectorJobCompletionRequest request, CancellationToken ct = default)
     {
         var report = await _wasteReportRepository.GetAssignedForCollectorUpdateAsync(collectorId, reportId, ct);
         if (report is null)
-            return CollectorJobDetailResult.NotFoundResult();
+            return CollectorJobCompletionResult.NotFoundResult();
 
         if (report.Status != WasteReportStatus.Accepted)
-            return CollectorJobDetailResult.Fail($"Không thể xác nhận hoàn tất từ trạng thái {report.Status}. Luồng hợp lệ là Pending -> Assigned -> Accepted -> Collected.");
+            return CollectorJobCompletionResult.Fail($"Không thể xác nhận hoàn tất từ trạng thái {report.Status}. Luồng hợp lệ là Pending -> Assigned -> Accepted -> Collected.");
 
         var proofImages = request.ProofImages.Where(x => x.Length > 0).ToList();
         if (proofImages.Count == 0)
-            return CollectorJobDetailResult.Fail("Vui lòng tải lên ít nhất một ảnh minh chứng hoàn tất thu gom.");
+            return CollectorJobCompletionResult.Fail("Vui lòng tải lên ít nhất một ảnh minh chứng hoàn tất thu gom.");
 
         if (proofImages.Count > MaxCompletionProofImages)
-            return CollectorJobDetailResult.Fail($"Chỉ được tải tối đa {MaxCompletionProofImages} ảnh minh chứng.");
+            return CollectorJobCompletionResult.Fail($"Chỉ được tải tối đa {MaxCompletionProofImages} ảnh minh chứng.");
 
         var bindResult = ValidateParallelArrays(request);
         if (!bindResult.Success)
-            return CollectorJobDetailResult.Fail(bindResult.Error ?? "Dữ liệu đầu vào không hợp lệ.");
+            return CollectorJobCompletionResult.Fail(bindResult.Error ?? "Dữ liệu đầu vào không hợp lệ.");
 
-        var actualWeightItems = BuildActualWeightItems(request);
+        var actualWeightItems = BuildActualWeightItems(request, report);
 
         if (actualWeightItems.Count == 0)
-            return CollectorJobDetailResult.Fail("Vui lòng nhập khối lượng thực tế cho từng loại rác.");
+        {
+            if (request.CategoryNames.Count > 0)
+                return CollectorJobCompletionResult.Fail("CategoryNames phải trùng với tên loại rác đang có trong report và không được gửi trùng category.");
+
+            return CollectorJobCompletionResult.Fail("Vui lòng nhập khối lượng thực tế cho từng loại rác.");
+        }
 
         if (actualWeightItems.Any(x => x.ActualWeightKg < 0))
-            return CollectorJobDetailResult.Fail("Khối lượng thực tế theo từng loại rác không được âm.");
+            return CollectorJobCompletionResult.Fail("Khối lượng thực tế theo từng loại rác không được âm.");
 
         var duplicateItemIds = actualWeightItems
             .Where(x => x.WasteReportItemId > 0)
             .GroupBy(x => x.WasteReportItemId)
             .Any(x => x.Count() > 1);
         if (duplicateItemIds)
-            return CollectorJobDetailResult.Fail("Không gửi trùng wasteReportItemId khi cập nhật khối lượng thực tế.");
+            return CollectorJobCompletionResult.Fail("Không gửi trùng categoryName khi cập nhật khối lượng thực tế.");
 
         var itemById = report.Items.ToDictionary(x => x.Id);
         foreach (var itemWeight in actualWeightItems)
         {
             if (!itemById.TryGetValue(itemWeight.WasteReportItemId, out var reportItem))
-                return CollectorJobDetailResult.Fail($"Không tìm thấy wasteReportItemId #{itemWeight.WasteReportItemId} trong công việc này.");
+                return CollectorJobCompletionResult.Fail($"Không tìm thấy wasteReportItemId #{itemWeight.WasteReportItemId} trong công việc này.");
 
             reportItem.ActualWeightKg = itemWeight.ActualWeightKg;
         }
@@ -207,7 +212,7 @@ public class CollectorJobService : ICollectorJobService
             .Select(x => x.Id)
             .ToList();
         if (missingActualWeightItemIds.Count > 0)
-            return CollectorJobDetailResult.Fail($"Vui lòng nhập đủ khối lượng thực tế cho các wasteReportItemId: {string.Join(", ", missingActualWeightItemIds)}.");
+            return CollectorJobCompletionResult.Fail($"Vui lòng nhập đủ khối lượng thực tế cho các wasteReportItemId: {string.Join(", ", missingActualWeightItemIds)}.");
 
         report.ActualTotalWeightKg = report.Items.Sum(x => x.ActualWeightKg!.Value);
 
@@ -237,7 +242,7 @@ public class CollectorJobService : ICollectorJobService
         }
         catch (InvalidOperationException ex)
         {
-            return CollectorJobDetailResult.Fail(ex.Message);
+            return CollectorJobCompletionResult.Fail(ex.Message);
         }
 
         report.StatusHistories.Add(new WasteReportStatusHistory
@@ -255,8 +260,8 @@ public class CollectorJobService : ICollectorJobService
 
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
-            ? CollectorJobDetailResult.Fail("Không thể đọc lại công việc sau khi xác nhận hoàn tất.")
-            : CollectorJobDetailResult.Ok(MapJob(saved));
+            ? CollectorJobCompletionResult.Fail("Không thể đọc lại công việc sau khi xác nhận hoàn tất.")
+            : CollectorJobCompletionResult.Ok(MapWasteReport(saved));
     }
 
     public bool TryGetCurrentUserId(ClaimsPrincipal user, out long userId)
@@ -315,6 +320,51 @@ public class CollectorJobService : ICollectorJobService
             }).ToList(),
             Images = imageUrls,
             ImageUrls = imageUrls,
+            ProofImageUrls = proofImageUrls,
+        };
+    }
+
+    private WasteReportResponse MapWasteReport(WasteReport report)
+    {
+        var reportEvidenceUrls = report.Images
+            .Where(x => x.Purpose == WasteReportImagePurpose.ReportEvidence)
+            .Select(x => ToClientImageUrl(x.ImageUrl))
+            .ToList();
+        var proofImageUrls = report.Images
+            .Where(x => x.Purpose == WasteReportImagePurpose.CompletionProof)
+            .Select(x => ToClientImageUrl(x.ImageUrl))
+            .ToList();
+
+        return new WasteReportResponse
+        {
+            ReportId = report.Id,
+            CitizenId = report.CitizenId,
+            Title = report.Title,
+            Description = report.Description,
+            LocationText = report.LocationText,
+            Status = report.Status.ToString(),
+            CreatedAtUtc = report.CreatedAtUtc,
+            EstimatedTotalPoints = report.EstimatedTotalPoints,
+            FinalRewardPoints = report.FinalRewardPoints,
+            RewardVerifiedAtUtc = report.RewardVerifiedAtUtc,
+            ActualTotalWeightKg = report.ActualTotalWeightKg,
+            CompletedAtUtc = report.CompletedAtUtc,
+            CompletionNote = report.CompletionNote,
+            WasteItems = report.Items.Select(x => new WasteReportItemResponse
+            {
+                WasteReportItemId = x.Id,
+                WasteCategoryId = x.WasteCategoryId,
+                WasteCategoryCode = x.WasteCategory?.Code ?? string.Empty,
+                WasteCategoryName = x.WasteCategory?.Name ?? string.Empty,
+                EstimatedWeightKg = x.EstimatedWeightKg,
+                ActualWeightKg = x.ActualWeightKg,
+                EstimatedPoints = x.EstimatedPoints,
+                ImageUrls = x.Images
+                    .Where(image => image.Purpose == WasteReportImagePurpose.ReportEvidence)
+                    .Select(image => ToClientImageUrl(image.ImageUrl))
+                    .ToList(),
+            }).ToList(),
+            ImageUrls = reportEvidenceUrls,
             ProofImageUrls = proofImageUrls,
         };
     }
@@ -399,26 +449,52 @@ public class CollectorJobService : ICollectorJobService
 
     private static CollectorJobFormBindResult ValidateParallelArrays(CollectorJobCompletionRequest request)
     {
-        var hasItemIds = request.WasteReportItemIds.Count > 0;
+        var hasCategoryNames = request.CategoryNames.Count > 0;
         var hasWeights = request.ActualWeightKgs.Count > 0;
 
-        if (!hasItemIds && !hasWeights)
+        if (!hasCategoryNames && !hasWeights)
             return CollectorJobFormBindResult.Ok();
 
-        if (!hasItemIds || !hasWeights || request.WasteReportItemIds.Count != request.ActualWeightKgs.Count)
-            return CollectorJobFormBindResult.Fail("Số lượng WasteReportItemIds phải bằng số lượng ActualWeightKgs.");
+        if (hasCategoryNames && (!hasWeights || request.CategoryNames.Count != request.ActualWeightKgs.Count))
+            return CollectorJobFormBindResult.Fail("Số lượng CategoryNames phải bằng số lượng ActualWeightKgs.");
 
         return CollectorJobFormBindResult.Ok();
     }
 
-    private static List<CollectorJobItemActualWeightRequest> BuildActualWeightItems(CollectorJobCompletionRequest request)
+    private static List<CollectorJobItemActualWeightRequest> BuildActualWeightItems(CollectorJobCompletionRequest request, WasteReport report)
     {
-        var result = new List<CollectorJobItemActualWeightRequest>(request.WasteReportItemIds.Count);
-        for (var i = 0; i < request.WasteReportItemIds.Count; i++)
+        var reportItems = report.Items.OrderBy(x => x.Id).ToList();
+        if (request.CategoryNames.Count == 0)
         {
+            if (request.ActualWeightKgs.Count != reportItems.Count)
+                return new List<CollectorJobItemActualWeightRequest>();
+
+            return reportItems.Select((item, index) => new CollectorJobItemActualWeightRequest
+            {
+                WasteReportItemId = item.Id,
+                ActualWeightKg = request.ActualWeightKgs[index],
+            }).ToList();
+        }
+
+        var itemsByCategoryName = reportItems
+            .Where(x => !string.IsNullOrWhiteSpace(x.WasteCategory?.Name))
+            .GroupBy(x => NormalizeCategoryName(x.WasteCategory!.Name))
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        var result = new List<CollectorJobItemActualWeightRequest>(request.CategoryNames.Count);
+        for (var i = 0; i < request.CategoryNames.Count; i++)
+        {
+            var categoryName = request.CategoryNames[i];
+            var normalizedCategoryName = NormalizeCategoryName(categoryName);
+            if (!itemsByCategoryName.TryGetValue(normalizedCategoryName, out var matchedItems) || matchedItems.Count == 0)
+                return new List<CollectorJobItemActualWeightRequest>();
+
+            if (matchedItems.Count > 1)
+                return new List<CollectorJobItemActualWeightRequest>();
+
             result.Add(new CollectorJobItemActualWeightRequest
             {
-                WasteReportItemId = request.WasteReportItemIds[i],
+                WasteReportItemId = matchedItems[0].Id,
                 ActualWeightKg = request.ActualWeightKgs[i],
             });
         }
@@ -428,14 +504,14 @@ public class CollectorJobService : ICollectorJobService
 
     private static void BindParallelArraysFromForm(IFormCollection form, CollectorJobCompletionRequest request)
     {
-        if (request.WasteReportItemIds.Count == 0)
+        if (request.CategoryNames.Count == 0)
         {
-            request.WasteReportItemIds = ReadLongListFromForm(
+            request.CategoryNames = ReadStringListFromForm(
                 form,
-                "WasteReportItemIds",
-                "wasteReportItemIds",
-                "ItemIds",
-                "itemIds");
+                "CategoryNames",
+                "categoryNames",
+                "CategoryName",
+                "categoryName");
         }
 
         if (request.ActualWeightKgs.Count == 0)
@@ -475,6 +551,11 @@ public class CollectorJobService : ICollectorJobService
         }
 
         return result;
+    }
+
+    private static string NormalizeCategoryName(string value)
+    {
+        return value.Trim().ToUpperInvariant();
     }
 
     private static List<string> ReadStringListFromForm(IFormCollection form, params string[] keys)

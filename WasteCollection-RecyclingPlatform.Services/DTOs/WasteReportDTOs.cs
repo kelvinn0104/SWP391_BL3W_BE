@@ -28,15 +28,6 @@ public class WasteReportCreateRequest
                 EstimatedWeightKg = i < EstimatedWeightKgs.Count ? EstimatedWeightKgs[i] : null,
             };
 
-            if (WasteCategoryIds.Count == 1)
-            {
-                item.Images.AddRange(Images);
-            }
-            else if (i < Images.Count)
-            {
-                item.Images.Add(Images[i]);
-            }
-
             items.Add(item);
         }
 
@@ -54,7 +45,6 @@ public class WasteReportItemCreateRequest
     public long WasteCategoryId { get; set; }
 
     public decimal? EstimatedWeightKg { get; set; }
-    public List<IFormFile> Images { get; set; } = new();
 }
 
 public class WasteCategoryResponse

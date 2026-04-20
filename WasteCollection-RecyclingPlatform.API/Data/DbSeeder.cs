@@ -248,20 +248,49 @@ public static class DbSeeder
             },
             new WasteCategory
             {
-                Code = "PAPER",
-                Name = "Giấy",
+                Code = "GENERAL",
+                Name = "Rác chung",
                 Unit = "kg",
-                Description = "Bìa carton, giấy báo và giấy văn phòng.",
+                Description = "Các loại rác tái chế thông thường không thuộc nhóm nhựa hoặc kim loại.",
                 PointsPerKg = 80,
                 CreatedAtUtc = now,
             });
+        }
+        else
+        {
+            var generalWasteCategory = existingCategories.FirstOrDefault(x => x.Code == "GENERAL");
+            var legacyGeneralWasteCategory = existingCategories.FirstOrDefault(x => x.Code == "PAPER");
+
+            if (generalWasteCategory is null && legacyGeneralWasteCategory is not null)
+            {
+                legacyGeneralWasteCategory.Code = "GENERAL";
+                generalWasteCategory = legacyGeneralWasteCategory;
+            }
+            else if (generalWasteCategory is not null && legacyGeneralWasteCategory is not null)
+            {
+                var legacyGeneralWasteItems = await db.WasteReportItems
+                    .Where(x => x.WasteCategoryId == legacyGeneralWasteCategory.Id)
+                    .ToListAsync();
+
+                foreach (var item in legacyGeneralWasteItems)
+                    item.WasteCategoryId = generalWasteCategory.Id;
+
+                db.WasteCategories.Remove(legacyGeneralWasteCategory);
+            }
+
+            if (generalWasteCategory is not null)
+            {
+                generalWasteCategory.Name = "Rác chung";
+                generalWasteCategory.Description = "Các loại rác tái chế thông thường không thuộc nhóm nhựa hoặc kim loại.";
+                generalWasteCategory.UpdatedAtUtc = now;
+            }
         }
 
         var removedCategories = existingCategories.Where(x => x.Code is "GLASS" or "EWASTE").ToList();
         if (removedCategories.Any())
         {
             var fallbackCategory = existingCategories.FirstOrDefault(x => x.Code == "PLASTIC")
-                ?? existingCategories.First(x => x.Code is "METAL" or "PAPER");
+                ?? existingCategories.First(x => x.Code is "METAL" or "GENERAL");
             var removedCategoryIds = removedCategories.Select(x => x.Id).ToList();
             var affectedItems = await db.WasteReportItems
                 .Where(x => removedCategoryIds.Contains(x.WasteCategoryId))
@@ -308,7 +337,7 @@ public static class DbSeeder
         var wards = await db.Wards.Include(w => w.Area).ToListAsync();
         var rnd = new Random();
  
-        var wasteCategories = new[] { "Nhựa", "Kim loại", "Giấy" };
+        var wasteCategories = new[] { "Nhựa", "Kim loại", "Rác chung" };
 
         var requests = new List<CollectionRequest>();
  
@@ -409,7 +438,7 @@ public static class DbSeeder
             ?? await db.Users.FirstAsync(u => u.Role == UserRole.Administrator);
 
         var plastic = categories.FirstOrDefault(x => x.Code == "PLASTIC") ?? categories[0];
-        var paper = categories.FirstOrDefault(x => x.Code == "PAPER") ?? categories[0];
+        var generalWaste = categories.FirstOrDefault(x => x.Code == "GENERAL") ?? categories[0];
         var metal = categories.FirstOrDefault(x => x.Code == "METAL") ?? categories[0];
         var now = DateTime.UtcNow;
 
@@ -418,10 +447,10 @@ public static class DbSeeder
             new { Email = "vo.thanh@gmail.com", Category = metal, Weight = 8.0m, Points = 960, DaysAgo = 2 },
             new { Email = "vo.thanh@gmail.com", Category = metal, Weight = 4.0m, Points = 480, DaysAgo = 8 },
             new { Email = "tran.anh@gmail.com", Category = plastic, Weight = 7.5m, Points = 750, DaysAgo = 3 },
-            new { Email = "tran.anh@gmail.com", Category = paper, Weight = 5.0m, Points = 400, DaysAgo = 9 },
+            new { Email = "tran.anh@gmail.com", Category = generalWaste, Weight = 5.0m, Points = 400, DaysAgo = 9 },
             new { Email = "le.hoang@gmail.com", Category = plastic, Weight = 6.5m, Points = 650, DaysAgo = 4 },
-            new { Email = "citizen@gmail.com", Category = paper, Weight = 5.0m, Points = 400, DaysAgo = 5 },
-            new { Email = "pham.lan@gmail.com", Category = paper, Weight = 4.5m, Points = 360, DaysAgo = 6 },
+            new { Email = "citizen@gmail.com", Category = generalWaste, Weight = 5.0m, Points = 400, DaysAgo = 5 },
+            new { Email = "pham.lan@gmail.com", Category = generalWaste, Weight = 4.5m, Points = 360, DaysAgo = 6 },
         };
 
         foreach (var plan in samplePlans)
@@ -595,7 +624,7 @@ public static class DbSeeder
                 Description = index switch
                 {
                     0 => "Nhân viên đến nhầm địa chỉ nên gia đình phải tự mang rác tái chế ra điểm hẹn khác.",
-                    1 => "Báo cáo có nhựa và giấy nhưng đội thu gom chỉ nhận phần nhựa, phần giấy vẫn còn lại.",
+                    1 => "Báo cáo có nhựa và rác chung nhưng đội thu gom chỉ nhận phần nhựa, phần rác chung vẫn còn lại.",
                     2 => "Ứng dụng hiển thị đã thu gom, tuy nhiên thực tế rác vẫn chưa được lấy trong khung giờ cam kết.",
                     _ => "Lịch thu gom bị hủy sát giờ và không có thông báo rõ ràng cho công dân.",
                 },

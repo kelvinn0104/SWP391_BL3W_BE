@@ -12,7 +12,7 @@ public interface ICollectorJobService
     Task<CollectorJobDetailResult> AssignCollectorAsync(long actorUserId, long reportId, long collectorId, CancellationToken ct = default);
     Task<CollectorJobDetailResult> AcceptMyJobAsync(long collectorId, long reportId, string? note, CancellationToken ct = default);
     Task<CollectorJobDetailResult> CancelMyJobAsync(long collectorId, long reportId, string? note, CancellationToken ct = default);
-    Task<CollectorJobDetailResult> CompleteMyJobAsync(long collectorId, long reportId, CollectorJobCompletionRequest request, CancellationToken ct = default);
+    Task<CollectorJobCompletionResult> CompleteMyJobAsync(long collectorId, long reportId, CollectorJobCompletionRequest request, CancellationToken ct = default);
     CollectorJobFormBindResult BindCompletionRequestFromRawForm(CollectorJobCompletionRequest request, IFormCollection? form);
     bool TryGetCurrentUserId(ClaimsPrincipal user, out long userId);
 }
