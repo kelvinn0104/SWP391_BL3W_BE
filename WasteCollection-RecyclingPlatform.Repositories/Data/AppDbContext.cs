@@ -23,6 +23,7 @@ public class AppDbContext : DbContext
     public DbSet<RewardPointTransaction> RewardPointTransactions => Set<RewardPointTransaction>();
     public DbSet<Complaint> Complaints => Set<Complaint>();
     public DbSet<ComplaintEvidence> ComplaintEvidenceFiles => Set<ComplaintEvidence>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -293,6 +294,22 @@ public class AppDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.ChangedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("notifications");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.RecipientUserId);
+            entity.HasIndex(x => x.CreatedAtUtc);
+            entity.Property(x => x.Title).HasMaxLength(255).IsRequired();
+            entity.Property(x => x.Body).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.Type).HasConversion<string>().HasMaxLength(32).IsRequired();
+
+            entity.HasOne(x => x.RecipientUser)
+                .WithMany()
+                .HasForeignKey(x => x.RecipientUserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
