@@ -91,7 +91,6 @@ public class WasteReportGetAllResponse
     public string WasteType { get; set; } = string.Empty;
     public decimal WeightKg { get; set; }
     public string? Note { get; set; }
-    public string? Priority { get; set; }
     public string Status { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }

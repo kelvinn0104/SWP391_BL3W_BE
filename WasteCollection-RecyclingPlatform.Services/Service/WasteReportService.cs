@@ -177,10 +177,15 @@ public class WasteReportService : IWasteReportService
 
         var now = DateTime.UtcNow;
         var categoryById = categories.ToDictionary(x => x.Id);
+
+        var finalWardId = request.WardId ?? citizen.Wards?.FirstOrDefault()?.Id;
+        if (finalWardId == null)
+            return WasteReportCreateResult.Fail("Vui lòng chọn khu vực (Phường/Xã) thu gom.");
+
         var report = new WasteReport
         {
             CitizenId = citizenId,
-            WardId = request.WardId ?? citizen.Wards?.FirstOrDefault()?.Id,
+            WardId = finalWardId,
             Title = string.IsNullOrWhiteSpace(request.Title) ? null : request.Title.Trim(),
             Description = description,
             LocationText = string.IsNullOrWhiteSpace(request.LocationText) ? null : request.LocationText.Trim(),
@@ -203,6 +208,10 @@ public class WasteReportService : IWasteReportService
 
                 report.Items.Add(reportItem);
             }
+
+            var totalRequestedKg = report.Items.Sum(x => x.EstimatedWeightKg ?? 0);
+            if (totalRequestedKg > 10)
+                return WasteReportCreateResult.Fail("Tổng khối lượng rác ước tính không được vượt quá 10kg.");
         }
         catch (InvalidOperationException ex)
         {
@@ -275,6 +284,10 @@ public class WasteReportService : IWasteReportService
         var categories = await _wasteReportRepository.GetActiveCategoriesByIdsAsync(categoryIds, ct);
         if (categories.Count != categoryIds.Count) return WasteReportUpdateResult.Fail("Một hoặc nhiều loại rác không tồn tại hoặc đã bị tắt.");
 
+        var totalRequestedKg = requestedItems.Sum(x => x.EstimatedWeightKg ?? 0);
+        if (totalRequestedKg > 10)
+            return WasteReportUpdateResult.Fail("Tổng khối lượng rác ước tính không được vượt quá 10kg.");
+
         var reportImages = request.Images.Where(x => x.Length > 0).ToList();
         var totalImageCount = reportImages.Count;
         if (totalImageCount > MaxImagesPerReport)
@@ -282,6 +295,11 @@ public class WasteReportService : IWasteReportService
 
         var now = DateTime.UtcNow;
         var categoryById = categories.ToDictionary(x => x.Id);
+
+        if (request.WardId.HasValue)
+        {
+            report.WardId = request.WardId.Value;
+        }
 
         report.Title = string.IsNullOrWhiteSpace(request.Title) ? null : request.Title.Trim();
         report.Description = description;
@@ -482,6 +500,11 @@ public class WasteReportService : IWasteReportService
             .Select(x => ToClientImageUrl(x.ImageUrl))
             .ToList();
 
+        var ward = report.Ward ?? report.Citizen?.Wards?.FirstOrDefault();
+        var wardName = ward != null 
+            ? (ward.Area != null ? $"{ward.Name}, {ward.Area.DistrictName}" : ward.Name)
+            : null;
+
         return new WasteReportGetAllResponse
         {
             Id = report.Id,
@@ -494,26 +517,19 @@ public class WasteReportService : IWasteReportService
             WasteType = wasteType,
             WeightKg = weightKg,
             Note = report.Description,
-            Priority = GetReportPriority(weightKg),
             Status = report.Status.ToString(),
             CreatedAt = report.CreatedAtUtc,
             CompletedAt = collectedAt,
             CancellationReason = report.Status == WasteReportStatus.Cancelled
                 ? cancellationReason ?? report.CompletionNote
                 : null,
-            WardId = report.WardId ?? report.Citizen?.Wards?.FirstOrDefault()?.Id,
-            WardName = report.Ward?.Name ?? report.Citizen?.Wards?.FirstOrDefault()?.Name,
+            WardId = ward?.Id,
+            WardName = wardName,
             Materials = materials,
             Images = images,
         };
     }
 
-    private static string GetReportPriority(decimal weightKg)
-    {
-        if (weightKg >= 15) return "High";
-        if (weightKg >= 8) return "Medium";
-        return "Standard";
-    }
 
     private string ToClientImageUrl(string imageUrl)
     {
@@ -790,29 +806,17 @@ public class WasteReportService : IWasteReportService
 
         await using var stream = new FileStream(filePath, FileMode.CreateNew);
         await file.CopyToAsync(stream, ct);
+        
+        var relativeUrl = $"/report-images/{reportId}/{fileName}";
+        Console.WriteLine($"[WasteReportService] Saved image to: {filePath} (Relative URL: {relativeUrl})");
 
-        return $"/src/assets/report-images/{reportId}/{fileName}";
+        return relativeUrl;
     }
 
     private static string ResolveUploadDirectory(long reportId)
     {
-        string feAssetsPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\report-images";
-        
-        if (!Directory.Exists(feAssetsPath))
-        {
-            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
-            while (currentDir != null)
-            {
-                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
-                {
-                    feAssetsPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "report-images");
-                    break;
-                }
-                currentDir = currentDir.Parent;
-            }
-        }
-
-        return Path.Combine(feAssetsPath, reportId.ToString());
+        string uploadRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "report-images");
+        return Path.Combine(uploadRoot, reportId.ToString());
     }
 }
 
