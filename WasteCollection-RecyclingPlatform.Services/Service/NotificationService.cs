@@ -147,4 +147,43 @@ public class NotificationService : INotificationService
         };
         await _notificationRepository.AddAsync(notification, ct);
     }
+
+    public async Task NotifyComplaintSubmittedAsync(long complaintId, long reportId, string citizenName, IEnumerable<long> adminUserIds, CancellationToken ct = default)
+    {
+        var notifications = adminUserIds.Select(adminId => new Notification
+        {
+            RecipientUserId = adminId,
+            Title = "⚠️ Có khiếu nại mới",
+            Body = $"Công dân {citizenName} vừa gửi khiếu nại (#{complaintId}) liên quan đến báo cáo thu gom #{reportId}.",
+            Type = NotificationType.ComplaintSubmitted,
+            RelatedReportId = reportId
+        }).ToList();
+
+        if (notifications.Any())
+        {
+            await _notificationRepository.AddRangeAsync(notifications, ct);
+        }
+    }
+
+    public async Task NotifyComplaintStatusUpdatedAsync(long complaintId, long reportId, long citizenId, string newStatus, string? note, CancellationToken ct = default)
+    {
+        string statusText = newStatus switch
+        {
+            "InReview" => "Đang xử lý",
+            "Resolved" => "Đã giải quyết",
+            "Rejected" => "Bị từ chối",
+            _ => "Đã cập nhật",
+        };
+
+        var notification = new Notification
+        {
+            RecipientUserId = citizenId,
+            Title = $"📝 Cập nhật khiếu nại #{complaintId}",
+            Body = $"Khiếu nại của bạn ở trạng thái: {statusText}.{(string.IsNullOrWhiteSpace(note) ? "" : $" Ghi chú: {note}")}",
+            Type = NotificationType.ComplaintStatusUpdated,
+            RelatedReportId = reportId
+        };
+        
+        await _notificationRepository.AddAsync(notification, ct);
+    }
 }

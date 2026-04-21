@@ -14,4 +14,6 @@ public interface INotificationService
     Task NotifyCollectorAcceptedAsync(long reportId, IEnumerable<long> enterpriseUserIds, long citizenId, CancellationToken ct = default);
     Task NotifyReportCollectedAsync(long reportId, IEnumerable<long> enterpriseUserIds, long citizenId, decimal points, CancellationToken ct = default);
     Task NotifyReportCancelledAsync(long reportId, long citizenId, string reason, CancellationToken ct = default);
+    Task NotifyComplaintSubmittedAsync(long complaintId, long reportId, string citizenName, IEnumerable<long> adminUserIds, CancellationToken ct = default);
+    Task NotifyComplaintStatusUpdatedAsync(long complaintId, long reportId, long citizenId, string newStatus, string? note, CancellationToken ct = default);
 }

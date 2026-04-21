@@ -7,6 +7,8 @@ public enum NotificationType
     CollectorAccepted,  // Collector xác nhận → Enterprise + Citizen
     ReportCollected,    // Collector hoàn thành → Enterprise + Citizen (kèm điểm)
     ReportCancelled,    // Báo cáo bị hủy → Citizen
+    ComplaintSubmitted, // Citizen khiếu nại báo cáo → Enterprise/Admin
+    ComplaintStatusUpdated, // Admin thay đổi trạng thái khiếu nại → Citizen
 }
 
 public class Notification
