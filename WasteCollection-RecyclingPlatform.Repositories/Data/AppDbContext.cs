@@ -166,6 +166,30 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
+        modelBuilder.Entity<CollectionRequest>(entity =>
+        {
+            entity.ToTable("CollectionRequests");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.CitizenId);
+            entity.HasIndex(x => x.CollectorId);
+            entity.HasIndex(x => x.WardId);
+
+            entity.HasOne(x => x.Citizen)
+                .WithMany()
+                .HasForeignKey(x => x.CitizenId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Collector)
+                .WithMany()
+                .HasForeignKey(x => x.CollectorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(x => x.Ward)
+                .WithMany()
+                .HasForeignKey(x => x.WardId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
         modelBuilder.Entity<Complaint>(entity =>
         {
             entity.ToTable("complaints");
@@ -299,16 +323,18 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.ToTable("notifications");
-            entity.HasKey(x => x.Id);
-            entity.HasIndex(x => x.RecipientUserId);
-            entity.HasIndex(x => x.CreatedAtUtc);
-            entity.Property(x => x.Title).HasMaxLength(255).IsRequired();
-            entity.Property(x => x.Body).HasMaxLength(1000).IsRequired();
-            entity.Property(x => x.Type).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.RecipientUserId);
+            entity.HasIndex(e => e.IsRead);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Body).IsRequired();
+            entity.Property(e => e.Type).HasConversion<string>().HasMaxLength(32).IsRequired();
+            entity.Property(e => e.CreatedAtUtc).IsRequired();
+            entity.Property(e => e.IsRead).HasDefaultValue(false);
 
-            entity.HasOne(x => x.RecipientUser)
+            entity.HasOne(e => e.RecipientUser)
                 .WithMany()
-                .HasForeignKey(x => x.RecipientUserId)
+                .HasForeignKey(e => e.RecipientUserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }
