@@ -126,39 +126,24 @@ public class UserService : IUserService
 
     private async Task<string> SaveProfileAvatarAsync(IFormFile file)
     {
-        // Target specifically src/assets/profile as requested
-        string fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\profile";
+        // Target specifically wwwroot/profile-images
+        var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profile-images");
         
-        // Backup discovery logic
-        if (!Directory.Exists(fePublicPath))
+        if (!Directory.Exists(uploadDirectory)) 
         {
-            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
-            while (currentDir != null)
-            {
-                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
-                {
-                    fePublicPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "profile");
-                    break;
-                }
-                currentDir = currentDir.Parent;
-            }
+            Directory.CreateDirectory(uploadDirectory);
         }
 
-        if (!Directory.Exists(fePublicPath)) 
-        {
-            Directory.CreateDirectory(fePublicPath);
-        }
+        var fileName = $"{Guid.NewGuid():N}{Path.GetExtension(file.FileName).ToLowerInvariant()}";
+        var filePath = Path.Combine(uploadDirectory, fileName);
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        var filePath = Path.Combine(fePublicPath, fileName);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        await using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // Return URL that Vite can serve in dev mode
-        return "/src/assets/profile/" + fileName;
+        // Return relative URL that the API can serve statically and FE resolveImageUrl can parse
+        return $"/profile-images/{fileName}";
     }
 
     public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)
