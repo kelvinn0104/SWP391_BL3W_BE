@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using WasteCollection_RecyclingPlatform.Repositories.Entities;
 using WasteCollection_RecyclingPlatform.Repositories.Repository;
@@ -62,8 +62,8 @@ public class CollectorJobService : ICollectorJobService
         if (report is null)
             return CollectorJobDetailResult.NotFoundResult();
 
-        if (report.Status != WasteReportStatus.Pending)
-            return CollectorJobDetailResult.Fail($"Chỉ có thể duyệt và phân công report từ trạng thái Pending. Trạng thái hiện tại là {report.Status}.");
+        if (report.Status != WasteReportStatus.Pending && report.Status != WasteReportStatus.Assigned)
+            return CollectorJobDetailResult.Fail($"Chỉ có thể duyệt và phân công report từ trạng thái Pending hoặc cập nhật phân công từ Assigned. Trạng thái hiện tại là {report.Status}.");
 
         var now = DateTime.UtcNow;
         report.AssignedCollectorId = collectorId;
