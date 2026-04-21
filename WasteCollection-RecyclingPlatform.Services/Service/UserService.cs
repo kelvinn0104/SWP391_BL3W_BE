@@ -1,3 +1,5 @@
+using System.IO;
+using Microsoft.AspNetCore.Http;
 using WasteCollection_RecyclingPlatform.Repositories.Entities;
 using WasteCollection_RecyclingPlatform.Repositories.Repository;
 using WasteCollection_RecyclingPlatform.Services.Model;
@@ -45,7 +47,11 @@ public class UserService : IUserService
         user.DateOfBirth = request.DateOfBirth;
         user.Address = request.Address;
         user.Language = request.Language;
-        if (!string.IsNullOrEmpty(request.AvatarUrl))
+        if (request.AvatarFile != null)
+        {
+            user.AvatarUrl = await SaveProfileAvatarAsync(request.AvatarFile);
+        }
+        else if (!string.IsNullOrEmpty(request.AvatarUrl))
             user.AvatarUrl = request.AvatarUrl;
 
         await _userRepo.UpdateAsync(user, ct);
@@ -107,11 +113,52 @@ public class UserService : IUserService
         user.DateOfBirth = request.DateOfBirth ?? user.DateOfBirth;
         user.Address = request.Address ?? user.Address;
         user.Language = request.Language ?? user.Language;
-        if (!string.IsNullOrEmpty(request.AvatarUrl))
+        if (request.AvatarFile != null)
+        {
+            user.AvatarUrl = await SaveProfileAvatarAsync(request.AvatarFile);
+        }
+        else if (!string.IsNullOrEmpty(request.AvatarUrl))
             user.AvatarUrl = request.AvatarUrl;
 
         await _userRepo.UpdateAsync(user, ct);
         return MapToProfileResponse(user);
+    }
+
+    private async Task<string> SaveProfileAvatarAsync(IFormFile file)
+    {
+        // Target specifically src/assets/profile as requested
+        string fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\profile";
+        
+        // Backup discovery logic
+        if (!Directory.Exists(fePublicPath))
+        {
+            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            while (currentDir != null)
+            {
+                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
+                {
+                    fePublicPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "profile");
+                    break;
+                }
+                currentDir = currentDir.Parent;
+            }
+        }
+
+        if (!Directory.Exists(fePublicPath)) 
+        {
+            Directory.CreateDirectory(fePublicPath);
+        }
+
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var filePath = Path.Combine(fePublicPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // Return URL that Vite can serve in dev mode
+        return "/src/assets/profile/" + fileName;
     }
 
     public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)

@@ -12,6 +12,7 @@ public class AreaResponse
 
 public class WardResponse
 {
+    public long Id { get; set; }
     public string Name { get; set; } = null!;
     public List<string> Collectors { get; set; } = new List<string>();
     public decimal CollectedKg { get; set; }

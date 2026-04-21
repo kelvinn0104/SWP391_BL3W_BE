@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
@@ -52,7 +53,10 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
-builder.Services.AddScoped<ICollectionRequestRepository, CollectionRequestRepository>();
+builder.Services.AddScoped<IWasteReportRepository, WasteReportRepository>();
+builder.Services.AddScoped<IRewardRepository, RewardRepository>();
+builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -68,7 +72,10 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
-builder.Services.AddScoped<ICollectionService, CollectionService>();
+builder.Services.AddScoped<IWasteReportService, WasteReportService>();
+builder.Services.AddScoped<ICollectorJobService, CollectorJobService>();
+builder.Services.AddScoped<IRewardService, RewardService>();
+builder.Services.AddScoped<IComplaintService, ComplaintService>();
 
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 builder.Services
@@ -108,6 +115,39 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("fe");
+
+var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+var reportImagesRoot = Path.Combine(staticFilesRoot, "report-images");
+var complaintEvidenceRoot = Path.Combine(staticFilesRoot, "complaint-evidence");
+Directory.CreateDirectory(reportImagesRoot);
+Directory.CreateDirectory(complaintEvidenceRoot);
+
+var staticFileProviders = new List<IFileProvider>
+{
+    new PhysicalFileProvider(staticFilesRoot),
+};
+
+var legacyFeReportImagesRoot = Path.GetFullPath(Path.Combine(
+    AppContext.BaseDirectory,
+    "..",
+    "..",
+    "..",
+    "..",
+    "..",
+    "SWP391_BL3W_FE",
+    "public",
+    "report-images"));
+
+if (Directory.Exists(legacyFeReportImagesRoot))
+{
+    staticFileProviders.Add(new PhysicalFileProvider(Path.GetFullPath(Path.Combine(legacyFeReportImagesRoot, ".."))));
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new CompositeFileProvider(staticFileProviders),
+    RequestPath = "",
+});
 
 if (!app.Environment.IsDevelopment())
 {

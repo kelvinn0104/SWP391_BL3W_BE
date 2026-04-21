@@ -34,7 +34,8 @@ public record AccountUpdateRequest(
     string? Gender,
     DateTime? DateOfBirth,
     string? Language,
-    string? AvatarUrl
+    string? AvatarUrl,
+    Microsoft.AspNetCore.Http.IFormFile? AvatarFile = null
 );
 
 public record AccountStatusRequest(
