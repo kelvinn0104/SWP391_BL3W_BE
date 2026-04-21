@@ -34,9 +34,9 @@ public class WasteCategoriesController : ControllerBase
         return Ok(cat);
     }
 
-    /// <summary>Tạo danh mục mới (chỉ Admin)</summary>
+    /// <summary>Tạo danh mục mới (Admin hoặc Enterprise)</summary>
     [HttpPost]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
     public async Task<ActionResult<WasteCategoryDetailResponse>> Create(
         [FromBody] WasteCategoryCreateRequest request, CancellationToken ct)
     {
@@ -47,9 +47,9 @@ public class WasteCategoriesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Category!.Id }, result.Category);
     }
 
-    /// <summary>Cập nhật tỷ lệ điểm (PointsPerKg) cho danh mục (chỉ Admin)</summary>
+    /// <summary>Cập nhật tỷ lệ điểm (PointsPerKg) cho danh mục (Admin hoặc Enterprise)</summary>
     [HttpPatch("{id:long}/points")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
     public async Task<ActionResult<WasteCategoryDetailResponse>> UpdatePoints(
         long id, [FromBody] WasteCategoryUpdatePointsRequest request, CancellationToken ct)
     {
@@ -59,9 +59,9 @@ public class WasteCategoriesController : ControllerBase
         return Ok(result.Category);
     }
 
-    /// <summary>Bật/tắt trạng thái hoạt động của danh mục (chỉ Admin)</summary>
+    /// <summary>Bật/tắt trạng thái hoạt động của danh mục (Admin hoặc Enterprise)</summary>
     [HttpPatch("{id:long}/toggle-active")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Administrator,RecyclingEnterprise")]
     public async Task<ActionResult<WasteCategoryDetailResponse>> ToggleActive(long id, CancellationToken ct)
     {
         var result = await _service.ToggleActiveAsync(id, ct);
