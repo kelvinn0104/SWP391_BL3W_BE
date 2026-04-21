@@ -425,6 +425,21 @@ public class WasteReportService : IWasteReportService
                 .Select(x => x.Note)
                 .FirstOrDefault()
             : null;
+        var wasteItems = report.Items.Select(x => new WasteReportItemResponse
+        {
+            WasteReportItemId = x.Id,
+            WasteCategoryId = x.WasteCategoryId,
+            WasteCategoryCode = x.WasteCategory?.Code ?? string.Empty,
+            WasteCategoryName = x.WasteCategory?.Name ?? string.Empty,
+            EstimatedWeightKg = x.EstimatedWeightKg,
+            ActualWeightKg = x.ActualWeightKg,
+            EstimatedPoints = x.EstimatedPoints,
+            ImageUrls = x.Images
+                .Where(image => image.Purpose == WasteReportImagePurpose.ReportEvidence)
+                .Select(image => ToClientImageUrl(image.ImageUrl))
+                .ToList(),
+        }).ToList();
+        var calculatedFinalPoints = CalculateActualTotalPoints(report);
 
         return new WasteReportResponse
         {
@@ -436,26 +451,13 @@ public class WasteReportService : IWasteReportService
             Status = report.Status.ToString(),
             CreatedAtUtc = report.CreatedAtUtc,
             EstimatedTotalPoints = report.EstimatedTotalPoints,
-            FinalRewardPoints = report.FinalRewardPoints,
+            FinalRewardPoints = report.Status == WasteReportStatus.Collected ? calculatedFinalPoints : report.FinalRewardPoints,
             RewardVerifiedAtUtc = report.RewardVerifiedAtUtc,
             ActualTotalWeightKg = report.ActualTotalWeightKg,
             CompletedAtUtc = report.CompletedAtUtc,
             CompletionNote = report.CompletionNote,
             CancellationReason = cancellationReason,
-            WasteItems = report.Items.Select(x => new WasteReportItemResponse
-            {
-                WasteReportItemId = x.Id,
-                WasteCategoryId = x.WasteCategoryId,
-                WasteCategoryCode = x.WasteCategory?.Code ?? string.Empty,
-                WasteCategoryName = x.WasteCategory?.Name ?? string.Empty,
-                EstimatedWeightKg = x.EstimatedWeightKg,
-                ActualWeightKg = x.ActualWeightKg,
-                EstimatedPoints = x.EstimatedPoints,
-                ImageUrls = x.Images
-                    .Where(image => image.Purpose == WasteReportImagePurpose.ReportEvidence)
-                    .Select(image => ToClientImageUrl(image.ImageUrl))
-                    .ToList(),
-            }).ToList(),
+            WasteItems = wasteItems,
             ImageUrls = reportEvidenceUrls,
             ProofImageUrls = proofImageUrls,
         };
@@ -530,6 +532,19 @@ public class WasteReportService : IWasteReportService
         };
     }
 
+
+    private int CalculateActualPoints(WasteReportItem item)
+    {
+        if (!item.ActualWeightKg.HasValue || item.WasteCategory is null)
+            return 0;
+
+        return _rewardService.CalculateEstimatedPoints(item.ActualWeightKg, item.WasteCategory.PointsPerKg);
+    }
+
+    private int CalculateActualTotalPoints(WasteReport report)
+    {
+        return report.Items.Sum(CalculateActualPoints);
+    }
 
     private string ToClientImageUrl(string imageUrl)
     {

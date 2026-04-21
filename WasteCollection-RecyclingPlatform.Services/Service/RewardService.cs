@@ -28,7 +28,7 @@ public class RewardService : IRewardService
         return long.TryParse(raw, out userId);
     }
 
-    public async Task AwardFinalPointsForCollectedReportAsync(WasteReport report, long actorUserId, CancellationToken ct = default)
+    public async Task AwardFinalPointsForCollectedReportAsync(WasteReport report, long actorUserId, IReadOnlyDictionary<long, int>? pointsPerKgByCategoryId = null, CancellationToken ct = default)
     {
         if (report.Status != WasteReportStatus.Collected)
             return;
@@ -40,7 +40,7 @@ public class RewardService : IRewardService
         if (citizen is null)
             throw new InvalidOperationException("Không tìm thấy người nhận điểm thưởng.");
 
-        var rewardPoints = Math.Max(0, report.EstimatedTotalPoints);
+        var rewardPoints = CalculateFinalRewardPoints(report, pointsPerKgByCategoryId);
         citizen.Points += rewardPoints;
 
         var now = DateTime.UtcNow;
@@ -59,6 +59,32 @@ public class RewardService : IRewardService
             CreatedByUserId = actorUserId,
             CreatedAtUtc = now,
         });
+    }
+
+    private int CalculateFinalRewardPoints(WasteReport report, IReadOnlyDictionary<long, int>? pointsPerKgByCategoryId)
+    {
+        var total = 0;
+
+        foreach (var item in report.Items)
+        {
+            if (!item.ActualWeightKg.HasValue)
+                continue;
+
+            var pointsPerKg = item.WasteCategory?.PointsPerKg;
+            if (!pointsPerKg.HasValue
+                && pointsPerKgByCategoryId is not null
+                && pointsPerKgByCategoryId.TryGetValue(item.WasteCategoryId, out var configuredPointsPerKg))
+            {
+                pointsPerKg = configuredPointsPerKg;
+            }
+
+            if (!pointsPerKg.HasValue)
+                throw new InvalidOperationException("Không thể tính điểm thưởng vì thiếu thông tin loại rác.");
+
+            total += CalculateEstimatedPoints(item.ActualWeightKg, pointsPerKg.Value);
+        }
+
+        return Math.Max(0, total);
     }
 
     public async Task<RewardActionResult<RewardPointHistoryResponse>> GetPointHistoryAsync(long userId, int skip, int take, CancellationToken ct = default)
