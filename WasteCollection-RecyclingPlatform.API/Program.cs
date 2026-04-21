@@ -63,6 +63,7 @@ builder.Services.AddScoped<ICollectionRequestRepository, CollectionRequestReposi
 builder.Services.AddScoped<IWasteReportRepository, WasteReportRepository>();
 builder.Services.AddScoped<IRewardRepository, RewardRepository>();
 builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
+builder.Services.AddScoped<IWasteCategoryRepository, WasteCategoryRepository>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -84,6 +85,7 @@ builder.Services.AddScoped<IWasteReportService, WasteReportService>();
 builder.Services.AddScoped<ICollectorJobService, CollectorJobService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
+builder.Services.AddScoped<IWasteCategoryService, WasteCategoryService>();
 
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 builder.Services
