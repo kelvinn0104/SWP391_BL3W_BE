@@ -89,6 +89,7 @@ public class CollectorJobCompletionRequest
     public List<IFormFile> ProofImages { get; set; } = new();
     public string? CompletionNote { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
+    public List<long> WasteCategoryIds { get; set; } = new();
     public List<string> CategoryNames { get; set; } = new();
     public List<decimal> ActualWeightKgs { get; set; } = new();
 }

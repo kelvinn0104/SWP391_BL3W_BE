@@ -8,7 +8,7 @@ public interface IRewardService
 {
     int CalculateEstimatedPoints(decimal? estimatedWeightKg, int pointsPerKg);
     bool TryGetCurrentUserId(ClaimsPrincipal user, out long userId);
-    Task AwardFinalPointsForCollectedReportAsync(WasteReport report, long actorUserId, CancellationToken ct = default);
+    Task AwardFinalPointsForCollectedReportAsync(WasteReport report, long actorUserId, IReadOnlyDictionary<long, int>? pointsPerKgByCategoryId = null, CancellationToken ct = default);
     Task<RewardActionResult<RewardPointHistoryResponse>> GetPointHistoryAsync(long userId, int skip, int take, CancellationToken ct = default);
     Task<RewardActionResult<PointBalanceResponse>> GetPointBalanceAsync(long userId, CancellationToken ct = default);
     Task<RewardActionResult<UserLeaderboardResponse>> GetUserLeaderboardAsync(long currentUserId, int skip, int take, CancellationToken ct = default);
