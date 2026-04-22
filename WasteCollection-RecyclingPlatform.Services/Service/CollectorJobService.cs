@@ -638,11 +638,11 @@ public class CollectorJobService : ICollectorJobService
         await using var stream = new FileStream(filePath, FileMode.CreateNew);
         await file.CopyToAsync(stream, ct);
 
-        return $"/report-images/{fileName}";
+        return $"/collector-images/{fileName}";
     }
 
     private static string ResolveUploadDirectory()
     {
-        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "wwwroot", "report-images"));
+        return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "collector-images");
     }
 }

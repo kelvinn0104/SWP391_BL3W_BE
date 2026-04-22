@@ -95,11 +95,12 @@ public class VoucherService : IVoucherService
     public async Task<bool> CreateVoucherAsync(VoucherCreateRequest request, CancellationToken ct = default)
     {
         var categories = await _voucherRepository.GetCategoriesAsync(ct);
-        var category = categories.FirstOrDefault(c => c.Name.Equals(request.Category, StringComparison.OrdinalIgnoreCase));
+        var categoryName = string.IsNullOrWhiteSpace(request.Category) ? "Chung" : request.Category;
+        var category = categories.FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
 
         if (category == null)
         {
-            category = new VoucherCategory { Name = request.Category };
+            category = new VoucherCategory { Name = categoryName };
             await _voucherRepository.AddCategoryAsync(category, ct);
         }
 
@@ -109,7 +110,7 @@ public class VoucherService : IVoucherService
             PointsRequired = request.Points,
             ImageUrl = request.Image,
             CategoryId = category.Id,
-            Codes = request.Codes.Select(c => new VoucherCode { Code = c }).ToList()
+            Codes = request.Codes?.Select(c => new VoucherCode { Code = c }).ToList() ?? new List<VoucherCode>()
         };
 
         if (request.ImageFile != null)
@@ -127,11 +128,12 @@ public class VoucherService : IVoucherService
         if (voucher == null) return false;
 
         var categories = await _voucherRepository.GetCategoriesAsync(ct);
-        var category = categories.FirstOrDefault(c => c.Name.Equals(request.Category, StringComparison.OrdinalIgnoreCase));
+        var categoryName = string.IsNullOrWhiteSpace(request.Category) ? "Chung" : request.Category;
+        var category = categories.FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
 
         if (category == null)
         {
-            category = new VoucherCategory { Name = request.Category };
+            category = new VoucherCategory { Name = categoryName };
             await _voucherRepository.AddCategoryAsync(category, ct);
         }
 
@@ -146,6 +148,16 @@ public class VoucherService : IVoucherService
         else if (!string.IsNullOrEmpty(request.Image))
         {
             voucher.ImageUrl = request.Image;
+        }
+
+        // Cập nhật codes
+        if (request.Codes != null)
+        {
+            voucher.Codes.Clear();
+            foreach (var code in request.Codes)
+            {
+                voucher.Codes.Add(new VoucherCode { Code = code });
+            }
         }
 
         // Sync codes - very basic implementation
