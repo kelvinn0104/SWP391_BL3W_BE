@@ -23,17 +23,20 @@ public class ComplaintService : IComplaintService
     private readonly IWasteReportRepository _wasteReportRepository;
     private readonly IUserRepository _userRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly INotificationService _notificationService;
 
     public ComplaintService(
         IComplaintRepository complaintRepository,
         IWasteReportRepository wasteReportRepository,
         IUserRepository userRepository,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        INotificationService notificationService)
     {
         _complaintRepository = complaintRepository;
         _wasteReportRepository = wasteReportRepository;
         _userRepository = userRepository;
         _httpContextAccessor = httpContextAccessor;
+        _notificationService = notificationService;
     }
 
     public bool TryGetCurrentUserId(ClaimsPrincipal user, out long userId)
@@ -102,6 +105,15 @@ public class ComplaintService : IComplaintService
             }
 
             await _complaintRepository.AddAsync(complaint, ct);
+
+            var enterprises = await _userRepository.GetByRoleAsync(UserRole.RecyclingEnterprise, null, ct);
+            var admins = await _userRepository.GetByRoleAsync(UserRole.Administrator, null, ct);
+            var notifyIds = enterprises.Select(x => x.Id).Concat(admins.Select(x => x.Id)).Distinct().ToList();
+
+            if (notifyIds.Any())
+            {
+                await _notificationService.NotifyComplaintSubmittedAsync(complaint.Id, reportId, citizen.DisplayName ?? citizen.FullName ?? citizen.Email, notifyIds, ct);
+            }
 
             var saved = await _complaintRepository.GetByIdAsync(complaint.Id, ct);
             return ComplaintActionResult<ComplaintResponse>.Ok(MapComplaint(saved ?? complaint));
@@ -194,6 +206,8 @@ public class ComplaintService : IComplaintService
 
             await _complaintRepository.SaveChangesAsync(ct);
 
+            await _notificationService.NotifyComplaintStatusUpdatedAsync(complaint.Id, complaint.WasteReportId, complaint.CitizenId, request.Status.ToString(), note, ct);
+
             var saved = await _complaintRepository.GetByIdAsync(complaint.Id, ct);
             return ComplaintActionResult<ComplaintResponse>.Ok(MapComplaint(saved ?? complaint));
         }
@@ -284,6 +298,6 @@ public class ComplaintService : IComplaintService
 
     private static string ResolveUploadDirectory()
     {
-        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "wwwroot", "complaint-evidence"));
+        return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "complaint-evidence");
     }
 }

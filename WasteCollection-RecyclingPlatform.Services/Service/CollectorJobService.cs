@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using WasteCollection_RecyclingPlatform.Repositories.Entities;
 using WasteCollection_RecyclingPlatform.Repositories.Repository;
@@ -22,17 +22,20 @@ public class CollectorJobService : ICollectorJobService
     private readonly IUserRepository _userRepository;
     private readonly IRewardService _rewardService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly INotificationService _notificationService;
 
     public CollectorJobService(
         IWasteReportRepository wasteReportRepository,
         IUserRepository userRepository,
         IRewardService rewardService,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        INotificationService notificationService)
     {
         _wasteReportRepository = wasteReportRepository;
         _userRepository = userRepository;
         _rewardService = rewardService;
         _httpContextAccessor = httpContextAccessor;
+        _notificationService = notificationService;
     }
 
     public async Task<CollectorJobListResult> GetMyJobsAsync(long collectorId, WasteReportStatus? status, CancellationToken ct = default)
@@ -62,8 +65,8 @@ public class CollectorJobService : ICollectorJobService
         if (report is null)
             return CollectorJobDetailResult.NotFoundResult();
 
-        if (report.Status != WasteReportStatus.Pending)
-            return CollectorJobDetailResult.Fail($"Chỉ có thể duyệt và phân công report từ trạng thái Pending. Trạng thái hiện tại là {report.Status}.");
+        if (report.Status != WasteReportStatus.Pending && report.Status != WasteReportStatus.Assigned)
+            return CollectorJobDetailResult.Fail($"Chỉ có thể duyệt và phân công report từ trạng thái Pending hoặc cập nhật phân công từ Assigned. Trạng thái hiện tại là {report.Status}.");
 
         var now = DateTime.UtcNow;
         report.AssignedCollectorId = collectorId;
@@ -80,6 +83,9 @@ public class CollectorJobService : ICollectorJobService
         });
 
         await _wasteReportRepository.SaveChangesAsync(ct);
+
+        // Notify collector
+        await _notificationService.NotifyCollectorAssignedAsync(reportId, collectorId, report.LocationText ?? "Địa chỉ không xác định", ct);
 
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
@@ -110,6 +116,11 @@ public class CollectorJobService : ICollectorJobService
         });
 
         await _wasteReportRepository.SaveChangesAsync(ct);
+
+        // Notify Enterprise and Citizen
+        var enterprises = await _userRepository.GetByRoleAsync(UserRole.RecyclingEnterprise, null, ct);
+        var enterpriseIds = enterprises.Select(x => x.Id).ToList();
+        await _notificationService.NotifyCollectorAcceptedAsync(reportId, enterpriseIds, report.CitizenId, ct);
 
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
@@ -238,6 +249,11 @@ public class CollectorJobService : ICollectorJobService
         var pointsPerKgByCategoryId = actualItemsResult.Items.ToDictionary(x => x.CategoryId, x => x.PointsPerKg);
         await _rewardService.AwardFinalPointsForCollectedReportAsync(report, collectorId, pointsPerKgByCategoryId, ct);
         await _wasteReportRepository.SaveChangesAsync(ct);
+
+        // Notify Enterprise and Citizen
+        var enterprises = await _userRepository.GetByRoleAsync(UserRole.RecyclingEnterprise, null, ct);
+        var enterpriseIds = enterprises.Select(x => x.Id).ToList();
+        await _notificationService.NotifyReportCollectedAsync(report.Id, enterpriseIds, report.CitizenId, (decimal)(report.FinalRewardPoints ?? 0), ct);
 
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
@@ -729,11 +745,11 @@ public class CollectorJobService : ICollectorJobService
         await using var stream = new FileStream(filePath, FileMode.CreateNew);
         await file.CopyToAsync(stream, ct);
 
-        return $"/report-images/{fileName}";
+        return $"/collector-images/{fileName}";
     }
 
     private static string ResolveUploadDirectory()
     {
-        return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "report-images"));
+        return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "collector-images");
     }
 }
