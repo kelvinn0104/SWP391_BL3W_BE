@@ -240,19 +240,19 @@ public static class DbSeeder
             new WasteCategory
             {
                 Code = "METAL",
-                Name = "Kim loại",
+                Name = "Kim Loại",
                 Unit = "kg",
                 Description = "Lon, vỏ hộp và phế liệu kim loại.",
-                PointsPerKg = 120,
+                PointsPerKg = 200,
                 CreatedAtUtc = now,
             },
             new WasteCategory
             {
                 Code = "GENERAL",
-                Name = "Rác chung",
+                Name = "Các loại rác chung",
                 Unit = "kg",
                 Description = "Các loại rác tái chế thông thường không thuộc nhóm nhựa hoặc kim loại.",
-                PointsPerKg = 80,
+                PointsPerKg = 100,
                 CreatedAtUtc = now,
             });
         }
@@ -280,7 +280,7 @@ public static class DbSeeder
 
             if (generalWasteCategory is not null)
             {
-                generalWasteCategory.Name = "Rác chung";
+                generalWasteCategory.Name = "Các loại rác chung";
                 generalWasteCategory.Description = "Các loại rác tái chế thông thường không thuộc nhóm nhựa hoặc kim loại.";
                 generalWasteCategory.UpdatedAtUtc = now;
             }

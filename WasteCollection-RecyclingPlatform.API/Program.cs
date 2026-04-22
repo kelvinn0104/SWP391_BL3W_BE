@@ -25,6 +25,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(new WasteCollection_RecyclingPlatform.API.Converters.UtcDateTimeConverter());
+        options.JsonSerializerOptions.Converters.Add(new WasteCollection_RecyclingPlatform.API.Converters.UtcNullableDateTimeConverter());
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -63,6 +65,8 @@ builder.Services.AddScoped<ICollectionRequestRepository, CollectionRequestReposi
 builder.Services.AddScoped<IWasteReportRepository, WasteReportRepository>();
 builder.Services.AddScoped<IRewardRepository, RewardRepository>();
 builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
+builder.Services.AddScoped<IWasteCategoryRepository, WasteCategoryRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -84,6 +88,8 @@ builder.Services.AddScoped<IWasteReportService, WasteReportService>();
 builder.Services.AddScoped<ICollectorJobService, CollectorJobService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
+builder.Services.AddScoped<IWasteCategoryService, WasteCategoryService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
 builder.Services
