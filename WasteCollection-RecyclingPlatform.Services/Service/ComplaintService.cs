@@ -298,6 +298,6 @@ public class ComplaintService : IComplaintService
 
     private static string ResolveUploadDirectory()
     {
-        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "wwwroot", "complaint-evidence"));
+        return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "complaint-evidence");
     }
 }

@@ -136,10 +136,12 @@ var reportImagesRoot = Path.Combine(staticFilesRoot, "report-images");
 var complaintEvidenceRoot = Path.Combine(staticFilesRoot, "complaint-evidence");
 var voucherImagesRoot = Path.Combine(staticFilesRoot, "voucher-images");
 var profileImagesRoot = Path.Combine(staticFilesRoot, "profile-images");
+var collectorImagesRoot = Path.Combine(staticFilesRoot, "collector-images");
 Directory.CreateDirectory(reportImagesRoot);
 Directory.CreateDirectory(complaintEvidenceRoot);
 Directory.CreateDirectory(voucherImagesRoot);
 Directory.CreateDirectory(profileImagesRoot);
+Directory.CreateDirectory(collectorImagesRoot);
 
 Console.WriteLine($"[Startup] Serving static files from: {staticFilesRoot}");
 
