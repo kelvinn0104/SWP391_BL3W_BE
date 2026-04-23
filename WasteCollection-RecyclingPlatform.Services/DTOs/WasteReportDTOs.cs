@@ -77,6 +77,9 @@ public class WasteReportResponse
     public string? CompletionNote { get; set; }
     public string? CancellationReason { get; set; }
     public List<string> ProofImageUrls { get; set; } = new();
+    public long? CollectorId { get; set; }
+    public string? CollectorName { get; set; }
+    public string? CollectorPhone { get; set; }
 }
 
 public class WasteReportGetAllResponse
