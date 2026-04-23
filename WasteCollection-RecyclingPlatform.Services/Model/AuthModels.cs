@@ -49,7 +49,8 @@ public record UserProfileResponse(
     string Role, 
     int Points,
     bool IsLocked,
-    List<long> WardIds
+    List<long> WardIds,
+    bool? HasActiveReport = null
 );
 
 public class UpdateProfileRequest

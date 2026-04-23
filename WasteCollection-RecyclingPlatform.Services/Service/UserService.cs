@@ -9,11 +9,13 @@ namespace WasteCollection_RecyclingPlatform.Services.Service;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepo;
+    private readonly IWasteReportRepository _wasteReportRepo;
     private readonly IPasswordHasher _hasher;
 
-    public UserService(IUserRepository userRepo, IPasswordHasher hasher)
+    public UserService(IUserRepository userRepo, IWasteReportRepository wasteReportRepo, IPasswordHasher hasher)
     {
         _userRepo = userRepo;
+        _wasteReportRepo = wasteReportRepo;
         _hasher = hasher;
     }
 
@@ -67,7 +69,18 @@ public class UserService : IUserService
     public async Task<List<UserProfileResponse>> GetCollectorsAsync(long? wardId = null, CancellationToken ct = default)
     {
         var users = await _userRepo.GetByRoleAsync(UserRole.Collector, wardId, ct);
-        return users.Select(MapToProfileResponse).ToList();
+        
+        // Fetch all assigned or accepted reports to identify busy collectors
+        var assignedReports = await _wasteReportRepo.GetByStatusAsync(WasteReportStatus.Assigned, ct);
+        var acceptedReports = await _wasteReportRepo.GetByStatusAsync(WasteReportStatus.Accepted, ct);
+        
+        var busyCollectorIds = assignedReports.Concat(acceptedReports)
+            .Where(r => r.AssignedCollectorId.HasValue)
+            .Select(r => r.AssignedCollectorId!.Value)
+            .Distinct()
+            .ToHashSet();
+
+        return users.Select(u => MapToProfileResponse(u, busyCollectorIds.Contains(u.Id))).ToList();
     }
 
     public async Task<UserProfileResponse> CreateCollectorAsync(CollectorCreateRequest request, CancellationToken ct = default)
@@ -163,6 +176,11 @@ public class UserService : IUserService
 
     private UserProfileResponse MapToProfileResponse(Repositories.Entities.User user)
     {
+        return MapToProfileResponse(user, null);
+    }
+
+    private UserProfileResponse MapToProfileResponse(Repositories.Entities.User user, bool? hasActiveReport)
+    {
         return new UserProfileResponse(
             UserId: user.Id,
             Email: user.Email,
@@ -177,7 +195,8 @@ public class UserService : IUserService
             Role: user.Role.ToString(),
             Points: user.Points,
             IsLocked: user.IsLocked,
-            WardIds: user.Wards?.Select(w => w.Id).ToList() ?? new List<long>()
+            WardIds: user.Wards?.Select(w => w.Id).ToList() ?? new List<long>(),
+            HasActiveReport: hasActiveReport
         );
     }
 }
