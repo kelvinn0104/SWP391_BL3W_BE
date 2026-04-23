@@ -454,6 +454,9 @@ public class WasteReportService : IWasteReportService
             CompletedAtUtc = report.CompletedAtUtc,
             CompletionNote = report.CompletionNote,
             CancellationReason = cancellationReason,
+            CollectorId = report.AssignedCollectorId,
+            CollectorName = report.AssignedCollector?.DisplayName,
+            CollectorPhone = report.AssignedCollector?.PhoneNumber,
             WasteItems = report.Items.Select(x => new WasteReportItemResponse
             {
                 WasteReportItemId = x.Id,
