@@ -85,6 +85,7 @@ public class VoucherRepository : IVoucherRepository
 
     public async Task<VoucherCode?> GetNextAvailableCodeAsync(long voucherId, CancellationToken ct = default)
     {
+        // Sử dụng AsTracking để đảm bảo code được theo dõi và có thể cập nhật ngay trong transaction
         return await _db.VoucherCodes
             .Where(c => c.VoucherId == voucherId && !c.IsUsed)
             .OrderBy(c => c.Id)

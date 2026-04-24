@@ -23,7 +23,8 @@ public class RewardService : IRewardService
     public bool TryGetCurrentUserId(ClaimsPrincipal user, out long userId)
     {
         var raw = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? user.FindFirst("sub")?.Value;
+            ?? user.FindFirst("sub")?.Value
+            ?? user.FindFirst("id")?.Value;
 
         return long.TryParse(raw, out userId);
     }
@@ -59,6 +60,24 @@ public class RewardService : IRewardService
             CreatedByUserId = actorUserId,
             CreatedAtUtc = now,
         });
+
+        // Update statistics for Ward and Area
+        if (report.WardId.HasValue)
+        {
+            var ward = await _rewardRepository.GetWardByIdAsync(report.WardId.Value, ct);
+            if (ward != null)
+            {
+                var weight = report.ActualTotalWeightKg ?? 0;
+                ward.CollectedKg += weight;
+                ward.CompletedRequests += 1;
+
+                if (ward.Area != null)
+                {
+                    ward.Area.ProcessedThisMonthKg += weight;
+                    ward.Area.CompletedRequests += 1;
+                }
+            }
+        }
     }
 
     private int CalculateFinalRewardPoints(WasteReport report, IReadOnlyDictionary<long, int>? pointsPerKgByCategoryId)
@@ -167,13 +186,16 @@ public class RewardService : IRewardService
         var safeTake = Math.Clamp(take, 1, 200);
 
         var areaUserRows = await _rewardRepository.GetAreaUserPointRowsAsync(ct);
+        
+        // SỬA LỖI: GroupBy AreaId sau đó lấy Unique User để tính tổng điểm chính xác
         var ranked = areaUserRows
             .GroupBy(x => new { x.AreaId, x.AreaName })
             .Select(g => new
             {
                 g.Key.AreaId,
                 g.Key.AreaName,
-                TotalPoints = g.Sum(x => x.Points),
+                // Tính tổng điểm bằng cách chỉ lấy điểm của mỗi User một lần duy nhất trong Quận đó
+                TotalPoints = g.GroupBy(u => u.UserId).Sum(u => u.Max(p => p.Points)),
                 ParticipantCount = g.Select(x => x.UserId).Distinct().Count(),
             })
             .OrderByDescending(x => x.TotalPoints)

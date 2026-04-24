@@ -69,13 +69,13 @@ public class AuthService : IAuthService
         if (displayName is { Length: > 100 })
             throw new ArgumentException("Tên hiển thị tối đa 100 ký tự.");
 
-        // Validate phone number (must be exactly 10 digits if provided)
         string? phoneNumber = null;
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
-            phoneNumber = request.PhoneNumber.Trim();
-            if (!System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^\d{10}$"))
-                throw new ArgumentException("Số điện thoại phải gồm đúng 10 chữ số.");
+            var phone = request.PhoneNumber.Trim();
+            if (phone.Length != 10 || !phone.All(char.IsDigit))
+                throw new ArgumentException("Số điện thoại phải bao gồm đúng 10 chữ số.");
+            phoneNumber = phone;
         }
 
         var exists = await _userRepo.ExistsByEmailAsync(email, ct);

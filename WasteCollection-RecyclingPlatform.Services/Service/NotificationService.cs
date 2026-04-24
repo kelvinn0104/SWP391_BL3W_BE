@@ -186,4 +186,21 @@ public class NotificationService : INotificationService
         
         await _notificationRepository.AddAsync(notification, ct);
     }
+
+    public async Task NotifyCollectorRejectedAsync(long reportId, string? collectorName, IEnumerable<long> enterpriseUserIds, string? reason, CancellationToken ct = default)
+    {
+        var notifications = enterpriseUserIds.Select(adminId => new Notification
+        {
+            RecipientUserId = adminId,
+            Title = "⚠️ Nhân viên từ chối đơn thu gom",
+            Body = $"Nhân viên {collectorName ?? "thu gom"} đã từ chối đơn #{reportId}. Lý do: {reason ?? "Không rõ"}. Đơn đã được chuyển lại về trạng thái Đang chờ (Pending).",
+            Type = NotificationType.CollectorAssigned,
+            RelatedReportId = reportId
+        }).ToList();
+
+        if (notifications.Any())
+        {
+            await _notificationRepository.AddRangeAsync(notifications, ct);
+        }
+    }
 }

@@ -30,9 +30,12 @@ public interface IRewardRepository
     Task<User?> GetUserByIdAsync(long userId, CancellationToken ct = default);
     Task<User?> GetUserForUpdateAsync(long userId, CancellationToken ct = default);
     Task<RewardPointTransactionPage> GetPointTransactionsAsync(long userId, int skip, int take, CancellationToken ct = default);
-    Task<List<UserLeaderboardRow>> GetCitizenLeaderboardRowsAsync(CancellationToken ct = default);
+    public Task<List<UserLeaderboardRow>> GetCitizenLeaderboardRowsAsync(CancellationToken ct = default);
     Task<List<AreaUserPointRow>> GetAreaUserPointRowsAsync(CancellationToken ct = default);
     Task<Area?> GetAreaByIdAsync(long areaId, CancellationToken ct = default);
+    Task<Ward?> GetWardByIdAsync(long wardId, CancellationToken ct = default);
     Task<List<UserLeaderboardRow>> GetCitizenLeaderboardRowsByAreaAsync(long areaId, CancellationToken ct = default);
+    Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
+    Task SaveChangesAsync(CancellationToken ct = default);
     void AddRewardPointTransaction(RewardPointTransaction transaction);
 }

@@ -153,6 +153,11 @@ public class CollectorJobService : ICollectorJobService
 
         await _wasteReportRepository.SaveChangesAsync(ct);
 
+        var enterprises = await _userRepository.GetByRoleAsync(UserRole.RecyclingEnterprise, null, ct);
+        var enterpriseIds = enterprises.Select(x => x.Id).ToList();
+        var collector = await _userRepository.GetByIdAsync(collectorId, ct);
+        await _notificationService.NotifyCollectorRejectedAsync(reportId, collector?.DisplayName ?? collector?.Email, enterpriseIds, note, ct);
+
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
             ? CollectorJobDetailResult.Fail("Không thể đọc lại công việc sau khi từ chối.")
@@ -446,15 +451,9 @@ public class CollectorJobService : ICollectorJobService
         if (Uri.TryCreate(imageUrl, UriKind.Absolute, out _))
             return imageUrl;
 
-        var request = _httpContextAccessor.HttpContext?.Request;
-        if (request is null)
-            return imageUrl;
-
-        var imagePath = imageUrl.StartsWith("/", StringComparison.Ordinal)
+        return imageUrl.StartsWith("/", StringComparison.Ordinal)
             ? imageUrl
             : $"/{imageUrl}";
-
-        return $"{request.Scheme}://{request.Host}{request.PathBase}{imagePath}";
     }
 
     private static CollectorJobFormBindResult ValidateParallelArrays(CollectorJobCompletionRequest request)
@@ -747,6 +746,7 @@ public class CollectorJobService : ICollectorJobService
 
     private static string ResolveUploadDirectory()
     {
-        return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "collector-images");
+        var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        return Path.Combine(staticFilesRoot, "collector-images");
     }
 }

@@ -295,6 +295,10 @@ public class WasteReportService : IWasteReportService
         report.LocationText = string.IsNullOrWhiteSpace(request.LocationText) ? null : request.LocationText.Trim();
         report.UpdatedAtUtc = now;
 
+        foreach (var img in report.Images)
+        {
+            WasteCollection_RecyclingPlatform.Services.Helpers.FileHelper.DeleteFileIfExists(img.ImageUrl);
+        }
         report.Images.Clear();
         report.Items.Clear();
 
@@ -376,16 +380,12 @@ public class WasteReportService : IWasteReportService
 
         await _wasteReportRepository.SaveChangesAsync(ct);
 
-        var trackedReport = await _wasteReportRepository.GetStatusTrackingByIdAsync(report.Id, ct);
-        if (trackedReport is null)
-            return WasteReportStatusChangeResult.Fail("Không thể đọc lại trạng thái sau khi cập nhật.");
+        await _notificationService.NotifyReportCancelledAsync(report.Id, report.CitizenId, note ?? "Báo cáo đã bị hủy.", ct);
 
-        if (actorUserId != report.CitizenId)
-        {
-            await _notificationService.NotifyReportCancelledAsync(report.Id, report.CitizenId, note ?? "Báo cáo đã bị hủy.", ct);
-        }
-
-        return WasteReportStatusChangeResult.Ok(MapStatusTracking(trackedReport));
+        var saved = await _wasteReportRepository.GetStatusTrackingByIdAsync(reportId, ct);
+        return saved is null
+            ? WasteReportStatusChangeResult.Fail("Không thể đọc lại lịch sử sau khi hủy.")
+            : WasteReportStatusChangeResult.Ok(MapStatusTracking(saved));
     }
 
     private static WasteCategoryResponse MapCategory(WasteCategory category)
@@ -821,28 +821,13 @@ public class WasteReportService : IWasteReportService
         await using var stream = new FileStream(filePath, FileMode.CreateNew);
         await file.CopyToAsync(stream, ct);
 
-        return $"/src/assets/report-images/{reportId}/{fileName}";
+        return $"/report-images/{reportId}/{fileName}";
     }
 
     private static string ResolveUploadDirectory(long reportId)
     {
-        string feAssetsPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\report-images";
-        
-        if (!Directory.Exists(feAssetsPath))
-        {
-            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
-            while (currentDir != null)
-            {
-                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
-                {
-                    feAssetsPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "report-images");
-                    break;
-                }
-                currentDir = currentDir.Parent;
-            }
-        }
-
-        return Path.Combine(feAssetsPath, reportId.ToString());
+        var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        return Path.Combine(staticFilesRoot, "report-images", reportId.ToString());
     }
 }
 
