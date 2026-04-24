@@ -5,7 +5,7 @@ namespace WasteCollection_RecyclingPlatform.Services.Model;
 
 public record LoginRequest(string Email, string Password);
 
-public record RegisterRequest(string Email, string Password, string? DisplayName);
+public record RegisterRequest(string Email, string Password, string? DisplayName, string? PhoneNumber = null);
 
 public record GoogleLoginRequest(string Credential);
 

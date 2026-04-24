@@ -69,6 +69,15 @@ public class AuthService : IAuthService
         if (displayName is { Length: > 100 })
             throw new ArgumentException("Tên hiển thị tối đa 100 ký tự.");
 
+        // Validate phone number (must be exactly 10 digits if provided)
+        string? phoneNumber = null;
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
+            phoneNumber = request.PhoneNumber.Trim();
+            if (!System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^\d{10}$"))
+                throw new ArgumentException("Số điện thoại phải gồm đúng 10 chữ số.");
+        }
+
         var exists = await _userRepo.ExistsByEmailAsync(email, ct);
         if (exists)
             throw new InvalidOperationException("Email đã được sử dụng.");
@@ -80,6 +89,7 @@ public class AuthService : IAuthService
             PasswordHash = _hasher.Hash(request.Password),
             Role = UserRole.Citizen,
             Points = 0,
+            PhoneNumber = phoneNumber,
         };
 
         await _userRepo.AddAsync(user, ct);
