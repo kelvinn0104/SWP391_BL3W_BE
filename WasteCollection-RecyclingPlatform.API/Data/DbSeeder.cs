@@ -43,7 +43,6 @@ public static class DbSeeder
         await SeedAreasAsync(db);
         await SeedVouchersAsync(db);
         await SeedWasteCategoriesAsync(db);
-        await SeedCollectionRequestsAsync(db);
         await SeedRewardSamplesAsync(db);
         await SeedComplaintSamplesAsync(db);
 
@@ -53,12 +52,10 @@ public static class DbSeeder
 
     private static async Task SeedAreasAsync(AppDbContext db)
     {
-        // Clear all existing data to ensure a fresh HCMC dataset
+        // Only seed if there is no existing data
         if (await db.Areas.AnyAsync())
         {
-            db.Areas.RemoveRange(db.Areas);
-            await db.SaveChangesAsync();
-            Console.WriteLine("[Seeder] Cleared existing Area/Ward data.");
+            return;
         }
 
         var jsonPath = Path.Combine(AppContext.BaseDirectory, "Data", "hcmc_admin_units.json");
@@ -306,48 +303,6 @@ public static class DbSeeder
         Console.WriteLine("[Seeder] Successfully seeded waste categories.");
     }
 
-    private static async Task SeedCollectionRequestsAsync(AppDbContext db)
-    {
-        var citizens = await db.Users.Where(u => u.Role == UserRole.Citizen).ToListAsync();
-        var collectors = await db.Users.Where(u => u.Role == UserRole.Collector).Take(10).ToListAsync();
-        var wards = await db.Wards.Include(w => w.Area).ToListAsync();
-        var rnd = new Random();
- 
-        var wasteCategories = new[] { "Nhựa", "Kim loại", "Rác chung" };
-
-        var requests = new List<CollectionRequest>();
- 
-        for (int i = 0; i < 25; i++)
-        {
-            var citizen = citizens[rnd.Next(citizens.Count)];
-            var ward = wards[rnd.Next(wards.Count)];
-            var status = (CollectionRequestStatus)rnd.Next(5);
-            
-            var req = new CollectionRequest
-            {
-                CitizenId = citizen.Id,
-                CitizenName = citizen.DisplayName,
-                WasteType = wasteCategories[rnd.Next(wasteCategories.Length)],
-                WeightKg = (decimal)(rnd.NextDouble() * 20 + 1),
-                Address = $"Số {rnd.Next(1, 500)} Đường {ward.Name}, {ward.Area.DistrictName}",
-                CreatedAtUtc = DateTime.UtcNow.AddDays(-rnd.Next(0, 30)),
-                Note = "Ghi chú mẫu từ Seeder",
-                Status = status,
-                WardId = ward.Id
-            };
-
-            if (status != CollectionRequestStatus.Pending && collectors.Any())
-            {
-                req.CollectorId = collectors[rnd.Next(collectors.Count)].Id;
-            }
-
-            requests.Add(req);
-        }
-
-        db.CollectionRequests.AddRange(requests);
-        await db.SaveChangesAsync();
-        Console.WriteLine($"[Seeder] Seeded {requests.Count} collection requests.");
-    }
 
     private static async Task SeedRewardSamplesAsync(AppDbContext db)
     {
@@ -381,11 +336,11 @@ public static class DbSeeder
             citizen.Points = sample.Points;
         }
 
-        var wardsPool = await db.Wards.Take(citizens.Count).ToListAsync();
-        for (var i = 0; i < citizens.Count && i < wardsPool.Count; i++)
+        var wards = await db.Wards.Take(citizens.Count).ToListAsync();
+        for (var i = 0; i < citizens.Count && i < wards.Count; i++)
         {
             if (!citizens[i].Wards.Any())
-                citizens[i].Wards.Add(wardsPool[i]);
+                citizens[i].Wards.Add(wards[i]);
         }
 
         var categories = await db.WasteCategories.ToListAsync();
@@ -655,7 +610,9 @@ public static class DbSeeder
             }
         }
 
-        // C. Backfill legacy collected waste reports
+        // B. (Legacy request repair removed)
+
+        // C. Backfill legacy collected waste reports after UC-COL-02 completion fields were added.
         var collectedReports = await db.WasteReports
             .Include(r => r.Items)
             .Include(r => r.StatusHistories)

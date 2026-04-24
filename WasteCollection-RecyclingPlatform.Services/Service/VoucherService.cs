@@ -242,23 +242,26 @@ public class VoucherService : IVoucherService
 
     private async Task<string> SaveVoucherImageAsync(IFormFile file)
     {
-        // Target: wwwroot/voucher-images
-        var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "voucher-images");
+        // Target: WasteCollection-RecyclingPlatform.FE/public/voucher
+        // Calculate path relative to the solution root
+        var fePublicPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "WasteCollection-RecyclingPlatform.FE", "public", "voucher"));
         
-        if (!Directory.Exists(uploadDirectory))
+        if (!Directory.Exists(fePublicPath))
         {
-            Directory.CreateDirectory(uploadDirectory);
+            // Fallback to absolute path if relative fails (just in case)
+            fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\voucher";
+            if (!Directory.Exists(fePublicPath)) Directory.CreateDirectory(fePublicPath);
         }
 
-        var fileName = $"{Guid.NewGuid():N}{Path.GetExtension(file.FileName).ToLowerInvariant()}";
-        var filePath = Path.Combine(uploadDirectory, fileName);
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var filePath = Path.Combine(fePublicPath, fileName);
 
-        await using (var stream = new FileStream(filePath, FileMode.Create))
+        using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // Return relative path for static serving
-        return $"/voucher-images/{fileName}";
+        // Return path relative to FE root
+        return $"/voucher/{fileName}";
     }
 }
