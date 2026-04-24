@@ -166,24 +166,27 @@ public class VoucherService : IVoucherService
             }
         }
 
-        // Sync codes - very basic implementation
-        // Remove codes that are not used and not in the new list
-        var unusedCodes = voucher.Codes.Where(c => !c.IsUsed).ToList();
-        foreach(var c in unusedCodes)
+        if (request.Codes != null)
         {
-            if (!request.Codes.Contains(c.Code))
+            // Sync codes - very basic implementation
+            // Remove codes that are not used and not in the new list
+            var unusedCodes = voucher.Codes.Where(c => !c.IsUsed).ToList();
+            foreach (var c in unusedCodes)
             {
-                voucher.Codes.Remove(c);
+                if (!request.Codes.Contains(c.Code))
+                {
+                    voucher.Codes.Remove(c);
+                }
             }
-        }
 
-        // Add new codes
-        var existingCodesStrings = voucher.Codes.Select(c => c.Code).ToList();
-        foreach(var newCode in request.Codes)
-        {
-            if (!existingCodesStrings.Contains(newCode))
+            // Add new codes
+            var existingCodesStrings = voucher.Codes.Select(c => c.Code).ToList();
+            foreach (var newCode in request.Codes)
             {
-                voucher.Codes.Add(new VoucherCode { Code = newCode });
+                if (!existingCodesStrings.Contains(newCode))
+                {
+                    voucher.Codes.Add(new VoucherCode { Code = newCode });
+                }
             }
         }
 

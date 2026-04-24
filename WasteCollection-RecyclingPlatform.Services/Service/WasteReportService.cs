@@ -380,7 +380,7 @@ public class WasteReportService : IWasteReportService
 
         await _wasteReportRepository.SaveChangesAsync(ct);
 
-        await _notificationService.NotifyReportCancelledAsync(report.Id, report.CitizenId, note ?? "Báo cáo đã bị hủy.", ct);
+        await _notificationService.NotifyReportCancelledAsync(report.Id, report.CitizenId, note ?? "Báo cáo đã bị hủy.", ct: ct);
 
         var saved = await _wasteReportRepository.GetStatusTrackingByIdAsync(reportId, ct);
         return saved is null

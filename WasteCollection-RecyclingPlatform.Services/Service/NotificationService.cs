@@ -135,17 +135,37 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task NotifyReportCancelledAsync(long reportId, long citizenId, string reason, CancellationToken ct = default)
+    public async Task NotifyReportCancelledAsync(long reportId, long citizenId, string reason, long? collectorId = null, CancellationToken ct = default)
     {
-         var notification = new Notification
+        var notifications = new List<Notification>();
+
+        // Notify Citizen
+        notifications.Add(new Notification
         {
             RecipientUserId = citizenId,
             Title = "❌ Đơn thu gom đã bị hủy",
             Body = $"Đơn thu gom #{reportId} của bạn đã bị hủy với lý do: {reason}",
             Type = NotificationType.ReportCancelled,
             RelatedReportId = reportId
-        };
-        await _notificationRepository.AddAsync(notification, ct);
+        });
+
+        // Notify Collector if assigned
+        if (collectorId.HasValue)
+        {
+            notifications.Add(new Notification
+            {
+                RecipientUserId = collectorId.Value,
+                Title = "❌ Nhiệm vụ đã bị hủy",
+                Body = $"Nhiệm vụ thu gom #{reportId} đã bị hủy bởi hệ thống hoặc người dùng.",
+                Type = NotificationType.ReportCancelled,
+                RelatedReportId = reportId
+            });
+        }
+
+        if (notifications.Any())
+        {
+            await _notificationRepository.AddRangeAsync(notifications, ct);
+        }
     }
 
     public async Task NotifyComplaintSubmittedAsync(long complaintId, long reportId, string citizenName, IEnumerable<long> adminUserIds, CancellationToken ct = default)
@@ -202,5 +222,18 @@ public class NotificationService : INotificationService
         {
             await _notificationRepository.AddRangeAsync(notifications, ct);
         }
+    }
+
+    public async Task NotifyCollectorUnassignedAsync(long reportId, long collectorId, CancellationToken ct = default)
+    {
+        var notification = new Notification
+        {
+            RecipientUserId = collectorId,
+            Title = "🔄 Thay đổi phân công",
+            Body = $"Bạn đã được gỡ bỏ khỏi đơn thu gom #{reportId}. Quản trị viên sẽ điều phối lại.",
+            Type = NotificationType.CollectorAssigned, // Reusing Assigned type for simplicity or can use a generic one
+            RelatedReportId = reportId
+        };
+        await _notificationRepository.AddAsync(notification, ct);
     }
 }
