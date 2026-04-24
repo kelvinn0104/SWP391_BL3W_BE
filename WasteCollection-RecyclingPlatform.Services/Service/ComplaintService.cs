@@ -190,7 +190,7 @@ public class ComplaintService : IComplaintService
             var note = request.AdminNote?.Trim();
             var now = DateTime.UtcNow;
             complaint.Status = request.Status;
-            complaint.AdminNote = string.IsNullOrWhiteSpace(note) ? complaint.AdminNote : note;
+            complaint.AdminNote = request.AdminNote?.Trim();
             complaint.UpdatedAtUtc = now;
 
             if (request.Status is ComplaintStatus.Resolved or ComplaintStatus.Rejected)
@@ -258,15 +258,9 @@ public class ComplaintService : IComplaintService
         if (Uri.TryCreate(fileUrl, UriKind.Absolute, out _))
             return fileUrl;
 
-        var request = _httpContextAccessor.HttpContext?.Request;
-        if (request is null)
-            return fileUrl;
-
-        var filePath = fileUrl.StartsWith("/", StringComparison.Ordinal)
+        return fileUrl.StartsWith("/", StringComparison.Ordinal)
             ? fileUrl
             : $"/{fileUrl}";
-
-        return $"{request.Scheme}://{request.Host}{request.PathBase}{filePath}";
     }
 
     private static async Task<string> SaveEvidenceAsync(IFormFile file, CancellationToken ct)
@@ -298,6 +292,7 @@ public class ComplaintService : IComplaintService
 
     private static string ResolveUploadDirectory()
     {
-        return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "complaint-evidence");
+        var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        return Path.Combine(staticFilesRoot, "complaint-evidence");
     }
 }

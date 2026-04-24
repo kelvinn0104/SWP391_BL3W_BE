@@ -83,7 +83,12 @@ public class RewardRepository : IRewardRepository
 
     public async Task<Area?> GetAreaByIdAsync(long areaId, CancellationToken ct = default)
     {
-        return await _db.Areas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == areaId, ct);
+        return await _db.Areas.Include(a => a.Wards).FirstOrDefaultAsync(x => x.Id == areaId, ct);
+    }
+
+    public async Task<Ward?> GetWardByIdAsync(long wardId, CancellationToken ct = default)
+    {
+        return await _db.Wards.Include(w => w.Area).FirstOrDefaultAsync(x => x.Id == wardId, ct);
     }
 
     public async Task<List<UserLeaderboardRow>> GetCitizenLeaderboardRowsByAreaAsync(long areaId, CancellationToken ct = default)
@@ -103,6 +108,16 @@ public class RewardRepository : IRewardRepository
             .ThenByDescending(x => x.CompletedReports)
             .ThenBy(x => x.DisplayName)
             .ToListAsync(ct);
+    }
+
+    public async Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default)
+    {
+        return await _db.Database.BeginTransactionAsync(ct);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+    {
+        await _db.SaveChangesAsync(ct);
     }
 
     public void AddRewardPointTransaction(RewardPointTransaction transaction)

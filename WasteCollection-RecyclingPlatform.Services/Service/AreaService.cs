@@ -66,7 +66,9 @@ public class AreaService : IAreaService
 
                 foreach (var collectorName in wDto.Collectors)
                 {
-                    var user = await _db.Users.FirstOrDefaultAsync(u => u.DisplayName == collectorName || u.Email == collectorName, ct);
+                    var user = await _db.Users.FirstOrDefaultAsync(u => 
+                        (u.DisplayName == collectorName || u.Email == collectorName) && 
+                        u.Role == UserRole.Collector, ct);
                     if (user != null)
                     {
                         ward.Collectors.Add(user);

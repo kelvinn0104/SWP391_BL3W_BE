@@ -16,11 +16,16 @@ public class VoucherService : IVoucherService
 {
     private readonly IVoucherRepository _voucherRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IRewardRepository _rewardRepository;
 
-    public VoucherService(IVoucherRepository voucherRepository, IUserRepository userRepository)
+    public VoucherService(
+        IVoucherRepository voucherRepository, 
+        IUserRepository userRepository,
+        IRewardRepository rewardRepository)
     {
         _voucherRepository = voucherRepository;
         _userRepository = userRepository;
+        _rewardRepository = rewardRepository;
     }
 
     public async Task<List<VoucherCategoryResponse>> GetCategoriesAsync(CancellationToken ct = default)
@@ -143,6 +148,7 @@ public class VoucherService : IVoucherService
 
         if (request.ImageFile != null)
         {
+            WasteCollection_RecyclingPlatform.Services.Helpers.FileHelper.DeleteFileIfExists(voucher.ImageUrl);
             voucher.ImageUrl = await SaveVoucherImageAsync(request.ImageFile);
         }
         else if (!string.IsNullOrEmpty(request.Image))
@@ -160,24 +166,27 @@ public class VoucherService : IVoucherService
             }
         }
 
-        // Sync codes - very basic implementation
-        // Remove codes that are not used and not in the new list
-        var unusedCodes = voucher.Codes.Where(c => !c.IsUsed).ToList();
-        foreach(var c in unusedCodes)
+        if (request.Codes != null)
         {
-            if (!request.Codes.Contains(c.Code))
+            // Sync codes - very basic implementation
+            // Remove codes that are not used and not in the new list
+            var unusedCodes = voucher.Codes.Where(c => !c.IsUsed).ToList();
+            foreach (var c in unusedCodes)
             {
-                voucher.Codes.Remove(c);
+                if (!request.Codes.Contains(c.Code))
+                {
+                    voucher.Codes.Remove(c);
+                }
             }
-        }
 
-        // Add new codes
-        var existingCodesStrings = voucher.Codes.Select(c => c.Code).ToList();
-        foreach(var newCode in request.Codes)
-        {
-            if (!existingCodesStrings.Contains(newCode))
+            // Add new codes
+            var existingCodesStrings = voucher.Codes.Select(c => c.Code).ToList();
+            foreach (var newCode in request.Codes)
             {
-                voucher.Codes.Add(new VoucherCode { Code = newCode });
+                if (!existingCodesStrings.Contains(newCode))
+                {
+                    voucher.Codes.Add(new VoucherCode { Code = newCode });
+                }
             }
         }
 
@@ -190,39 +199,64 @@ public class VoucherService : IVoucherService
         var voucher = await _voucherRepository.GetVoucherByIdAsync(id, ct);
         if (voucher == null) return false;
 
+        WasteCollection_RecyclingPlatform.Services.Helpers.FileHelper.DeleteFileIfExists(voucher.ImageUrl);
         await _voucherRepository.DeleteVoucherAsync(voucher, ct);
         return true;
     }
 
     public async Task<(bool Success, string? VoucherCode, string? Error)> RedeemVoucherAsync(long userId, long voucherId, CancellationToken ct = default)
     {
-        var user = await _userRepository.GetByIdAsync(userId, ct);
-        if (user == null) return (false, null, "User not found");
-
-        var voucher = await _voucherRepository.GetVoucherByIdAsync(voucherId, ct);
-        if (voucher == null) return (false, null, "Voucher not found");
-
-        if (user.Points < voucher.PointsRequired)
+        using var transaction = await _rewardRepository.BeginTransactionAsync(ct);
+        try
         {
-            return (false, null, "Insufficient points");
-        }
+            // Fetch user for update (tracked)
+            var user = await _userRepository.GetByIdAsync(userId, ct);
+            if (user == null) return (false, null, "Không tìm thấy người dùng.");
 
-        var code = await _voucherRepository.GetNextAvailableCodeAsync(voucherId, ct);
-        if (code == null)
+            var voucher = await _voucherRepository.GetVoucherByIdAsync(voucherId, ct);
+            if (voucher == null) return (false, null, "Không tìm thấy Voucher.");
+
+            // Final check of points
+            if (user.Points < voucher.PointsRequired)
+            {
+                return (false, null, "Bạn không đủ điểm để đổi voucher này.");
+            }
+
+            var code = await _voucherRepository.GetNextAvailableCodeAsync(voucherId, ct);
+            if (code == null)
+            {
+                return (false, null, "Voucher này hiện đã hết mã.");
+            }
+
+            // Dấu mốc bảo vệ: Trừ điểm và gán mã trong cùng một đơn vị công việc
+            user.Points -= voucher.PointsRequired;
+            
+            code.IsUsed = true;
+            code.UsedByUserId = userId;
+            code.UsedAtUtc = DateTime.UtcNow;
+
+            // Ghi nhật ký giao dịch điểm
+            _rewardRepository.AddRewardPointTransaction(new RewardPointTransaction
+            {
+                UserId = userId,
+                Amount = -voucher.PointsRequired,
+                BalanceAfter = user.Points,
+                TransactionType = RewardPointTransactionType.Spent,
+                SourceType = RewardPointSourceType.VoucherRedemption,
+                SourceRefId = voucher.Id,
+                Description = $"Đổi điểm lấy voucher: {voucher.Title}",
+                CreatedAtUtc = DateTime.UtcNow,
+            });
+            await _rewardRepository.SaveChangesAsync(ct);
+
+            await transaction.CommitAsync(ct);
+            return (true, code.Code, null);
+        }
+        catch (Exception ex)
         {
-            return (false, null, "Voucher is out of stock");
+            await transaction.RollbackAsync(ct);
+            return (false, null, $"Lỗi hệ thống khi đổi voucher: {ex.Message}");
         }
-
-        // Action
-        user.Points -= voucher.PointsRequired;
-        await _userRepository.UpdateAsync(user, ct);
-
-        code.IsUsed = true;
-        code.UsedByUserId = userId;
-        code.UsedAtUtc = DateTime.UtcNow;
-        await _voucherRepository.UpdateVoucherCodeAsync(code, ct);
-
-        return (true, code.Code, null);
     }
 
     public async Task<List<VoucherHistoryResponse>> GetRedemptionHistoryAsync(long? userId = null, CancellationToken ct = default)
@@ -242,26 +276,22 @@ public class VoucherService : IVoucherService
 
     private async Task<string> SaveVoucherImageAsync(IFormFile file)
     {
-        // Target: WasteCollection-RecyclingPlatform.FE/public/voucher
-        // Calculate path relative to the solution root
-        var fePublicPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "WasteCollection-RecyclingPlatform.FE", "public", "voucher"));
+        var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        var uploadDirectory = Path.Combine(staticFilesRoot, "voucher-images");
         
-        if (!Directory.Exists(fePublicPath))
+        if (!Directory.Exists(uploadDirectory)) 
         {
-            // Fallback to absolute path if relative fails (just in case)
-            fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\public\voucher";
-            if (!Directory.Exists(fePublicPath)) Directory.CreateDirectory(fePublicPath);
+            Directory.CreateDirectory(uploadDirectory);
         }
 
         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        var filePath = Path.Combine(fePublicPath, fileName);
+        var filePath = Path.Combine(uploadDirectory, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // Return path relative to FE root
-        return $"/voucher/{fileName}";
+        return "/voucher-images/" + fileName;
     }
 }

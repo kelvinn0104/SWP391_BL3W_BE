@@ -114,6 +114,8 @@ builder.Services.AddCors(options =>
 // ── Build & Middleware ────────────────────────────────────────────
 var app = builder.Build();
 
+app.UseMiddleware<WasteCollection_RecyclingPlatform.API.Middleware.ExceptionHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -123,41 +125,15 @@ if (app.Environment.IsDevelopment())
 app.UseCors("fe");
 
 var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
-var reportImagesRoot = Path.Combine(staticFilesRoot, "report-images");
-var complaintEvidenceRoot = Path.Combine(staticFilesRoot, "complaint-evidence");
-var voucherImagesRoot = Path.Combine(staticFilesRoot, "voucher-images");
-var profileImagesRoot = Path.Combine(staticFilesRoot, "profile-images");
-var collectorImagesRoot = Path.Combine(staticFilesRoot, "collector-images");
-Directory.CreateDirectory(reportImagesRoot);
-Directory.CreateDirectory(complaintEvidenceRoot);
-Directory.CreateDirectory(voucherImagesRoot);
-Directory.CreateDirectory(profileImagesRoot);
-Directory.CreateDirectory(collectorImagesRoot);
-
-var staticFileProviders = new List<IFileProvider>
-{
-    new PhysicalFileProvider(staticFilesRoot),
-};
-
-var legacyFeReportImagesRoot = Path.GetFullPath(Path.Combine(
-    AppContext.BaseDirectory,
-    "..",
-    "..",
-    "..",
-    "..",
-    "..",
-    "SWP391_BL3W_FE",
-    "public",
-    "report-images"));
-
-if (Directory.Exists(legacyFeReportImagesRoot))
-{
-    staticFileProviders.Add(new PhysicalFileProvider(Path.GetFullPath(Path.Combine(legacyFeReportImagesRoot, ".."))));
-}
+Directory.CreateDirectory(Path.Combine(staticFilesRoot, "report-images"));
+Directory.CreateDirectory(Path.Combine(staticFilesRoot, "complaint-evidence"));
+Directory.CreateDirectory(Path.Combine(staticFilesRoot, "voucher-images"));
+Directory.CreateDirectory(Path.Combine(staticFilesRoot, "profile-images"));
+Directory.CreateDirectory(Path.Combine(staticFilesRoot, "collector-images"));
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new CompositeFileProvider(staticFileProviders),
+    FileProvider = new PhysicalFileProvider(staticFilesRoot),
     RequestPath = "",
 });
 

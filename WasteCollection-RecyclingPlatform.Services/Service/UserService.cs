@@ -128,6 +128,7 @@ public class UserService : IUserService
         user.Language = request.Language ?? user.Language;
         if (request.AvatarFile != null)
         {
+            WasteCollection_RecyclingPlatform.Services.Helpers.FileHelper.DeleteFileIfExists(user.AvatarUrl);
             user.AvatarUrl = await SaveProfileAvatarAsync(request.AvatarFile);
         }
         else if (!string.IsNullOrEmpty(request.AvatarUrl))
@@ -139,39 +140,23 @@ public class UserService : IUserService
 
     private async Task<string> SaveProfileAvatarAsync(IFormFile file)
     {
-        // Target specifically src/assets/profile as requested
-        string fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\profile";
+        var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        var uploadDirectory = Path.Combine(staticFilesRoot, "profile-images");
         
-        // Backup discovery logic
-        if (!Directory.Exists(fePublicPath))
+        if (!Directory.Exists(uploadDirectory)) 
         {
-            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
-            while (currentDir != null)
-            {
-                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
-                {
-                    fePublicPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "profile");
-                    break;
-                }
-                currentDir = currentDir.Parent;
-            }
-        }
-
-        if (!Directory.Exists(fePublicPath)) 
-        {
-            Directory.CreateDirectory(fePublicPath);
+            Directory.CreateDirectory(uploadDirectory);
         }
 
         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        var filePath = Path.Combine(fePublicPath, fileName);
+        var filePath = Path.Combine(uploadDirectory, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // Return URL that Vite can serve in dev mode
-        return "/src/assets/profile/" + fileName;
+        return "/profile-images/" + fileName;
     }
 
     public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)
