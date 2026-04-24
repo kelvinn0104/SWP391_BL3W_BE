@@ -84,8 +84,7 @@ public class CollectorJobService : ICollectorJobService
 
         await _wasteReportRepository.SaveChangesAsync(ct);
 
-        // Notify collector
-        await _notificationService.NotifyCollectorAssignedAsync(reportId, collectorId, report.LocationText ?? "Địa chỉ không xác định", ct);
+        await _notificationService.NotifyCollectorAssignedAsync(reportId, collectorId, report.LocationText ?? report.Citizen?.PhoneNumber ?? "địa chỉ chưa cập nhật", ct);
 
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
@@ -117,10 +116,9 @@ public class CollectorJobService : ICollectorJobService
 
         await _wasteReportRepository.SaveChangesAsync(ct);
 
-        // Notify Enterprise and Citizen
         var enterprises = await _userRepository.GetByRoleAsync(UserRole.RecyclingEnterprise, null, ct);
         var enterpriseIds = enterprises.Select(x => x.Id).ToList();
-        await _notificationService.NotifyCollectorAcceptedAsync(reportId, enterpriseIds, report.CitizenId, ct);
+        await _notificationService.NotifyCollectorAcceptedAsync(report.Id, enterpriseIds, report.CitizenId, ct);
 
         var saved = await _wasteReportRepository.GetByIdAsync(reportId, ct);
         return saved is null
@@ -269,7 +267,6 @@ public class CollectorJobService : ICollectorJobService
         await _rewardService.AwardFinalPointsForCollectedReportAsync(report, collectorId, ct);
         await _wasteReportRepository.SaveChangesAsync(ct);
 
-        // Notify Enterprise and Citizen
         var enterprises = await _userRepository.GetByRoleAsync(UserRole.RecyclingEnterprise, null, ct);
         var enterpriseIds = enterprises.Select(x => x.Id).ToList();
         await _notificationService.NotifyReportCollectedAsync(report.Id, enterpriseIds, report.CitizenId, (decimal)(report.FinalRewardPoints ?? 0), ct);

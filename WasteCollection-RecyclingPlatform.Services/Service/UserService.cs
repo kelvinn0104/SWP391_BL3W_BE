@@ -126,24 +126,39 @@ public class UserService : IUserService
 
     private async Task<string> SaveProfileAvatarAsync(IFormFile file)
     {
-        // Target specifically wwwroot/profile-images
-        var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profile-images");
+        // Target specifically src/assets/profile as requested
+        string fePublicPath = @"d:\WasteCollection-RecyclingPlatform\WasteCollection-RecyclingPlatform.FE\src\assets\profile";
         
-        if (!Directory.Exists(uploadDirectory)) 
+        // Backup discovery logic
+        if (!Directory.Exists(fePublicPath))
         {
-            Directory.CreateDirectory(uploadDirectory);
+            var currentDir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            while (currentDir != null)
+            {
+                if (currentDir.Name == "WasteCollection-RecyclingPlatform")
+                {
+                    fePublicPath = Path.Combine(currentDir.FullName, "WasteCollection-RecyclingPlatform.FE", "src", "assets", "profile");
+                    break;
+                }
+                currentDir = currentDir.Parent;
+            }
         }
 
-        var fileName = $"{Guid.NewGuid():N}{Path.GetExtension(file.FileName).ToLowerInvariant()}";
-        var filePath = Path.Combine(uploadDirectory, fileName);
+        if (!Directory.Exists(fePublicPath)) 
+        {
+            Directory.CreateDirectory(fePublicPath);
+        }
 
-        await using (var stream = new FileStream(filePath, FileMode.Create))
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        var filePath = Path.Combine(fePublicPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
 
-        // Return relative URL that the API can serve statically and FE resolveImageUrl can parse
-        return $"/profile-images/{fileName}";
+        // Return URL that Vite can serve in dev mode
+        return "/src/assets/profile/" + fileName;
     }
 
     public async Task DeleteAccountAsync(long userId, CancellationToken ct = default)

@@ -16,7 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<VoucherCode> VoucherCodes => Set<VoucherCode>();
     public DbSet<WasteCategory> WasteCategories => Set<WasteCategory>();
     public DbSet<WasteReport> WasteReports => Set<WasteReport>();
-    public DbSet<CollectionRequest> CollectionRequests => Set<CollectionRequest>();
+
     public DbSet<WasteReportItem> WasteReportItems => Set<WasteReportItem>();
     public DbSet<WasteReportImage> WasteReportImages => Set<WasteReportImage>();
     public DbSet<WasteReportStatusHistory> WasteReportStatusHistories => Set<WasteReportStatusHistory>();
@@ -166,30 +166,6 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<CollectionRequest>(entity =>
-        {
-            entity.ToTable("CollectionRequests");
-            entity.HasKey(x => x.Id);
-            entity.HasIndex(x => x.CitizenId);
-            entity.HasIndex(x => x.CollectorId);
-            entity.HasIndex(x => x.WardId);
-
-            entity.HasOne(x => x.Citizen)
-                .WithMany()
-                .HasForeignKey(x => x.CitizenId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(x => x.Collector)
-                .WithMany()
-                .HasForeignKey(x => x.CollectorId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(x => x.Ward)
-                .WithMany()
-                .HasForeignKey(x => x.WardId)
-                .OnDelete(DeleteBehavior.NoAction);
-        });
-
         modelBuilder.Entity<Complaint>(entity =>
         {
             entity.ToTable("complaints");
@@ -333,9 +309,9 @@ public class AppDbContext : DbContext
             entity.Property(e => e.IsRead).HasDefaultValue(false);
 
             entity.HasOne(e => e.RecipientUser)
-                .WithMany()
-                .HasForeignKey(e => e.RecipientUserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany()
+                  .HasForeignKey(e => e.RecipientUserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

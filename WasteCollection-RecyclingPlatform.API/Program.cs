@@ -9,15 +9,9 @@ using WasteCollection_RecyclingPlatform.API.Auth;
 using WasteCollection_RecyclingPlatform.API.Data;
 using WasteCollection_RecyclingPlatform.Repositories.Data;
 using WasteCollection_RecyclingPlatform.Repositories.Repository;
-using System.Globalization;
-using Microsoft.AspNetCore.Localization;
 using WasteCollection_RecyclingPlatform.Services.Service;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var cultureInfo = new CultureInfo("en-US");
-CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
-CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -61,7 +55,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
-builder.Services.AddScoped<ICollectionRequestRepository, CollectionRequestRepository>();
 builder.Services.AddScoped<IWasteReportRepository, WasteReportRepository>();
 builder.Services.AddScoped<IRewardRepository, RewardRepository>();
 builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
@@ -83,7 +76,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>();
-builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<IWasteReportService, WasteReportService>();
 builder.Services.AddScoped<ICollectorJobService, CollectorJobService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
@@ -130,34 +122,38 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("fe");
 
-// Ensure directories exist
-var staticFilesRoot = app.Environment.WebRootPath ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+var staticFilesRoot = Path.Combine(AppContext.BaseDirectory, "wwwroot");
 var reportImagesRoot = Path.Combine(staticFilesRoot, "report-images");
 var complaintEvidenceRoot = Path.Combine(staticFilesRoot, "complaint-evidence");
-var voucherImagesRoot = Path.Combine(staticFilesRoot, "voucher-images");
-var profileImagesRoot = Path.Combine(staticFilesRoot, "profile-images");
 Directory.CreateDirectory(reportImagesRoot);
 Directory.CreateDirectory(complaintEvidenceRoot);
-Directory.CreateDirectory(voucherImagesRoot);
-Directory.CreateDirectory(profileImagesRoot);
 
-Console.WriteLine($"[Startup] Serving static files from: {staticFilesRoot}");
-
-// Serve static files from wwwroot (default behavior with better error handling)
-app.UseStaticFiles(); 
-
-// Support legacy FE path if needed (Optional, but let's keep it simple for now)
-// If we want to serve files from ANOTHER directory, we add another UseStaticFiles call
-var legacyFeRoot = Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "..", "..", "..", "..", "SWP391_BL3W_FE", "public"));
-if (Directory.Exists(legacyFeRoot))
+var staticFileProviders = new List<IFileProvider>
 {
-    Console.WriteLine($"[Startup] Including legacy FE static files from: {legacyFeRoot}");
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(legacyFeRoot),
-        RequestPath = "" 
-    });
+    new PhysicalFileProvider(staticFilesRoot),
+};
+
+var legacyFeReportImagesRoot = Path.GetFullPath(Path.Combine(
+    AppContext.BaseDirectory,
+    "..",
+    "..",
+    "..",
+    "..",
+    "..",
+    "SWP391_BL3W_FE",
+    "public",
+    "report-images"));
+
+if (Directory.Exists(legacyFeReportImagesRoot))
+{
+    staticFileProviders.Add(new PhysicalFileProvider(Path.GetFullPath(Path.Combine(legacyFeReportImagesRoot, ".."))));
 }
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new CompositeFileProvider(staticFileProviders),
+    RequestPath = "",
+});
 
 if (!app.Environment.IsDevelopment())
 {
